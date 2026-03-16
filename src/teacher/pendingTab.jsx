@@ -1,40 +1,50 @@
 import { useState } from 'react';
 
 const ALL_SUBMISSIONS_INIT = [
-  { id: 101, student_id: 2, assignment_id: 1, student_name: 'Alice Mwale', assignment_title: 'Climate Change & Society', max_score: 100,
+  {
+    id: 101, student_id: 2, assignment_id: 1, student_name: 'Alice Mwale', assignment_title: 'Climate Change & Society', max_score: 100,
     essay_text: 'Climate change is one of the most pressing global challenges... [full essay content would appear here, demonstrating the student\'s analysis of food insecurity, economic losses, and mass displacement across developing nations with references to IPCC, World Bank, and IOM reports]',
     file_name: null, submit_mode: 'write', submitted_at: '2026-03-04T10:30:00',
     ai_score: 82, ai_detection_score: 8,
     ai_feedback: 'Content (28/35): Three clear impacts identified with relevant examples. Structure (22/25): Clear paragraphs. Grammar (18/20): Fluent writing. Evidence (14/20): Good citations but needs more statistics.\nAI Detection: Low (~8%). Appears authentically written.',
-    final_score: 85, teacher_feedback: 'Excellent work Alice! Strong analysis with good examples. Watch citation formatting.', status: 'graded' },
+    final_score: 85, teacher_feedback: 'Excellent work Alice! Strong analysis with good examples. Watch citation formatting.', status: 'graded'
+  },
 
-  { id: 102, student_id: 2, assignment_id: 2, student_name: 'Alice Mwale', assignment_title: 'Artificial Intelligence in Education', max_score: 100,
+  {
+    id: 102, student_id: 2, assignment_id: 2, student_name: 'Alice Mwale', assignment_title: 'Artificial Intelligence in Education', max_score: 100,
     essay_text: 'Artificial intelligence is rapidly transforming education... [essay presenting balanced arguments on AI integration in secondary schools]',
     file_name: null, submit_mode: 'write', submitted_at: '2026-03-10T14:00:00',
     ai_score: 76, ai_detection_score: 18,
     ai_feedback: 'Argumentation (30/40): Balanced perspective. Structure (20/25): Good flow. Grammar (16/20): Minor errors. Evidence (10/15): Needs more specific citations.\nAI Detection: Low (~18%). Original work.',
-    final_score: null, teacher_feedback: null, status: 'ai_graded' },
+    final_score: null, teacher_feedback: null, status: 'ai_graded'
+  },
 
-  { id: 103, student_id: 3, assignment_id: 1, student_name: 'Brian Phiri', assignment_title: 'Climate Change & Society', max_score: 100,
+  {
+    id: 103, student_id: 3, assignment_id: 1, student_name: 'Brian Phiri', assignment_title: 'Climate Change & Society', max_score: 100,
     essay_text: 'Climate change represents a multifaceted global challenge with profound socio-economic implications...',
     file_name: null, submit_mode: 'write', submitted_at: '2026-03-05T11:00:00',
     ai_score: 0, ai_detection_score: 81,
     ai_feedback: '⚠️ HIGH AI CONTENT (81%)\nUniform sentence structure, generic phrasing, no local examples, vocabulary patterns consistent with LLMs. Score: 0/100.',
-    final_score: null, teacher_feedback: null, status: 'ai_graded' },
+    final_score: null, teacher_feedback: null, status: 'ai_graded'
+  },
 
-  { id: 104, student_id: 3, assignment_id: 2, student_name: 'Brian Phiri', assignment_title: 'Artificial Intelligence in Education', max_score: 100,
+  {
+    id: 104, student_id: 3, assignment_id: 2, student_name: 'Brian Phiri', assignment_title: 'Artificial Intelligence in Education', max_score: 100,
     essay_text: '[Content from uploaded file: AI_Education_Essay_BPhiri.pdf]',
     file_name: 'AI_Education_Essay_BPhiri.pdf', submit_mode: 'upload', submitted_at: '2026-03-12T09:30:00',
     ai_score: 71, ai_detection_score: 12,
     ai_feedback: 'Argumentation (28/40): Good but needs stronger counterarguments. Structure (22/25): Well organised. Grammar (18/20): Strong. Evidence (3/15): Very few citations.\nAI Detection: Low (~12%). Authentic writing.',
-    final_score: 68, teacher_feedback: 'Good effort Brian. Need much stronger evidence.', status: 'graded' },
+    final_score: 68, teacher_feedback: 'Good effort Brian. Need much stronger evidence.', status: 'graded'
+  },
 
-  { id: 107, student_id: 3, assignment_id: 3, student_name: 'Brian Phiri', assignment_title: 'The Role of Entrepreneurs in Africa', max_score: 100,
+  {
+    id: 107, student_id: 3, assignment_id: 3, student_name: 'Brian Phiri', assignment_title: 'The Role of Entrepreneurs in Africa', max_score: 100,
     essay_text: 'Entrepreneurship in Africa is often discussed in the context of M-Pesa in Kenya...',
     file_name: null, submit_mode: 'write', submitted_at: '2026-01-28T20:00:00',
     ai_score: 63, ai_detection_score: 31,
     ai_feedback: 'Content (20/30): Good examples but shallow analysis. Structure (18/25): Needs better transitions. Grammar (16/20): Several errors. Examples (9/25): More country-specific detail needed.\nAI Detection: Borderline (~31%).',
-    final_score: null, teacher_feedback: null, status: 'ai_graded' },
+    final_score: null, teacher_feedback: null, status: 'ai_graded'
+  },
 ];
 
 const C = {
@@ -73,7 +83,7 @@ export default function PendingTab({ onBack }) {
   const [submissions, setSubmissions] = useState(ALL_SUBMISSIONS_INIT);
   const [toast, setToast] = useState(null);
   const [gradeModal, setGradeModal] = useState(null);
-  const [submissionDetail, setSubmissionDetail] = useState(null);
+  const [viewModal, setViewModal] = useState(null);
   const [gradeScore, setGradeScore] = useState('');
   const [gradeFeedback, setGradeFeedback] = useState('');
 
@@ -89,6 +99,9 @@ export default function PendingTab({ onBack }) {
     setGradeModal(null);
     showToast('✅ Grade saved and visible to student.');
   };
+
+  const aiColor = score => score >= 50 ? '#dc2626' : score >= 30 ? '#d97706' : '#16a34a';
+  const aiLabel = score => score >= 50 ? 'High AI' : score >= 30 ? 'Borderline' : 'Original';
 
   return (
     <div style={C.page}>
@@ -123,51 +136,81 @@ export default function PendingTab({ onBack }) {
           </div>
         ) : pending.map(sub => (
           <div key={sub.id} style={{ ...C.card, borderLeft: `4px solid ${sub.ai_detection_score >= 50 ? '#ef4444' : '#f59e0b'}` }}>
+            {/* Card top: avatar + name/assignment + AI score */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
               <div style={{ display: 'flex', gap: '12px', flex: 1 }}>
-                <div style={{ width: '42px', height: '42px', background: sub.ai_detection_score >= 50 ? '#fee2e2' : '#fef3c7', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '16px', color: sub.ai_detection_score >= 50 ? '#dc2626' : '#d97706', flexShrink: 0 }}>{sub.student_name.charAt(0)}</div>
+                <div style={{ width: '42px', height: '42px', background: sub.ai_detection_score >= 50 ? '#fee2e2' : '#fef3c7', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '16px', color: sub.ai_detection_score >= 50 ? '#dc2626' : '#d97706', flexShrink: 0 }}>
+                  {sub.student_name.charAt(0)}
+                </div>
                 <div>
                   <p style={{ fontWeight: '800', fontSize: '15px', color: '#1e293b', margin: '0 0 2px' }}>{sub.student_name}</p>
                   <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 4px' }}>{sub.assignment_title}</p>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Submitted {new Date(sub.submitted_at).toLocaleString()}{sub.file_name ? ` · 📎 ${sub.file_name}` : ''}</p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+                    Submitted {new Date(sub.submitted_at).toLocaleString()}
+                    {sub.file_name ? ` · 📎 ${sub.file_name}` : ''}
+                  </p>
                 </div>
               </div>
+
+              {/* AI Score % badge - prominent on card */}
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                {sub.ai_detection_score >= 50 ? (
-                  <div><p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>AI Score</p><p style={{ fontSize: '18px', fontWeight: '800', color: '#dc2626', margin: 0 }}>0/{sub.max_score}</p></div>
-                ) : sub.ai_score !== null ? (
-                  <div><p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>AI Score</p><p style={{ fontSize: '18px', fontWeight: '800', color: '#6366f1', margin: 0 }}>{sub.ai_score}/{sub.max_score}</p></div>
-                ) : null}
+                <p style={{ fontSize: '11px', color: '#94a3b8', margin: '0 0 2px', fontWeight: '600' }}>AI Score</p>
+                <p style={{ fontSize: '20px', fontWeight: '800', color: sub.ai_detection_score >= 50 ? '#dc2626' : '#6366f1', margin: 0, lineHeight: 1 }}>
+                  {sub.ai_detection_score >= 50 ? 0 : sub.ai_score}/{sub.max_score}
+                </p>
+                {/* AI detection % pill */}
+                <div style={{ marginTop: '5px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: sub.ai_detection_score >= 50 ? '#fef2f2' : sub.ai_detection_score >= 30 ? '#fff7ed' : '#f0fdf4', border: `1px solid ${sub.ai_detection_score >= 50 ? '#fecaca' : sub.ai_detection_score >= 30 ? '#fed7aa' : '#bbf7d0'}`, borderRadius: '20px', padding: '2px 8px' }}>
+                  <span style={{ fontSize: '9px' }}>{sub.ai_detection_score >= 50 ? '🚨' : sub.ai_detection_score >= 30 ? '⚠️' : '✅'}</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: aiColor(sub.ai_detection_score) }}>{sub.ai_detection_score}% AI</span>
+                </div>
               </div>
             </div>
+
+            {/* High AI warning banner */}
             {sub.ai_detection_score >= 50 && (
               <div style={{ marginTop: '10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '8px 12px', display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <span>🚨</span><p style={{ fontSize: '12px', color: '#dc2626', fontWeight: '700', margin: 0 }}>HIGH AI CONTENT — {sub.ai_detection_score}% detected. Score auto-set to 0. Review required.</p>
+                <span>🚨</span>
+                <p style={{ fontSize: '12px', color: '#dc2626', fontWeight: '700', margin: 0 }}>HIGH AI CONTENT — {sub.ai_detection_score}% detected. Score auto-set to 0. Review required.</p>
               </div>
             )}
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-              <button onClick={() => setSubmissionDetail(sub)} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>👁 View Essay</button>
-              <button onClick={() => openGrade(sub)} style={{ ...C.pBtn, padding: '7px 16px', fontSize: '12px' }}>Review & Grade →</button>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+              <button onClick={() => setViewModal(sub)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#475569', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                👁 View Essay
+              </button>
+              <button onClick={() => openGrade(sub)} style={{ ...C.pBtn, padding: '8px 18px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                ✏️ Grade Essay
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* SUBMISSION DETAIL MODAL */}
-      {submissionDetail && (
-        <Sheet onClose={() => setSubmissionDetail(null)} title={submissionDetail.student_name} subtitle={submissionDetail.assignment_title}
+      {/* ─── VIEW ESSAY MODAL ─── */}
+      {viewModal && (
+        <Sheet
+          onClose={() => setViewModal(null)}
+          title={viewModal.assignment_title}
+          subtitle={`${viewModal.student_name} · Submitted ${new Date(viewModal.submitted_at).toLocaleString()}`}
           footer={
             <div style={{ display: 'flex', gap: '10px' }}>
-              {submissionDetail.status === 'ai_graded' && <button onClick={() => { setSubmissionDetail(null); openGrade(submissionDetail); }} style={C.pBtn}>Grade This Essay →</button>}
-              <button onClick={() => setSubmissionDetail(null)} style={C.gBtn}>Close</button>
+              {viewModal.status === 'ai_graded' && (
+                <button onClick={() => { setViewModal(null); openGrade(viewModal); }} style={C.pBtn}>
+                  ✏️ Grade Essay
+                </button>
+              )}
+              <button onClick={() => setViewModal(null)} style={C.gBtn}>Close</button>
             </div>
-          }>
+          }
+        >
+          {/* Metadata row: assignment, date/time, AI score, AI detection */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
             {[
-              { label: 'Submitted', value: new Date(submissionDetail.submitted_at).toLocaleString() },
-              { label: 'Submit Mode', value: submissionDetail.file_name ? `📎 ${submissionDetail.file_name}` : '✏️ Written' },
-              { label: 'AI Score', value: submissionDetail.ai_score !== null ? `${submissionDetail.ai_score}/${submissionDetail.max_score}` : '—' },
-              { label: 'AI Detection', value: submissionDetail.ai_detection_score !== null ? `${submissionDetail.ai_detection_score}%${submissionDetail.ai_detection_score >= 50 ? ' 🚨' : ''}` : '—' },
+              { label: 'Assignment', value: viewModal.assignment_title },
+              { label: 'Date & Time Submitted', value: new Date(viewModal.submitted_at).toLocaleString() },
+              { label: 'AI Score', value: viewModal.ai_detection_score >= 50 ? `0/${viewModal.max_score}` : viewModal.ai_score !== null ? `${viewModal.ai_score}/${viewModal.max_score}` : '—' },
+              { label: 'AI Detection', value: viewModal.ai_detection_score !== null ? `${viewModal.ai_detection_score}% — ${aiLabel(viewModal.ai_detection_score)}${viewModal.ai_detection_score >= 50 ? ' 🚨' : viewModal.ai_detection_score >= 30 ? ' ⚠️' : ' ✅'}` : '—' },
             ].map(d => (
               <div key={d.label} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px' }}>
                 <p style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', margin: '0 0 3px' }}>{d.label}</p>
@@ -175,68 +218,90 @@ export default function PendingTab({ onBack }) {
               </div>
             ))}
           </div>
-          {submissionDetail.ai_detection_score >= 50 && (
+
+          {/* High AI alert */}
+          {viewModal.ai_detection_score >= 50 && (
             <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', display: 'flex', gap: '8px' }}>
-              <span>🚨</span><p style={{ fontSize: '12px', color: '#dc2626', fontWeight: '700', margin: 0 }}>{submissionDetail.ai_detection_score}% AI detected. Score automatically set to 0.</p>
+              <span>🚨</span>
+              <p style={{ fontSize: '12px', color: '#dc2626', fontWeight: '700', margin: 0 }}>{viewModal.ai_detection_score}% AI content detected. Score automatically set to 0.</p>
             </div>
           )}
-          {submissionDetail.ai_feedback && (
+
+          {/* AI Feedback (Grammar, Argumentation, etc.) */}
+          {viewModal.ai_feedback && (
             <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '14px', marginBottom: '14px' }}>
               <p style={{ ...C.sL, color: '#1d4ed8' }}>🤖 AI Feedback</p>
-              <p style={{ fontSize: '13px', color: '#1e293b', margin: 0, lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>{submissionDetail.ai_feedback}</p>
+              <p style={{ fontSize: '13px', color: '#1e293b', margin: 0, lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>{viewModal.ai_feedback}</p>
             </div>
           )}
-          {submissionDetail.teacher_feedback && (
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '14px', marginBottom: '14px' }}>
-              <p style={{ ...C.sL, color: '#15803d' }}>👨‍🏫 Your Feedback</p>
-              <p style={{ fontSize: '13px', color: '#1e293b', margin: 0, lineHeight: '1.8' }}>{submissionDetail.teacher_feedback}</p>
-            </div>
-          )}
+
+          {/* Essay text */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
             <p style={C.sL}>Essay Text</p>
-            <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.85', margin: 0, whiteSpace: 'pre-wrap' }}>{submissionDetail.essay_text}</p>
+            <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.85', margin: 0, whiteSpace: 'pre-wrap' }}>{viewModal.essay_text}</p>
           </div>
         </Sheet>
       )}
 
-      {/* GRADE MODAL */}
+      {/* ─── GRADE ESSAY MODAL ─── */}
       {gradeModal && (
-        <Sheet onClose={() => setGradeModal(null)} title="Review & Grade" subtitle={`${gradeModal.student_name} — ${gradeModal.assignment_title}`}
+        <Sheet
+          onClose={() => setGradeModal(null)}
+          title={gradeModal.student_name}
+          subtitle={gradeModal.assignment_title}
           footer={
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => setGradeModal(null)} style={C.gBtn}>Cancel</button>
               <button onClick={saveGrade} style={C.pBtn}>💾 Save Grade</button>
             </div>
-          }>
+          }
+        >
+          {/* AI Score summary */}
           {gradeModal.ai_score !== null && (
             <div style={{ background: gradeModal.ai_detection_score >= 50 ? '#fef2f2' : '#eff6ff', border: `1px solid ${gradeModal.ai_detection_score >= 50 ? '#fecaca' : '#bfdbfe'}`, borderRadius: '12px', padding: '14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '24px' }}>{gradeModal.ai_detection_score >= 50 ? '🚨' : '🤖'}</span>
               <div>
                 <p style={{ fontWeight: '700', color: gradeModal.ai_detection_score >= 50 ? '#dc2626' : '#1d4ed8', fontSize: '14px', margin: '0 0 2px' }}>
-                  AI Score: {gradeModal.ai_score}/{gradeModal.max_score}{gradeModal.ai_detection_score >= 50 && ' · AI Flagged'}
+                  AI Score: {gradeModal.ai_detection_score >= 50 ? 0 : gradeModal.ai_score}/{gradeModal.max_score}
+                  {gradeModal.ai_detection_score >= 50 && ' · AI Flagged'}
                 </p>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>You can accept or override below. AI detection: {gradeModal.ai_detection_score}%</p>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+                  You can accept or override below. AI detection: {gradeModal.ai_detection_score}%
+                </p>
               </div>
             </div>
           )}
+
+          {/* Essay submitted */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginBottom: '16px', maxHeight: '160px', overflow: 'auto' }}>
-            <p style={C.sL}>Student Essay</p>
+            <p style={C.sL}>Essay Submitted</p>
             <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.8', margin: 0, whiteSpace: 'pre-wrap' }}>{gradeModal.essay_text}</p>
           </div>
-          {gradeModal.ai_feedback && (
-            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px', marginBottom: '14px' }}>
-              <p style={{ ...C.sL, color: '#1d4ed8' }}>🤖 AI Feedback</p>
-              <p style={{ fontSize: '12px', color: '#1e293b', margin: 0, lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>{gradeModal.ai_feedback}</p>
-            </div>
-          )}
+
+          {/* Final Score input */}
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ ...C.sL, marginBottom: '6px' }}>Final Score (out of {gradeModal.max_score}) *</label>
-            <input style={{ ...C.input, width: '140px' }} type="number" min="0" max={gradeModal.max_score} value={gradeScore} onChange={e => setGradeScore(e.target.value)} placeholder="0–100" />
+            <label style={{ ...C.sL, display: 'block', marginBottom: '6px' }}>Final Score (out of {gradeModal.max_score}) *</label>
+            <input
+              style={{ ...C.input, width: '160px' }}
+              type="number"
+              min="0"
+              max={gradeModal.max_score}
+              value={gradeScore}
+              onChange={e => setGradeScore(e.target.value)}
+              placeholder={`0 – ${gradeModal.max_score}`}
+            />
           </div>
+
+          {/* Feedback input */}
           <div>
-            <label style={{ ...C.sL, marginBottom: '6px' }}>Your Feedback to Student</label>
-            <textarea value={gradeFeedback} onChange={e => setGradeFeedback(e.target.value)} rows={4} placeholder="Write personalised feedback for the student..."
-              style={{ ...C.input, resize: 'vertical', lineHeight: '1.6' }} />
+            <label style={{ ...C.sL, display: 'block', marginBottom: '6px' }}>Feedback on Final Score</label>
+            <textarea
+              value={gradeFeedback}
+              onChange={e => setGradeFeedback(e.target.value)}
+              rows={4}
+              placeholder="Write personalised feedback for the student..."
+              style={{ ...C.input, resize: 'vertical', lineHeight: '1.6' }}
+            />
           </div>
         </Sheet>
       )}
