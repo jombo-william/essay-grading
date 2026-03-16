@@ -1,7 +1,7 @@
 // src/componets/auth/LoginPage.jsx
 import { useState, useEffect, useRef } from "react";
 
-const API_BASE = "http://localhost:8000/api";   // ← Python backend
+const API_BASE = "http://localhost:8000/api";  
 
 export default function LoginPage({ onSelect }) {
   const [email, setEmail]       = useState("");
@@ -28,7 +28,7 @@ export default function LoginPage({ onSelect }) {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {   // ← /auth/login (no .php)
+      const res = await fetch(`${API_BASE}/auth/login`, {   
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -282,7 +282,7 @@ export default function LoginPage({ onSelect }) {
       </div>
 
       <p style={{ position: "absolute", bottom: "20px", fontSize: "12px", color: "#94a3b8" }}>
-        Final Year Project · EssayGrade AI
+        Final Year Project by group 30· EssayGrade AI
       </p>
     </div>
   );
