@@ -194,7 +194,7 @@
 
 
 
-// src/components/student/WriteEssaySheet.jsx
+// src/componets/student/WriteEssaySheet.jsx
 import { useRef, useState } from 'react';
 import { C, Sheet } from './shared.jsx';
 
@@ -226,6 +226,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadText, setUploadText] = useState('');
   const [extracting, setExtracting] = useState(false);
+  const [showFull,   setShowFull]   = useState(false);
   const fileRef = useRef();
 
   if (!assignment) return null;
@@ -239,32 +240,24 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
     setUploadFile(file);
     setUploadText('');
     setExtracting(true);
+    setShowFull(false);
 
     try {
       if (file.type === 'text/plain') {
-        // ── Plain text ────────────────────────────────────────────────────
         const r = new FileReader();
-        r.onload = ev => {
-          setUploadText(ev.target.result);
-          setExtracting(false);
-        };
-        r.onerror = () => {
-          setUploadText(`[Could not read "${file.name}"]`);
-          setExtracting(false);
-        };
+        r.onload = ev => { setUploadText(ev.target.result); setExtracting(false); };
+        r.onerror = () => { setUploadText(`[Could not read "${file.name}"]`); setExtracting(false); };
         r.readAsText(file);
 
       } else if (file.type === 'application/pdf') {
-        // ── PDF ───────────────────────────────────────────────────────────
-        const pdfjsLib = await loadPdfJs();
+        const pdfjsLib    = await loadPdfJs();
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         let fullText = '';
         for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
+          const page    = await pdf.getPage(i);
           const content = await page.getTextContent();
-          const pageText = content.items.map(item => item.str).join(' ');
-          fullText += pageText + '\n';
+          fullText += content.items.map(item => item.str).join(' ') + '\n';
         }
         setUploadText(fullText.trim() || '[No readable text found in PDF]');
         setExtracting(false);
@@ -273,10 +266,9 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         file.name.toLowerCase().endsWith('.docx')
       ) {
-        // ── DOCX ──────────────────────────────────────────────────────────
-        const mammoth = await loadMammoth();
+        const mammoth     = await loadMammoth();
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
+        const result      = await mammoth.extractRawText({ arrayBuffer });
         setUploadText(result.value.trim() || '[No readable text found in DOCX]');
         setExtracting(false);
 
@@ -284,13 +276,11 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         file.type === 'application/msword' ||
         file.name.toLowerCase().endsWith('.doc')
       ) {
-        // ── Legacy .doc — cannot be parsed client-side ────────────────────
         setUploadText('[Legacy .doc files cannot be read in the browser. Please save as .docx or .pdf and re-upload.]');
         setExtracting(false);
 
       } else {
-        // ── Unsupported ───────────────────────────────────────────────────
-        setUploadText(`[Unsupported file type: "${file.name}". Please upload a PDF, DOCX, or TXT file.]`);
+        setUploadText(`[Unsupported file type. Please upload PDF, DOCX, or TXT.]`);
         setExtracting(false);
       }
     } catch (err) {
@@ -301,15 +291,18 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
   };
 
   const handleClose = () => {
-    setEssayText(''); setUploadFile(null); setUploadText(''); setSubmitMode('write'); setExtracting(false);
+    setEssayText(''); setUploadFile(null); setUploadText('');
+    setSubmitMode('write'); setExtracting(false); setShowFull(false);
     onClose();
   };
 
-  const canSubmit = submitMode === 'write'
+  const canSubmit  = submitMode === 'write'
     ? wordCount >= 50
     : !!uploadFile && !extracting && wordCount >= 50;
-
   const isDisabled = submitting || !canSubmit;
+
+  // Is the extracted text an error message?
+  const isError = uploadText.startsWith('[');
 
   return (
     <Sheet
@@ -381,6 +374,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         <div>
           <p style={C.sL}>Upload Your Essay File</p>
           <input ref={fileRef} type="file" accept=".pdf,.txt,.doc,.docx" onChange={handleFileChange} style={{ display: 'none' }} />
+
           {!uploadFile ? (
             <div onClick={() => fileRef.current?.click()}
               style={{ border: '2px dashed #c7d2fe', borderRadius: '14px', padding: '40px 24px', textAlign: 'center', cursor: 'pointer', background: '#fafafe', transition: 'all 0.2s' }}
@@ -398,6 +392,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
             </div>
           ) : (
             <div>
+              {/* File name bar */}
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '24px' }}>
@@ -408,44 +403,69 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
                     <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>{(uploadFile.size / 1024).toFixed(1)} KB</p>
                   </div>
                 </div>
-                <button onClick={() => { setUploadFile(null); setUploadText(''); setExtracting(false); if (fileRef.current) fileRef.current.value = ''; }}
-                  style={{ background: '#fee2e2', border: 'none', borderRadius: '8px', padding: '5px 10px', color: '#dc2626', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}>
+                <button
+                  onClick={() => { setUploadFile(null); setUploadText(''); setExtracting(false); setShowFull(false); if (fileRef.current) fileRef.current.value = ''; }}
+                  style={{ background: '#fee2e2', border: 'none', borderRadius: '8px', padding: '5px 10px', color: '#dc2626', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}
+                >
                   ✕ Remove
                 </button>
               </div>
 
               {/* Extracting spinner */}
               {extracting && (
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', textAlign: 'center', marginBottom: '12px' }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '20px', textAlign: 'center', marginBottom: '12px' }}>
                   <p style={{ fontSize: '13px', color: '#6366f1', fontWeight: '700', margin: 0 }}>⏳ Extracting text from file...</p>
                 </div>
               )}
 
-              {/* Extracted text preview */}
+              {/* Extracted text — full scrollable view */}
               {!extracting && uploadText && (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <p style={{ ...C.sL, margin: 0 }}>Extracted Text Preview</p>
-                    <span style={{ fontSize: '11px', color: wordCount >= 50 ? '#16a34a' : '#f59e0b', fontWeight: '700' }}>
-                      ~{wordCount} words {wordCount < 50 ? '⚠️ need more' : '✓'}
-                    </span>
+                  {/* Header row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <p style={{ ...C.sL, margin: 0 }}>Extracted Text</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '11px', color: wordCount >= 50 ? '#16a34a' : '#f59e0b', fontWeight: '700' }}>
+                        {wordCount} words {wordCount < 50 ? '⚠️' : '✓'}
+                      </span>
+                      {!isError && (
+                        <button
+                          onClick={() => setShowFull(f => !f)}
+                          style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '3px 10px', color: '#3b82f6', fontSize: '11px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                        >
+                          {showFull ? '▲ Collapse' : '▼ View all'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ background: '#f8fafc', border: `1px solid ${wordCount < 50 ? '#fca5a5' : '#e2e8f0'}`, borderRadius: '10px', padding: '12px', maxHeight: '160px', overflow: 'auto', fontSize: '12px', color: '#475569', lineHeight: '1.6' }}>
-                    {uploadText.startsWith('[') ? (
-                      <span style={{ color: '#ef4444' }}>{uploadText}</span>
-                    ) : (
-                      <>{uploadText.slice(0, 600)}{uploadText.length > 600 ? '...' : ''}</>
-                    )}
+
+                  {/* Text box — scrollable when collapsed, full height when expanded */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: `1px solid ${isError ? '#fca5a5' : wordCount < 50 ? '#fde68a' : '#e2e8f0'}`,
+                    borderRadius: '10px',
+                    padding: '14px',
+                    maxHeight: showFull ? 'none' : '200px',
+                    overflow: showFull ? 'visible' : 'auto',
+                    fontSize: '13px',
+                    color: isError ? '#ef4444' : '#475569',
+                    lineHeight: '1.75',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    transition: 'max-height 0.2s',
+                  }}>
+                    {uploadText}
                   </div>
-                  {wordCount < 50 && !uploadText.startsWith('[') && (
-                    <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px' }}>
-                      ⚠️ Your essay must be at least 50 words to submit.
+
+                  {wordCount < 50 && !isError && (
+                    <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px', fontWeight: '600' }}>
+                      ⚠️ Need at least 50 words to submit. Your file has {wordCount} words.
                     </p>
                   )}
                 </div>
               )}
 
-              <p style={{ fontSize: '12px', color: '#8b5cf6', marginTop: '10px' }}>🤖 AI will grade based on the extracted text.</p>
+              <p style={{ fontSize: '12px', color: '#8b5cf6', marginTop: '10px' }}>🤖 The full extracted text will be sent to AI for grading.</p>
             </div>
           )}
         </div>
