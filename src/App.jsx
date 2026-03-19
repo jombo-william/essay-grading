@@ -2,7 +2,6 @@ import { useState } from 'react';
 import LoginPage from './LoginPage.jsx';
 import PendingTab from "./teacher/pendingTab.jsx";
 import StudentsTab from "./teacher/studentsTab.jsx";
-import StudentDashboard from './StudentDashboard.jsx';
 
 export default function App() {
   const [role, setRole] = useState(null);
@@ -13,27 +12,43 @@ export default function App() {
   }
 
   if (role === 'student') {
-    return <StudentDashboard />;
+    return <div style={{ padding: 40, textAlign: 'center' }}>Student dashboard coming soon.</div>;
   }
 
   if (role === 'teacher') {
     return (
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px' }}>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={() => setTeacherTab('pending')} style={{ padding: '10px', background: teacherTab === 'pending' ? '#6366f1' : '#f1f5f9', color: teacherTab === 'pending' ? '#fff' : '#000' }}>
-              Pending Essays
-            </button>
-            <button onClick={() => setTeacherTab('students')} style={{ padding: '10px', background: teacherTab === 'students' ? '#6366f1' : '#f1f5f9', color: teacherTab === 'students' ? '#fff' : '#000' }}>
-              Students Overview
-            </button>
-          </div>
-          <button onClick={() => setRole(null)} style={{ padding: '10px', background: '#dc2626', color: '#fff' }}>
-            Logout
+        {teacherTab === 'pending' && <PendingTab onLogout={() => setRole(null)} />}
+        {teacherTab === 'students' && <StudentsTab onBack={() => setTeacherTab('pending')} />}
+
+        {/* Tab switcher bar at the bottom */}
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          display: 'flex', justifyContent: 'center', gap: 10,
+          padding: '12px 20px', background: '#fff',
+          borderTop: '1px solid #e2e8f0', zIndex: 300
+        }}>
+          <button onClick={() => setTeacherTab('pending')} style={{
+            padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            background: teacherTab === 'pending' ? '#022aa4' : '#f1f5f9',
+            color: teacherTab === 'pending' ? '#fff' : '#000', fontWeight: 700
+          }}>
+            📋 Pending Essays
+          </button>
+          <button onClick={() => setTeacherTab('students')} style={{
+            padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            background: teacherTab === 'students' ? '#022aa4' : '#f1f5f9',
+            color: teacherTab === 'students' ? '#fff' : '#000', fontWeight: 700
+          }}>
+            👥 Students Overview
+          </button>
+          <button onClick={() => setRole(null)} style={{
+            padding: '8px 20px', borderRadius: 8, border: 'none',
+            cursor: 'pointer', background: '#dc2626', color: '#fff', fontWeight: 700
+          }}>
+            🚪 Logout
           </button>
         </div>
-        {teacherTab === 'pending' && <PendingTab />}
-        {teacherTab === 'students' && <StudentsTab />}
       </div>
     );
   }

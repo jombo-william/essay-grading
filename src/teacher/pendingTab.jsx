@@ -44,9 +44,20 @@ const ALL_SUBMISSIONS_INIT = [
   },
 ];
 
-const aiColor = score => score >= 50 ? 'var(--red)' : score >= 30 ? 'var(--amber)' : 'var(--green)';
 const aiLabel = score => score >= 50 ? 'High AI' : score >= 30 ? 'Borderline' : 'Original';
 
+const btnPrimary = {
+  flex: 1, background: '#2563eb', color: '#fff', border: 'none',
+  borderRadius: 10, padding: '13px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+};
+const btnGhost = {
+  flex: 1, background: '#f1f5f9', color: '#475569',
+  border: '1.5px solid #e2e8f0', borderRadius: 10,
+  padding: '13px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+};
+
+// KEY FIX: footer lives INSIDE pg-sheet-body so it scrolls with the content
+// and is never clipped by overflow:hidden on .pg-sheet
 function Sheet({ onClose, title, subtitle, children, footer }) {
   return (
     <div className="pg-sheet-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -59,8 +70,18 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
           </div>
           <button className="pg-sheet-close" onClick={onClose}>×</button>
         </div>
-        <div className="pg-sheet-body">{children}</div>
-        {footer && <div className="pg-sheet-footer">{footer}</div>}
+        <div className="pg-sheet-body">
+          {children}
+          {footer && (
+            <div style={{
+              display: 'flex', gap: 10,
+              marginTop: 24, paddingTop: 16,
+              borderTop: '1px solid #e2e8f0',
+            }}>
+              {footer}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -74,16 +95,35 @@ export default function PendingTab({ onBack }) {
   const [gradeScore, setGradeScore] = useState('');
   const [gradeFeedback, setGradeFeedback] = useState('');
 
-  const showToast = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500); };
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   const pending = submissions.filter(s => s.status === 'ai_graded' && s.final_score === null);
-  const openGrade = sub => { setGradeModal(sub); setGradeScore(sub.ai_score ?? ''); setGradeFeedback(sub.teacher_feedback || ''); };
+
+  const openGrade = sub => {
+    setGradeModal(sub);
+    setGradeScore(sub.ai_score ?? '');
+    setGradeFeedback(sub.teacher_feedback || '');
+  };
 
   const saveGrade = () => {
     const score = parseInt(gradeScore);
-    if (isNaN(score) || score < 0 || score > gradeModal.max_score) { showToast('Invalid score.', 'error'); return; }
-    setSubmissions(prev => prev.map(s => s.id === gradeModal.id ? { ...s, final_score: score, teacher_feedback: gradeFeedback, status: 'graded' } : s));
+    if (isNaN(score) || score < 0 || score > gradeModal.max_score) {
+      showToast('Invalid score. Enter a number between 0 and ' + gradeModal.max_score + '.', 'error');
+      return;
+    }
+    const studentName = gradeModal.student_name;
+    setSubmissions(prev =>
+      prev.map(s =>
+        s.id === gradeModal.id
+          ? { ...s, final_score: score, teacher_feedback: gradeFeedback, status: 'graded' }
+          : s
+      )
+    );
     setGradeModal(null);
-    showToast('✅ Grade saved and visible to student.');
+    showToast(`✅ Grade saved for ${studentName}.`);
   };
 
   return (
@@ -116,7 +156,6 @@ export default function PendingTab({ onBack }) {
           </div>
         ) : pending.map(sub => (
           <div key={sub.id} className={`pg-card ${sub.ai_detection_score >= 50 ? 'pg-card-flagged' : 'pg-card-warn'}`}>
-            {/* Card top */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
               <div style={{ display: 'flex', gap: 12, flex: 1 }}>
                 <div className={`pg-avatar-lg ${sub.ai_detection_score >= 50 ? 'pg-avatar-lg--red' : 'pg-avatar-lg--amber'}`}>
@@ -131,8 +170,6 @@ export default function PendingTab({ onBack }) {
                   </p>
                 </div>
               </div>
-
-              {/* AI Score badge */}
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '0 0 2px', fontWeight: 600 }}>AI Score</p>
                 <p style={{ fontSize: 20, fontWeight: 800, color: sub.ai_detection_score >= 50 ? 'var(--red)' : 'var(--blue)', margin: 0, lineHeight: 1 }}>
@@ -147,7 +184,6 @@ export default function PendingTab({ onBack }) {
               </div>
             </div>
 
-            {/* High AI warning */}
             {sub.ai_detection_score >= 50 && (
               <div className="alert-red">
                 <span>🚨</span>
@@ -155,7 +191,6 @@ export default function PendingTab({ onBack }) {
               </div>
             )}
 
-            {/* Action buttons */}
             <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
               <button onClick={() => setViewModal(sub)} className="btn-sm-view">👁 View Essay</button>
               <button onClick={() => openGrade(sub)} className="btn-sm-grade">✏️ Grade Essay</button>
@@ -173,13 +208,14 @@ export default function PendingTab({ onBack }) {
           footer={
             <>
               {viewModal.status === 'ai_graded' && (
-                <button onClick={() => { setViewModal(null); openGrade(viewModal); }} className="btn-primary">✏️ Grade Essay</button>
+                <button onClick={() => { setViewModal(null); openGrade(viewModal); }} style={btnPrimary}>
+                  ✏️ Grade Essay
+                </button>
               )}
-              <button onClick={() => setViewModal(null)} className="btn-ghost">Close</button>
+              <button onClick={() => setViewModal(null)} style={btnGhost}>Close</button>
             </>
           }
         >
-          {/* Metadata grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
             {[
               { label: 'Assignment', value: viewModal.assignment_title },
@@ -208,7 +244,7 @@ export default function PendingTab({ onBack }) {
             </div>
           )}
 
-          <div className="essay-box" style={{ maxHeight: 'none' }}>
+          <div className="essay-box">
             <span className="pg-label">Essay Text</span>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>{viewModal.essay_text}</p>
           </div>
@@ -223,8 +259,8 @@ export default function PendingTab({ onBack }) {
           subtitle={gradeModal.assignment_title}
           footer={
             <>
-              <button onClick={() => setGradeModal(null)} className="btn-ghost">Cancel</button>
-              <button onClick={saveGrade} className="btn-primary">💾 Save Grade</button>
+              <button onClick={() => setGradeModal(null)} style={btnGhost}>Cancel</button>
+              <button onClick={saveGrade} style={btnPrimary}>💾 Save Grade</button>
             </>
           }
         >
@@ -246,17 +282,37 @@ export default function PendingTab({ onBack }) {
             <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{gradeModal.essay_text}</p>
           </div>
 
+          {gradeModal.ai_feedback && (
+            <div className="ai-feedback-box">
+              <span className="pg-label" style={{ color: 'var(--blue)' }}>🤖 AI Feedback</span>
+              <p style={{ fontSize: 12, color: 'var(--text)', margin: 0, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{gradeModal.ai_feedback}</p>
+            </div>
+          )}
+
           <div style={{ marginBottom: 14 }}>
             <label className="pg-label">Final Score (out of {gradeModal.max_score}) *</label>
-            <input className="pg-input" style={{ width: 160 }} type="number" min="0" max={gradeModal.max_score}
-              value={gradeScore} onChange={e => setGradeScore(e.target.value)} placeholder={`0 – ${gradeModal.max_score}`} />
+            <input
+              className="pg-input"
+              style={{ width: 160 }}
+              type="number"
+              min="0"
+              max={gradeModal.max_score}
+              value={gradeScore}
+              onChange={e => setGradeScore(e.target.value)}
+              placeholder={`0 – ${gradeModal.max_score}`}
+            />
           </div>
 
           <div>
             <label className="pg-label">Feedback on Final Score</label>
-            <textarea className="pg-input" value={gradeFeedback} onChange={e => setGradeFeedback(e.target.value)}
-              rows={4} placeholder="Write personalised feedback for the student..."
-              style={{ resize: 'vertical', lineHeight: 1.6 }} />
+            <textarea
+              className="pg-input"
+              value={gradeFeedback}
+              onChange={e => setGradeFeedback(e.target.value)}
+              rows={4}
+              placeholder="Write personalised feedback for the student..."
+              style={{ resize: 'vertical', lineHeight: 1.6 }}
+            />
           </div>
         </Sheet>
       )}

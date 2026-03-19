@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './students.css';
 import './pending.css';
 
 const ALL_SUBMISSIONS_INIT = [
@@ -61,6 +62,16 @@ const ALL_SUBMISSIONS_INIT = [
 
 const scoreColorClass = p => p >= 70 ? 'score--green' : p >= 50 ? 'score--amber' : 'score--red';
 
+const btnPrimary = {
+  flex: 1, background: '#2563eb', color: '#fff', border: 'none',
+  borderRadius: 10, padding: '13px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+};
+const btnGhost = {
+  flex: 1, background: '#f1f5f9', color: '#475569',
+  border: '1.5px solid #e2e8f0', borderRadius: 10,
+  padding: '13px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+};
+
 function StatusBadge({ status, aiDetection }) {
   if (aiDetection >= 50) return <span className="badge badge--flagged">🚨 AI Flagged</span>;
   if (status === 'graded') return <span className="badge badge--graded">✅ Graded</span>;
@@ -68,6 +79,8 @@ function StatusBadge({ status, aiDetection }) {
   return <span className="badge badge--process">🤖 Processing</span>;
 }
 
+// KEY FIX: footer lives INSIDE pg-sheet-body so it scrolls with the content
+// and is never clipped by overflow:hidden on .pg-sheet
 function Sheet({ onClose, title, subtitle, children, footer }) {
   return (
     <div className="pg-sheet-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -80,8 +93,18 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
           </div>
           <button className="pg-sheet-close" onClick={onClose}>×</button>
         </div>
-        <div className="pg-sheet-body">{children}</div>
-        {footer && <div className="pg-sheet-footer">{footer}</div>}
+        <div className="pg-sheet-body">
+          {children}
+          {footer && (
+            <div style={{
+              display: 'flex', gap: 10,
+              marginTop: 24, paddingTop: 16,
+              borderTop: '1px solid #e2e8f0',
+            }}>
+              {footer}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -96,32 +119,75 @@ export default function StudentsTab({ onBack }) {
   const [gradeScore, setGradeScore] = useState('');
   const [gradeFeedback, setGradeFeedback] = useState('');
 
-  const showToast = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500); };
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
-  const openGrade = sub => { setGradeModal(sub); setGradeScore(sub.ai_score ?? ''); setGradeFeedback(''); };
-  const openEditGrade = sub => { setEditGradeModal(sub); setGradeScore(sub.final_score ?? ''); setGradeFeedback(sub.teacher_feedback || ''); };
-  const openFeedback = sub => { setFeedbackModal(sub); setGradeFeedback(sub.teacher_feedback || ''); };
+  const openGrade = sub => {
+    setGradeModal(sub);
+    setGradeScore(sub.ai_score ?? '');
+    setGradeFeedback('');
+  };
+
+  const openEditGrade = sub => {
+    setEditGradeModal(sub);
+    setGradeScore(sub.final_score ?? '');
+    setGradeFeedback(sub.teacher_feedback || '');
+  };
+
+  const openFeedback = sub => {
+    setFeedbackModal(sub);
+    setGradeFeedback(sub.teacher_feedback || '');
+  };
 
   const saveGrade = () => {
     const score = parseInt(gradeScore);
-    if (isNaN(score) || score < 0 || score > gradeModal.max_score) { showToast('Invalid score.', 'error'); return; }
-    setSubmissions(prev => prev.map(s => s.id === gradeModal.id ? { ...s, final_score: score, teacher_feedback: gradeFeedback, status: 'graded' } : s));
+    if (isNaN(score) || score < 0 || score > gradeModal.max_score) {
+      showToast('Invalid score. Enter a number between 0 and ' + gradeModal.max_score + '.', 'error');
+      return;
+    }
+    const studentName = gradeModal.student_name;
+    setSubmissions(prev =>
+      prev.map(s =>
+        s.id === gradeModal.id
+          ? { ...s, final_score: score, teacher_feedback: gradeFeedback, status: 'graded' }
+          : s
+      )
+    );
     setGradeModal(null);
-    showToast('✅ Grade saved and visible to student.');
+    showToast(`✅ Grade saved for ${studentName}.`);
   };
 
   const saveEditGrade = () => {
     const score = parseInt(gradeScore);
-    if (isNaN(score) || score < 0 || score > editGradeModal.max_score) { showToast('Invalid score.', 'error'); return; }
-    setSubmissions(prev => prev.map(s => s.id === editGradeModal.id ? { ...s, final_score: score, teacher_feedback: gradeFeedback, status: 'graded' } : s));
+    if (isNaN(score) || score < 0 || score > editGradeModal.max_score) {
+      showToast('Invalid score. Enter a number between 0 and ' + editGradeModal.max_score + '.', 'error');
+      return;
+    }
+    const studentName = editGradeModal.student_name;
+    setSubmissions(prev =>
+      prev.map(s =>
+        s.id === editGradeModal.id
+          ? { ...s, final_score: score, teacher_feedback: gradeFeedback, status: 'graded' }
+          : s
+      )
+    );
     setEditGradeModal(null);
-    showToast('✅ Grade updated.');
+    showToast(`✅ Grade updated for ${studentName}.`);
   };
 
   const saveFeedback = () => {
-    setSubmissions(prev => prev.map(s => s.id === feedbackModal.id ? { ...s, teacher_feedback: gradeFeedback } : s));
+    const studentName = feedbackModal.student_name;
+    setSubmissions(prev =>
+      prev.map(s =>
+        s.id === feedbackModal.id
+          ? { ...s, teacher_feedback: gradeFeedback }
+          : s
+      )
+    );
     setFeedbackModal(null);
-    showToast('✅ Feedback saved.');
+    showToast(`✅ Feedback saved for ${studentName}.`);
   };
 
   const rows = [...submissions].sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
@@ -224,8 +290,17 @@ export default function StudentsTab({ onBack }) {
 
       {/* ── GRADE MODAL ── */}
       {gradeModal && (
-        <Sheet onClose={() => setGradeModal(null)} title={gradeModal.student_name} subtitle={gradeModal.assignment_title}
-          footer={<><button onClick={() => setGradeModal(null)} className="btn-ghost">Cancel</button><button onClick={saveGrade} className="btn-primary">💾 Save Grade</button></>}>
+        <Sheet
+          onClose={() => setGradeModal(null)}
+          title={gradeModal.student_name}
+          subtitle={gradeModal.assignment_title}
+          footer={
+            <>
+              <button onClick={() => setGradeModal(null)} style={btnGhost}>Cancel</button>
+              <button onClick={saveGrade} style={btnPrimary}>💾 Save Grade</button>
+            </>
+          }
+        >
           {gradeModal.ai_score !== null && (
             <div className={`info-box ${gradeModal.ai_detection_score >= 50 ? 'info-box--red' : 'info-box--blue'}`}>
               <span className="info-box__icon">{gradeModal.ai_detection_score >= 50 ? '🚨' : '🤖'}</span>
@@ -250,21 +325,44 @@ export default function StudentsTab({ onBack }) {
           )}
           <div style={{ marginBottom: 14 }}>
             <label className="pg-label">Final Score (out of {gradeModal.max_score}) *</label>
-            <input className="pg-input" style={{ width: 160 }} type="number" min="0" max={gradeModal.max_score}
-              value={gradeScore} onChange={e => setGradeScore(e.target.value)} placeholder={`0 – ${gradeModal.max_score}`} />
+            <input
+              className="pg-input"
+              style={{ width: 160 }}
+              type="number"
+              min="0"
+              max={gradeModal.max_score}
+              value={gradeScore}
+              onChange={e => setGradeScore(e.target.value)}
+              placeholder={`0 – ${gradeModal.max_score}`}
+            />
           </div>
           <div>
             <label className="pg-label">Feedback to Student</label>
-            <textarea className="pg-input" value={gradeFeedback} onChange={e => setGradeFeedback(e.target.value)}
-              rows={4} placeholder="Write personalised feedback..." style={{ resize: 'vertical', lineHeight: 1.6 }} />
+            <textarea
+              className="pg-input"
+              value={gradeFeedback}
+              onChange={e => setGradeFeedback(e.target.value)}
+              rows={4}
+              placeholder="Write personalised feedback..."
+              style={{ resize: 'vertical', lineHeight: 1.6 }}
+            />
           </div>
         </Sheet>
       )}
 
       {/* ── EDIT GRADE MODAL ── */}
       {editGradeModal && (
-        <Sheet onClose={() => setEditGradeModal(null)} title="Edit Grade" subtitle={`${editGradeModal.student_name} — ${editGradeModal.assignment_title}`}
-          footer={<><button onClick={() => setEditGradeModal(null)} className="btn-ghost">Cancel</button><button onClick={saveEditGrade} className="btn-primary">💾 Update Grade</button></>}>
+        <Sheet
+          onClose={() => setEditGradeModal(null)}
+          title="Edit Grade"
+          subtitle={`${editGradeModal.student_name} — ${editGradeModal.assignment_title}`}
+          footer={
+            <>
+              <button onClick={() => setEditGradeModal(null)} style={btnGhost}>Cancel</button>
+              <button onClick={saveEditGrade} style={btnPrimary}>💾 Update Grade</button>
+            </>
+          }
+        >
           <div className="info-box info-box--amber">
             <span className="info-box__icon">✏️</span>
             <p style={{ fontSize: 13, color: '#92400e', fontWeight: 600, margin: 0 }}>
@@ -273,21 +371,42 @@ export default function StudentsTab({ onBack }) {
           </div>
           <div style={{ marginBottom: 14 }}>
             <label className="pg-label">New Score (out of {editGradeModal.max_score})</label>
-            <input className="pg-input" style={{ width: 160 }} type="number" min="0" max={editGradeModal.max_score}
-              value={gradeScore} onChange={e => setGradeScore(e.target.value)} />
+            <input
+              className="pg-input"
+              style={{ width: 160 }}
+              type="number"
+              min="0"
+              max={editGradeModal.max_score}
+              value={gradeScore}
+              onChange={e => setGradeScore(e.target.value)}
+            />
           </div>
           <div>
             <label className="pg-label">Updated Feedback</label>
-            <textarea className="pg-input" value={gradeFeedback} onChange={e => setGradeFeedback(e.target.value)}
-              rows={4} style={{ resize: 'vertical', lineHeight: 1.6 }} />
+            <textarea
+              className="pg-input"
+              value={gradeFeedback}
+              onChange={e => setGradeFeedback(e.target.value)}
+              rows={4}
+              style={{ resize: 'vertical', lineHeight: 1.6 }}
+            />
           </div>
         </Sheet>
       )}
 
       {/* ── FEEDBACK MODAL ── */}
       {feedbackModal && (
-        <Sheet onClose={() => setFeedbackModal(null)} title="Give Feedback" subtitle={`${feedbackModal.student_name} — ${feedbackModal.assignment_title}`}
-          footer={<><button onClick={() => setFeedbackModal(null)} className="btn-ghost">Cancel</button><button onClick={saveFeedback} className="btn-primary">💾 Save Feedback</button></>}>
+        <Sheet
+          onClose={() => setFeedbackModal(null)}
+          title="Give Feedback"
+          subtitle={`${feedbackModal.student_name} — ${feedbackModal.assignment_title}`}
+          footer={
+            <>
+              <button onClick={() => setFeedbackModal(null)} style={btnGhost}>Cancel</button>
+              <button onClick={saveFeedback} style={btnPrimary}>💾 Save Feedback</button>
+            </>
+          }
+        >
           {feedbackModal.ai_feedback && (
             <div className="ai-feedback-box">
               <span className="pg-label" style={{ color: 'var(--blue)' }}>🤖 AI Feedback (for reference)</span>
@@ -302,11 +421,18 @@ export default function StudentsTab({ onBack }) {
           )}
           <div>
             <label className="pg-label">{feedbackModal.teacher_feedback ? 'Update Feedback' : 'Write Feedback to Student'}</label>
-            <textarea className="pg-input" value={gradeFeedback} onChange={e => setGradeFeedback(e.target.value)}
-              rows={5} placeholder="Write personalised feedback for the student..." style={{ resize: 'vertical', lineHeight: 1.6 }} />
+            <textarea
+              className="pg-input"
+              value={gradeFeedback}
+              onChange={e => setGradeFeedback(e.target.value)}
+              rows={5}
+              placeholder="Write personalised feedback for the student..."
+              style={{ resize: 'vertical', lineHeight: 1.6 }}
+            />
           </div>
         </Sheet>
       )}
+
     </div>
   );
 }
