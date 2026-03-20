@@ -33,14 +33,14 @@ export default function App() {
             background: teacherTab === 'pending' ? '#022aa4' : '#f1f5f9',
             color: teacherTab === 'pending' ? '#fff' : '#000', fontWeight: 700
           }}>
-            📋 Pending Essays
+            📋 Pending Review
           </button>
           <button onClick={() => setTeacherTab('students')} style={{
             padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: teacherTab === 'students' ? '#022aa4' : '#f1f5f9',
             color: teacherTab === 'students' ? '#fff' : '#000', fontWeight: 700
           }}>
-            👥 Students Overview
+            👥 Students
           </button>
           <button onClick={() => setRole(null)} style={{
             padding: '8px 20px', borderRadius: 8, border: 'none',

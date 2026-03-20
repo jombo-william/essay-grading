@@ -136,7 +136,7 @@ export default function PendingTab({ onBack }) {
           <div className="pg-header-logo">✍️</div>
           <div>
             <p className="pg-header-title">EssayGrade AI</p>
-            <p className="pg-header-sub">Pending Review</p>
+            <p className="pg-header-sub">Submitted essays</p>
           </div>
         </div>
         {onBack && <button onClick={onBack} className="pg-back-btn">← Home</button>}

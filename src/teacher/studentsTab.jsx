@@ -1,11 +1,12 @@
+
 import { useState } from 'react';
 import './students.css';
 import './pending.css';
 
 const ALL_SUBMISSIONS_INIT = [
   {
-    id: 101, student_id: 2, assignment_id: 1, student_name: 'Alice Mwale', assignment_title: 'Climate Change & Society', max_score: 100,
-    essay_text: 'Climate change is one of the most pressing global challenges...',
+    id: 101, student_id: 2, assignment_id: 1, student_name: 'Limbani Chipeni', assignment_title: 'The good, the bad and the ugly of Intenert governance', max_score: 100,
+    essay_text: 'essay answer goes here',
     file_name: null, submit_mode: 'write', submitted_at: '2026-03-04T10:30:00',
     ai_score: 82, ai_detection_score: 8,
     ai_feedback: 'Content (28/35): Three clear impacts identified. Structure (22/25): Clear paragraphs. Grammar (18/20): Fluent. Evidence (14/20): Needs more statistics.\nAI Detection: Low (~8%).',
@@ -79,8 +80,6 @@ function StatusBadge({ status, aiDetection }) {
   return <span className="badge badge--process">🤖 Processing</span>;
 }
 
-// KEY FIX: footer lives INSIDE pg-sheet-body so it scrolls with the content
-// and is never clipped by overflow:hidden on .pg-sheet
 function Sheet({ onClose, title, subtitle, children, footer }) {
   return (
     <div className="pg-sheet-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -112,6 +111,7 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
 
 export default function StudentsTab({ onBack }) {
   const [submissions, setSubmissions] = useState(ALL_SUBMISSIONS_INIT);
+  const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
   const [gradeModal, setGradeModal] = useState(null);
   const [editGradeModal, setEditGradeModal] = useState(null);
@@ -190,26 +190,51 @@ export default function StudentsTab({ onBack }) {
     showToast(`✅ Feedback saved for ${studentName}.`);
   };
 
-  const rows = [...submissions].sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+  const rows = [...submissions]
+    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+    .filter(sub =>
+      sub.student_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <div className="pg-page">
 
-      {toast && <div className={`pg-toast pg-toast--${toast.type}`}>{toast.msg}</div>}
+      {toast && <div className={`pg - toast pg - toast--${toast.type} `}>{toast.msg}</div>}
 
       <header className="pg-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="pg-header-logo">✍️</div>
           <div>
             <p className="pg-header-title">EssayGrade AI</p>
-            <p className="pg-header-sub">Students Overview</p>
+            <p className="pg-header-sub">Students</p>
           </div>
         </div>
-        {onBack && <button onClick={onBack} className="pg-back-btn">← Home</button>}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="text"
+            placeholder="Search student..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              padding: '7px 12px',
+              borderRadius: 8,
+              border: '1.5px solid #e2e8f0',
+              fontSize: 13,
+              color: '#0f172a',
+              background: '#f8fafc',
+              outline: 'none',
+              width: 200,
+            }}
+          />
+          {onBack && (
+            <button onClick={onBack} className="pg-back-btn">← Home</button>
+          )}
+        </div>
       </header>
 
       <div className="pg-main">
-        <p className="pg-page-title">Students Overview</p>
+        <p className="pg-page-title">Students</p>
 
         <div className="pg-table-wrap">
           <div style={{ overflowX: 'auto' }}>
@@ -226,62 +251,70 @@ export default function StudentsTab({ onBack }) {
                 </tr>
               </thead>
               <tbody>
-                {rows.map(sub => {
-                  const isFlagged = sub.ai_detection_score >= 50;
-                  const finalPct = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
-                  return (
-                    <tr key={sub.id} className="pg-tr">
-                      <td className="pg-td">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div className={`pg-avatar ${isFlagged ? 'pg-avatar--red' : 'pg-avatar--blue'}`}>
-                            {sub.student_name.charAt(0)}
+                {rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: '#94a3b8', fontSize: 13 }}>
+                      No students match your search.
+                    </td>
+                  </tr>
+                ) : (
+                  rows.map(sub => {
+                    const isFlagged = sub.ai_detection_score >= 50;
+                    const finalPct = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
+                    return (
+                      <tr key={sub.id} className="pg-tr">
+                        <td className="pg-td">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div className={`pg - avatar ${isFlagged ? 'pg-avatar--red' : 'pg-avatar--blue'} `}>
+                              {sub.student_name.charAt(0)}
+                            </div>
+                            <p style={{ fontWeight: 700, color: 'var(--text)', margin: 0, fontSize: 13, whiteSpace: 'nowrap' }}>{sub.student_name}</p>
                           </div>
-                          <p style={{ fontWeight: 700, color: 'var(--text)', margin: 0, fontSize: 13, whiteSpace: 'nowrap' }}>{sub.student_name}</p>
-                        </div>
-                      </td>
-                      <td className="pg-td">
-                        <p style={{ fontWeight: 600, color: 'var(--text)', margin: '0 0 2px', fontSize: 13 }}>{sub.assignment_title}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: 0 }}>
-                          {new Date(sub.submitted_at).toLocaleDateString()}
-                          {sub.file_name && <span style={{ color: 'var(--blue)', marginLeft: 6 }}>📎 {sub.file_name}</span>}
-                        </p>
-                      </td>
-                      <td className="pg-td">
-                        <StatusBadge status={sub.status} aiDetection={sub.ai_detection_score} />
-                      </td>
-                      <td className="pg-td">
-                        {sub.ai_score !== null
-                          ? <span className={isFlagged ? 'score--red' : 'score--blue'}>{isFlagged ? 0 : sub.ai_score}/{sub.max_score}</span>
-                          : <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>}
-                      </td>
-                      <td className="pg-td">
-                        {sub.final_score !== null
-                          ? <span className={scoreColorClass(finalPct)}>{sub.final_score}/{sub.max_score}</span>
-                          : <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>}
-                      </td>
-                      <td className="pg-td">
-                        {sub.ai_detection_score !== null
-                          ? <span className={`ai-pill ${isFlagged ? 'ai-pill--red' : sub.ai_detection_score >= 30 ? 'ai-pill--amber' : 'ai-pill--green'}`}>
-                            {isFlagged ? '🚨' : sub.ai_detection_score >= 30 ? '⚠️' : '✅'} {sub.ai_detection_score}%
-                          </span>
-                          : <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>}
-                      </td>
-                      <td className="pg-td" style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: 5, justifyContent: 'center', flexWrap: 'nowrap' }}>
-                          {sub.status === 'ai_graded' && (
-                            <button onClick={() => openGrade(sub)} className="btn-sm-grade">✏️ Grade</button>
-                          )}
-                          {sub.status === 'graded' && (
-                            <button onClick={() => openEditGrade(sub)} className="btn-outline-blue">🔁 Edit Grade</button>
-                          )}
-                          {(sub.status === 'graded' || sub.status === 'ai_graded') && (
-                            <button onClick={() => openFeedback(sub)} className="btn-sm-ghost">💬 Feedback</button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                        <td className="pg-td">
+                          <p style={{ fontWeight: 600, color: 'var(--text)', margin: '0 0 2px', fontSize: 13 }}>{sub.assignment_title}</p>
+                          <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: 0 }}>
+                            {new Date(sub.submitted_at).toLocaleDateString()}
+                            {sub.file_name && <span style={{ color: 'var(--blue)', marginLeft: 6 }}>📎 {sub.file_name}</span>}
+                          </p>
+                        </td>
+                        <td className="pg-td">
+                          <StatusBadge status={sub.status} aiDetection={sub.ai_detection_score} />
+                        </td>
+                        <td className="pg-td">
+                          {sub.ai_score !== null
+                            ? <span className={isFlagged ? 'score--red' : 'score--blue'}>{isFlagged ? 0 : sub.ai_score}/{sub.max_score}</span>
+                            : <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>}
+                        </td>
+                        <td className="pg-td">
+                          {sub.final_score !== null
+                            ? <span className={scoreColorClass(finalPct)}>{sub.final_score}/{sub.max_score}</span>
+                            : <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>}
+                        </td>
+                        <td className="pg-td">
+                          {sub.ai_detection_score !== null
+                            ? <span className={`ai - pill ${isFlagged ? 'ai-pill--red' : sub.ai_detection_score >= 30 ? 'ai-pill--amber' : 'ai-pill--green'} `}>
+                              {isFlagged ? '🚨' : sub.ai_detection_score >= 30 ? '⚠️' : '✅'} {sub.ai_detection_score}%
+                            </span>
+                            : <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>—</span>}
+                        </td>
+                        <td className="pg-td" style={{ textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: 5, justifyContent: 'center', flexWrap: 'nowrap' }}>
+                            {sub.status === 'ai_graded' && (
+                              <button onClick={() => openGrade(sub)} className="btn-sm-grade">✏️ Grade</button>
+                            )}
+                            {sub.status === 'graded' && (
+                              <button onClick={() => openEditGrade(sub)} className="btn-outline-blue">🔁 Edit Grade</button>
+                            )}
+                            {(sub.status === 'graded' || sub.status === 'ai_graded') && (
+                              <button onClick={() => openFeedback(sub)} className="btn-sm-ghost">💬 Feedback</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -302,10 +335,10 @@ export default function StudentsTab({ onBack }) {
           }
         >
           {gradeModal.ai_score !== null && (
-            <div className={`info-box ${gradeModal.ai_detection_score >= 50 ? 'info-box--red' : 'info-box--blue'}`}>
+            <div className={`info - box ${gradeModal.ai_detection_score >= 50 ? 'info-box--red' : 'info-box--blue'} `}>
               <span className="info-box__icon">{gradeModal.ai_detection_score >= 50 ? '🚨' : '🤖'}</span>
               <div>
-                <p className={`info-box__title ${gradeModal.ai_detection_score >= 50 ? 'info-box__title--red' : 'info-box__title--blue'}`}>
+                <p className={`info - box__title ${gradeModal.ai_detection_score >= 50 ? 'info-box__title--red' : 'info-box__title--blue'} `}>
                   AI Score: {gradeModal.ai_detection_score >= 50 ? 0 : gradeModal.ai_score}/{gradeModal.max_score}
                   {gradeModal.ai_detection_score >= 50 && ' · AI Flagged'}
                 </p>
@@ -333,7 +366,7 @@ export default function StudentsTab({ onBack }) {
               max={gradeModal.max_score}
               value={gradeScore}
               onChange={e => setGradeScore(e.target.value)}
-              placeholder={`0 – ${gradeModal.max_score}`}
+              placeholder={`0 – ${gradeModal.max_score} `}
             />
           </div>
           <div>
@@ -355,7 +388,7 @@ export default function StudentsTab({ onBack }) {
         <Sheet
           onClose={() => setEditGradeModal(null)}
           title="Edit Grade"
-          subtitle={`${editGradeModal.student_name} — ${editGradeModal.assignment_title}`}
+          subtitle={`${editGradeModal.student_name} — ${editGradeModal.assignment_title} `}
           footer={
             <>
               <button onClick={() => setEditGradeModal(null)} style={btnGhost}>Cancel</button>
@@ -399,7 +432,7 @@ export default function StudentsTab({ onBack }) {
         <Sheet
           onClose={() => setFeedbackModal(null)}
           title="Give Feedback"
-          subtitle={`${feedbackModal.student_name} — ${feedbackModal.assignment_title}`}
+          subtitle={`${feedbackModal.student_name} — ${feedbackModal.assignment_title} `}
           footer={
             <>
               <button onClick={() => setFeedbackModal(null)} style={btnGhost}>Cancel</button>
