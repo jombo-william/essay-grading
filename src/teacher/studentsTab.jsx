@@ -228,7 +228,7 @@ export default function StudentsTab({ onBack }) {
             }}
           />
           {onBack && (
-            <button onClick={onBack} className="pg-back-btn">← Home</button>
+            <button onClick={onBack} className="pg-back-btn">gitHome</button>
           )}
         </div>
       </header>
