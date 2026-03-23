@@ -139,7 +139,7 @@ export default function PendingTab({ onBack }) {
             <p className="pg-header-sub">Submitted essays</p>
           </div>
         </div>
-        {onBack && <button onClick={onBack} className="pg-back-btn">← Home</button>}
+        {onBack && <button onClick={onBack} className="pg-back-btn">Home</button>}
       </header>
 
       <div className="pg-main">
