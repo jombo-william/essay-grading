@@ -1,6 +1,6 @@
 // src/components/teacher/api.js
 
-const BASE_URL = 'http://localhost:8000/api/teacher';
+const BASE_URL = 'http://localhost:8080/api/teacher';
 
 export async function apiFetch(path, options = {}) {
   const csrfToken = getCsrfToken();

@@ -1,8 +1,5 @@
-
-
-
 // src/componets/teacher/AssignmentForm.jsx
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { inp, label } from "./shared.jsx";
 
 const FILE_TYPES = [
@@ -12,18 +9,118 @@ const FILE_TYPES = [
   { label: "📎 Any File",   accept: "*",                bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
 ];
 
-export default function AssignmentForm({ form, setForm, attachments, setAttachments, onAttachFile }) {
-  const fileRef = useRef();
-  const rubricTotal = Object.values(form.rubric || {}).reduce((a, b) => a + b, 0);
+const API_BASE = "http://localhost:8080/api";
+
+const loadPdfJs = () =>
+  new Promise(resolve => {
+    if (window.pdfjsLib) return resolve(window.pdfjsLib);
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      resolve(window.pdfjsLib);
+    };
+    document.head.appendChild(s);
+  });
+
+export default function AssignmentForm({ form, setForm, attachments, setAttachments, onAttachFile, assignmentId }) {
+  const fileRef      = useRef();
+  const refFileRef   = useRef();
+  const rubricTotal  = Object.values(form.rubric || {}).reduce((a, b) => a + b, 0);
+
+  const [refUploading, setRefUploading] = useState(false);
+  const [refUploadMsg, setRefUploadMsg] = useState("");
+  const [refFileName,  setRefFileName]  = useState("");
 
   const triggerUpload = (accept) => {
     fileRef.current.accept = accept;
     fileRef.current.click();
   };
 
+  // ── Handle reference material file upload ─────────────────────────────────
+  const handleRefFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setRefUploading(true);
+    setRefFileName(file.name);
+    setRefUploadMsg("📤 Reading file...");
+
+    try {
+      let extractedText = "";
+
+      if (file.type === "text/plain") {
+        // TXT — read directly
+        extractedText = await file.text();
+
+      } else if (file.type === "application/pdf") {
+        // PDF — extract with pdf.js
+        setRefUploadMsg("📄 Extracting text from PDF...");
+        try {
+          const pdfjsLib    = await loadPdfJs();
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page    = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(item => item.str).join(" ") + "\n";
+          }
+          extractedText = fullText.trim();
+        } catch (pdfErr) {
+          setRefUploadMsg(`❌ Could not extract PDF text: ${pdfErr.message}`);
+          setTimeout(() => setRefUploadMsg(""), 4000);
+          setRefUploading(false);
+          e.target.value = "";
+          return;
+        }
+
+      } else {
+        // Other files — try reading as text
+        try {
+          extractedText = await file.text();
+        } catch {
+          setRefUploadMsg("❌ Could not read this file type. Please use PDF or TXT.");
+          setTimeout(() => setRefUploadMsg(""), 4000);
+          setRefUploading(false);
+          e.target.value = "";
+          return;
+        }
+      }
+
+      if (!extractedText || extractedText.trim().length < 10) {
+        setRefUploadMsg("❌ No readable text found in the file.");
+        setTimeout(() => setRefUploadMsg(""), 4000);
+        setRefUploading(false);
+        e.target.value = "";
+        return;
+      }
+
+      // Limit to 5000 chars and append to existing reference material
+      const trimmed  = extractedText.trim().slice(0, 5000);
+      const existing = form.referenceMaterial ? form.referenceMaterial.trim() + "\n\n" : "";
+      setForm(prev => ({
+        ...prev,
+        referenceMaterial: existing + `--- ${file.name} ---\n${trimmed}`,
+      }));
+
+      setRefUploadMsg(`✅ "${file.name}" — ${trimmed.length} characters extracted successfully`);
+      setTimeout(() => setRefUploadMsg(""), 5000);
+
+    } catch (err) {
+      setRefUploadMsg(`❌ Error: ${err.message}`);
+      setTimeout(() => setRefUploadMsg(""), 4000);
+    } finally {
+      setRefUploading(false);
+      e.target.value = "";
+    }
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      <input ref={fileRef} type="file" multiple style={{ display: "none" }} onChange={onAttachFile} />
+      <input ref={fileRef}    type="file" multiple style={{ display: "none" }} onChange={onAttachFile} />
+      <input ref={refFileRef} type="file" accept=".pdf,.txt,.doc,.docx" style={{ display: "none" }} onChange={handleRefFileChange} />
 
       {/* Title */}
       <div>
@@ -48,15 +145,50 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
           onChange={e => setForm({ ...form, instructions: e.target.value })} />
       </div>
 
-      {/* Reference material */}
+      {/* Reference material with file upload */}
       <div>
-        <label style={label}>Reference Material (for AI grading)</label>
-        <textarea style={{ ...inp, resize: "vertical", lineHeight: "1.65", minHeight: "90px" }}
-          rows={3} placeholder="Key facts, model answers, or study notes the AI uses when grading..."
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+          <label style={{ ...label, margin: 0 }}>Reference Material (for AI grading)</label>
+          <button
+            type="button"
+            onClick={() => refFileRef.current.click()}
+            disabled={refUploading}
+            style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              padding: "6px 14px", borderRadius: "8px",
+              border: "1.5px dashed #8b5cf6",
+              background: refUploading ? "#f5f3ff" : "#faf5ff",
+              color: "#7c3aed", fontSize: "12px", fontWeight: "700",
+              cursor: refUploading ? "not-allowed" : "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            {refUploading ? "⏳ Reading..." : "📎 Upload File"}
+          </button>
+        </div>
+
+        {/* Upload status message */}
+        {refUploadMsg && (
+          <div style={{
+            padding: "8px 12px", borderRadius: "8px", marginBottom: "8px",
+            background: refUploadMsg.startsWith("✅") ? "#f0fdf4" : refUploadMsg.startsWith("❌") ? "#fef2f2" : "#eff6ff",
+            border: `1px solid ${refUploadMsg.startsWith("✅") ? "#bbf7d0" : refUploadMsg.startsWith("❌") ? "#fecaca" : "#bfdbfe"}`,
+            fontSize: "12px", fontWeight: "600",
+            color: refUploadMsg.startsWith("✅") ? "#15803d" : refUploadMsg.startsWith("❌") ? "#dc2626" : "#1d4ed8",
+          }}>
+            {refUploadMsg}
+          </div>
+        )}
+
+        <textarea
+          style={{ ...inp, resize: "vertical", lineHeight: "1.65", minHeight: "90px" }}
+          rows={3}
+          placeholder="Paste key facts, model answers, or study notes here... OR click 'Upload File' to extract text from a PDF or TXT book/document."
           value={form.referenceMaterial || ""}
-          onChange={e => setForm({ ...form, referenceMaterial: e.target.value })} />
+          onChange={e => setForm({ ...form, referenceMaterial: e.target.value })}
+        />
         <p style={{ fontSize: "12px", color: "#8b5cf6", marginTop: "6px", fontWeight: "500" }}>
-          🤖 The AI uses this to assess accuracy and relevance of student essays.
+          🤖 Upload a book, notes, or any document — the AI will use it to strictly assess student essays.
         </p>
       </div>
 
@@ -96,7 +228,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
         </div>
       </div>
 
-      {/* File attachments */}
+      {/* File attachments for students */}
       <div>
         <label style={label}>Attach Files for Students</label>
         <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 12px" }}>

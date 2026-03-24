@@ -1,7 +1,7 @@
 // src/componets/auth/LoginPage.jsx
 import { useState, useEffect, useRef } from "react";
 
-const API_BASE = "http://localhost:8000/api";  
+const API_BASE = "http://localhost:8080/api";  
 
 export default function LoginPage({ onSelect }) {
   const [email, setEmail]       = useState("");
@@ -46,7 +46,7 @@ export default function LoginPage({ onSelect }) {
         setLoading(false);
       }
     } catch {
-      setError("Cannot reach server. Make sure Python backend is running on port 8000.");
+      setError("Cannot reach server. Make sure Python backend is running on port 8080.");
       triggerShake();
       setLoading(false);
     }

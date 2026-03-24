@@ -1,6 +1,7 @@
 
 
 
+
 // src/components/student/StudentDashboard.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch }         from './api.js';
@@ -76,7 +77,6 @@ export default function StudentDashboard({ user, onBack }) {
     ...a,
     isPast:     new Date() > new Date(a.due_date),
     submission: results.find(r => r.assignment_id === a.id) || null,
-    // "submitted" flag comes from the API (get_assignments.php returns it)
   }));
 
   const graded = results.filter(r => r.final_score !== null);
@@ -100,25 +100,22 @@ export default function StudentDashboard({ user, onBack }) {
 
     try {
       setGradingStatus('🤖 AI is grading your essay...');
+
+      const csrfToken = sessionStorage.getItem('csrf_token') || '';
+
       const data = await apiFetch('/submit_essay.php', {
         method: 'POST',
         body: JSON.stringify({
           assignment_id: assignment.id,
           essay_text:    activeText,
-          submit_mode:   submitMode,
-          file_name:     uploadFile ? uploadFile.name : null,
+          csrf_token:    csrfToken,
         }),
       });
 
       setWriteAssignment(null);
       setTab('results');
 
-      const aiPct = data.submission?.ai_detection_score ?? 0;
-      showToast(
-        aiPct >= 50
-          ? '🚨 AI content detected — score set to 0. Awaiting teacher review.'
-          : '✅ Submitted and AI-graded! Awaiting teacher approval.'
-      );
+      showToast('✅ Submitted and AI-graded! Awaiting teacher approval.');
 
       await fetchAll();
     } catch (err) {
@@ -132,9 +129,13 @@ export default function StudentDashboard({ user, onBack }) {
   // ── Unsubmit essay ──────────────────────────────────────────────────────
   const handleUnsubmit = async sub => {
     try {
+      const csrfToken = sessionStorage.getItem('csrf_token') || '';
       await apiFetch('/unsubmit_essay.php', {
         method: 'POST',
-        body: JSON.stringify({ submission_id: sub.id }),
+        body: JSON.stringify({
+          submission_id: sub.id,
+          csrf_token:    csrfToken,
+        }),
       });
       setEssayViewSub(null);
       setResultSub(null);
