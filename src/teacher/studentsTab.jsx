@@ -458,7 +458,7 @@ export default function StudentsTab({ onBack }) {
               animation: 'atRiskPulse 1.4s ease-in-out infinite',
               flexShrink: 0,
             }} />
-            ⚠️ At-Risk
+            ⚠️ WatchList
             {/* Count badge */}
             {atRiskCount > 0 && (
               <span style={{
@@ -570,8 +570,8 @@ export default function StudentsTab({ onBack }) {
                         <td className="pg-td">
                           {sub.ai_detection_score !== null
                             ? <span className={`ai-pill ${isFlagged ? 'ai-pill--red'
-                                : sub.ai_detection_score >= 30 ? 'ai-pill--amber'
-                                  : 'ai-pill--green'
+                              : sub.ai_detection_score >= 30 ? 'ai-pill--amber'
+                                : 'ai-pill--green'
                               }`}>
                               {isFlagged ? '🚨' : sub.ai_detection_score >= 30 ? '⚠️' : '✅'} {sub.ai_detection_score}%
                             </span>
