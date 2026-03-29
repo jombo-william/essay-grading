@@ -7,11 +7,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetch }         from './api.js';
 import { C, Toast }         from './shared.jsx';
 import AssignmentsTab       from './AssignmentsTab.jsx';
-import ResultsTab           from './ResultsTab.jsx';
+import Results               from './Results.jsx';
 import AssignmentDetail     from './AssignmentDetail.jsx';
 import WriteEssaySheet      from './WriteEssaySheet.jsx';
 import EssayViewSheet       from './EssayViewSheet.jsx';
-import ResultDetailSheet    from './ResultDetailSheet.jsx';
+// import ResultDetailSheet    from './ResultDetailSheet.jsx';
 
 const TABS = [
   { id: 'assignments', label: '📋 Assignments' },
@@ -206,13 +206,15 @@ export default function StudentDashboard({ user, onBack }) {
             onOpenDetail={setDetailAssignment}
           />
         )}
-        {tab === 'results' && (
+        {/* {tab === 'results' && (
           <ResultsTab
             results={results}
             loading={loading}
             onOpenResult={setResultSub}
           />
-        )}
+        )} */}
+
+        {tab === 'results' && <Results />}
       </div>
 
       {/* ── Modals ── */}
