@@ -17,12 +17,13 @@ export default function App() {
         <Route path="/"         element={<LandingPage />} />
         <Route path="/login"    element={<LoginPage />} />
 
-        {/* Protected — student dashboard / results */}
+        {/* Protected — student dashboard / results
         <Route path="/dashboard" element={
           <PrivateRoute>
             <Results />
           </PrivateRoute>
-        } />
+        } /> */}
+        <Route path="/dashboard" element={<Results />} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
