@@ -151,4 +151,4 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
       )}
     </div>
   );
-}
+}// AssignmentsTab - Handles assignment listing and creation
