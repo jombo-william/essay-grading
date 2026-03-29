@@ -397,7 +397,7 @@ export default function LandingPage() {
           <p className="section-desc" style={{ color:'rgba(255,255,255,0.6)' }}>Designed to serve every stakeholder in the Education ecosystem.</p>
           <div className="who-cards">
             {[
-              { icon:'🧑‍🎓', title:'Students', text:"Submit essays, receive instant detailed feedback, track your writing improvement and resubmit to improve your score." },
+              { icon:'🧑‍🎓', title:'Students (form 1-4)', text:"Submit essays, receive instant detailed feedback, track your writing improvement and resubmit to improve your score." },
               { icon:'👩‍🏫', title:'Computer Teachers', text:"Review AI grades, set rubrics, assign writing tasks, and spend more time on actual classroom teaching." },
               { icon:'🏫', title:'School Administrators', text:"Monitor school-wide writing performance with analytics, track progress and generate reports effortlessly." },
             ].map(w => (
@@ -446,10 +446,10 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="footer-bottom">
-            <p>© 2026 AI Essay Grading System — University of Malawi Fourth Year Project</p>
+            <p>© 2026 Essay Grading System Leveraging AI — University of Malawi Fourth Year Project</p>
             <div className="footer-badge">
-              <span className="badge-item">React + Supabase</span>
-              <span className="badge-item">Gemini AI & Hugging Face AI</span>
+              {/* <span className="badge-item">React + Supabase</span>
+              <span className="badge-item">Gemini AI & Hugging Face AI</span> */}
               <span className="badge-item">BED/COM 2021–2022</span>
             </div>
           </div>
