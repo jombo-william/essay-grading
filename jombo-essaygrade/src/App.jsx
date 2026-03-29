@@ -26,3 +26,4 @@ export default function App() {
   if (role === 'teacher') return <TeacherDashboard user={user} onBack={handleBack} />;
   if (role === 'student') return <StudentDashboard user={user} onBack={handleBack} />;
 }
+

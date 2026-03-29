@@ -9,7 +9,7 @@ const FILE_TYPES = [
   { label: "📎 Any File",   accept: "*",                bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
 ];
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "https://jombo-essaygrade.fly.dev/api";
 
 const loadPdfJs = () =>
   new Promise(resolve => {
