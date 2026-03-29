@@ -1,5 +1,6 @@
 
 
+
 // C:\Users\BR\Desktop\final_p\jombo-essaygrade\src\App.jsx
 import { useState } from 'react';
 import LoginPage from './componets/auth/LoginPage.jsx';
@@ -25,3 +26,4 @@ export default function App() {
   if (role === 'teacher') return <TeacherDashboard user={user} onBack={handleBack} />;
   if (role === 'student') return <StudentDashboard user={user} onBack={handleBack} />;
 }
+
