@@ -43,4 +43,4 @@ function getCsrfToken() {
   const cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
   return sessionStorage.getItem('csrf_token') || '';
-}
+}// api.js - API utility functions for teacher dashboard
