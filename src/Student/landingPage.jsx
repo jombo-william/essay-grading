@@ -1,8 +1,8 @@
 // C:\PROJECTS\Essay-Grader\src\Student\landingPage.jsx
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
 
-export default function LandingPage() {
+export default function LandingPage({ onLogin }) {
   const [current, setCurrent] = useState(0)
   const [progress, setProgress] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -188,18 +188,20 @@ export default function LandingPage() {
       {/* NAVBAR */}
       <nav>
         <div className="nav-inner">
-          <Link to="/" className="nav-brand">
+          {/* <Link to="/" className="nav-brand"> */}
+          <div className="nav-brand">
             <div className="nav-logo">U</div>
             <div>
               <div className="nav-brand-title">Essay Grading System Leveraging AI</div>
               <div className="nav-brand-sub">University of Malawi</div>
             </div>
-          </Link>
+           </div> 
           <ul className={`nav-links${menuOpen ? ' open' : ''}`} id="navLinks">
             <li><a href="#how-it-works">How It Works</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="#who">Who It's For</a></li>
-            <li><Link to="/login" className="btn-nav">Sign In →</Link></li>
+            {/* <li><Link to="/login" className="btn-nav">Sign In →</Link></li> */}
+            <li><button onClick={onLogin} className="btn-nav">Sign In →</button></li>
           </ul>
           <button className="hamburger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
             <span /><span /><span />
@@ -240,7 +242,7 @@ export default function LandingPage() {
               <h1 className="slide-heading">Grade Essays with <em>Artificial Intelligence</em></h1>
               <p className="slide-desc">Instantly evaluate student essays with 85%+ accuracy. Reduce teacher workload and deliver consistent, detailed feedback in seconds.</p>
               <div className="slide-actions">
-                <Link to="/login" className="btn-primary-hero">Get Started →</Link>
+                <button onClick={onLogin} className="btn-primary-hero">Get Started →</button>
                 <a href="#how-it-works" className="btn-outline-hero">▶ How It Works</a>
               </div>
             </div>
@@ -269,7 +271,8 @@ export default function LandingPage() {
               <h1 className="slide-heading">Instant, <em>Detailed</em> Writing Feedback</h1>
               <p className="slide-desc">Students receive comprehensive breakdowns of grammar, content, structure and vocabulary within 2 minutes of submission.</p>
               <div className="slide-actions">
-                <Link to="/login" className="btn-primary-hero">Try It Now →</Link>
+                {/* <Link to="/login" className="btn-primary-hero">Try It Now →</Link> */}
+                <button onClick={onLogin} className="btn-primary-hero">Try It Now →</button>
                 <a href="#features" className="btn-outline-hero">See Features</a>
               </div>
             </div>
@@ -301,7 +304,8 @@ export default function LandingPage() {
               <h1 className="slide-heading">Empower <em>Teachers</em> to Teach More</h1>
               <p className="slide-desc">Free up 70% of grading time. Powerful analytics help teachers track class progress and focus on students who need the most support.</p>
               <div className="slide-actions">
-                <Link to="/login" className="btn-primary-hero">Teacher Login →</Link>
+                {/* <Link to="/login" className="btn-primary-hero">Teacher Login →</Link> */}
+                <button onClick={onLogin} className="btn-primary-hero">Teacher Login →</button>
                 <a href="#who" className="btn-outline-hero">Learn More</a>
               </div>
             </div>
@@ -417,8 +421,10 @@ export default function LandingPage() {
           <h2>Ready to Transform Essay Grading?</h2>
           <p>Join the pilot programme and help shape the future of AI-powered education in Malawi.</p>
           <div className="cta-buttons">
-            <Link to="/login" className="btn-primary-hero">Sign In to Portal →</Link>
-            <Link to="/register" className="btn-outline-hero">Register Your School</Link>
+            {/* <Link to="/login" className="btn-primary-hero">Sign In to Portal →</Link>
+            <Link to="/register" className="btn-outline-hero">Register Your School</Link> */}
+             <button onClick={onLogin} className="btn-primary-hero">Sign In to Portal →</button>
+            <button className="btn-outline-hero">Register Your School</button>
           </div>
         </div>
       </section>

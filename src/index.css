@@ -1,2 +1,6 @@
 /* C:\Users\BR\Desktop\final_p\jombo-essaygrade\src\index.css */
-@import "tailwindcss";
+/* @import "tailwindcss"; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

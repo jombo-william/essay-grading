@@ -1,29 +1,29 @@
-
-
-
-// C:\Users\BR\Desktop\final_p\jombo-essaygrade\src\App.jsx
 import { useState } from 'react';
-import LoginPage from './componets/auth/LoginPage.jsx';
+import LandingPage from './Student/landingPage.jsx';
+import LoginPage from './Student/LoginPage.jsx';
 import TeacherDashboard from './componets/teacher/TeacherDashboard.jsx';
 import StudentDashboard from './componets/student/StudentDashboard.jsx';
 
 export default function App() {
-  const [role, setRole] = useState(null);   // null | 'teacher' | 'student'
-  const [user, setUser] = useState(null);   // full user object from backend
+  const [page, setPage] = useState('landing');  // 'landing' | 'login' | 'dashboard'
+  const [role, setRole] = useState(null);
+  const [user, setUser] = useState(null);
 
   const handleSelect = (selectedRole, userData) => {
     setRole(selectedRole);
     setUser(userData);
+    setPage('dashboard');
   };
 
   const handleBack = () => {
     setRole(null);
     setUser(null);
+    setPage('landing');
     sessionStorage.clear();
   };
 
-  if (!role) return <LoginPage onSelect={handleSelect} />;
+  if (page === 'landing') return <LandingPage onLogin={() => setPage('login')} />;
+  if (page === 'login')   return <LoginPage onSelect={handleSelect} />;
   if (role === 'teacher') return <TeacherDashboard user={user} onBack={handleBack} />;
   if (role === 'student') return <StudentDashboard user={user} onBack={handleBack} />;
 }
-

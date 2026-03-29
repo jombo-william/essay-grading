@@ -241,12 +241,12 @@ export default function StudentDashboard({ user, onBack }) {
         onUnsubmit={handleUnsubmit}
       />
 
-      <ResultDetailSheet
+      {/* <ResultDetailSheet
         sub={resultSub}
         canUnsubmit={resultSub ? canUnsubmit(resultSub) : false}
         onClose={() => setResultSub(null)}
         onUnsubmit={handleUnsubmit}
-      />
+      /> */}
     </div>
   );
 }

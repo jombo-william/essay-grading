@@ -1,11 +1,10 @@
 
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+// import { Link, useNavigate } from 'react-router-dom'
 
 // ── Supabase REMOVED — now using Python FastAPI backend ────────────────────
 
-export default function LoginPage() {
-  const navigate = useNavigate()
+export default function LoginPage({ onSelect }) {
   const [email, setEmail]             = useState('')
   const [password, setPassword]       = useState('')
   const [remember, setRemember]       = useState(false)
@@ -49,7 +48,7 @@ export default function LoginPage() {
 
       // Redirect based on role detected from database
       setTimeout(() => {
-        navigate(data.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+        onSelect(data.role, data)
       }, 900)
 
     } catch (err) {
@@ -86,7 +85,8 @@ export default function LoginPage() {
 
         {/* ── LEFT PANEL ── */}
         <div className="lp-left" style={{ display:'flex', flexDirection:'column', justifyContent:'center', padding:'48px 64px', position:'relative' }}>
-          <Link to="/" style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, textDecoration:'none' }}>
+          {/* <Link to="/" style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, textDecoration:'none' }}> */}
+          <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, textDecoration:'none' }}>
             <div style={{ position:'relative', width:64, height:64 }}>
               <div style={{ position:'absolute', inset:0, borderRadius:'50%', border:'2px solid rgba(201,162,39,0.4)', animation:'spin 12s linear infinite' }} />
               <div style={{ position:'absolute', inset:6, background:'linear-gradient(135deg,#c9a227,#a07a18)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Playfair Display',serif", fontSize:'1.5rem', fontWeight:700, color:'#0f1d3a' }}>U</div>
@@ -95,7 +95,7 @@ export default function LoginPage() {
               <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.15rem', color:'#fff', fontWeight:700, lineHeight:1.2 }}>AI Essay Grading System</div>
               <div style={{ fontSize:'0.72rem', color:'#e8c547', letterSpacing:'0.1em', textTransform:'uppercase', marginTop:2 }}>University of Malawi</div>
             </div>
-          </Link>
+          </div>
 
           <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:'2.4rem', color:'#fff', lineHeight:1.25, marginBottom:20 }}>
             Welcome to <em style={{ fontStyle:'normal', color:'#e8c547' }}>Smarter</em> Essay Grading
@@ -261,7 +261,7 @@ export default function LoginPage() {
 
             <p style={{ textAlign:'center', fontSize:'0.85rem', color:'#8a95a8' }}>
               Don't have an account?{' '}
-              <Link to="/register" style={{ color:'#1a2e5a', fontWeight:600, textDecoration:'none' }}>Register here</Link>
+              <a href="#"style={{ color:'#1a2e5a', fontWeight:600, textDecoration:'none' }}>Register here </a>
             </p>
 
             <div style={{ marginTop:24, paddingTop:20, borderTop:'1px solid #eef0f5', display:'flex', justifyContent:'center' }}>
