@@ -1,4 +1,4 @@
-// src/components/student/AssignmentDetail.jsx
+
 import { C, Sheet } from './shared.jsx';
 
 export default function AssignmentDetail({ assignment, onClose, onWrite, onViewEssay, onViewResult }) {
@@ -17,7 +17,7 @@ export default function AssignmentDetail({ assignment, onClose, onWrite, onViewE
       >
         View My Essay
       </button>
-      {/* {a.submission?.final_score !== null && ( */}
+      {}
       {a.submission && a.submission.final_score !== null && (
         <button onClick={() => { onClose(); onViewResult(a.submission); }} style={C.pBtn(false)}>
           See Results →
@@ -33,14 +33,14 @@ export default function AssignmentDetail({ assignment, onClose, onWrite, onViewE
       subtitle={`Due ${new Date(a.due_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${a.max_score} pts`}
       footer={footer}
     >
-      {/* Submitted banner */}
+      {}
       {a.submitted && (
         <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '20px' }}>✅</span>
           <div>
             <p style={{ fontWeight: '700', color: '#7e22ce', fontSize: '13px', margin: 0 }}>You have submitted this assignment</p>
             <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-              {/* {a.submission?.final_score !== null */}
+              {}
               {a.submission && a.submission.final_score !== null
                 ? `Score: ${a.submission.final_score}/${a.max_score}`
                 : a.submission?.status === 'pending' ? 'AI grading in progress...'
@@ -51,7 +51,7 @@ export default function AssignmentDetail({ assignment, onClose, onWrite, onViewE
         </div>
       )}
 
-      {/* Past due + not submitted */}
+      {}
       {a.isPast && !a.submitted && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '20px' }}>⏰</span>
@@ -59,19 +59,19 @@ export default function AssignmentDetail({ assignment, onClose, onWrite, onViewE
         </div>
       )}
 
-      {/* Description */}
+      {}
       <div style={{ marginBottom: '18px' }}>
         <p style={C.sL}>About this Assignment</p>
         <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.7, margin: 0 }}>{a.description}</p>
       </div>
 
-      {/* Instructions */}
+      {}
       <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
         <p style={{ ...C.sL, color: '#92400e' }}>Full Instructions</p>
         <p style={{ fontSize: '14px', color: '#78350f', margin: 0, lineHeight: 1.7 }}>{a.instructions}</p>
       </div>
 
-      {/* Rubric */}
+      {}
       {a.rubric && (
         <div style={{ marginBottom: '16px' }}>
           <p style={C.sL}>Grading Rubric</p>
@@ -89,7 +89,7 @@ export default function AssignmentDetail({ assignment, onClose, onWrite, onViewE
         </div>
       )}
 
-      {/* Info grid */}
+      {}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         {[
           { label: 'Maximum Score', value: `${a.max_score} points`,                                                         icon: '🏆' },

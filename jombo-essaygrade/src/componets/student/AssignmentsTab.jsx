@@ -1,10 +1,10 @@
-// src/components/student/AssignmentsTab.jsx
+
 import { C, Sheet, scoreColor, scoreLabel } from './shared.jsx';
 
 export default function AssignmentsTab({
-  assignments,   // enriched: has .submitted, .isPast, .submission
+  assignments,   
   loading,
-  onOpenDetail,  // open assignment detail sheet
+  onOpenDetail,  
 }) {
   if (loading) {
     return (
@@ -50,7 +50,7 @@ export default function AssignmentsTab({
             <span style={{ fontSize: '18px', color: '#94a3b8', flexShrink: 0 }}>→</span>
           </div>
 
-          {/* Inline submission status bar */}
+          {}
           {a.submitted && a.submission && (() => {
             const sub = a.submission;
             const isAI = (sub.ai_detection_score ?? 0) >= 50;

@@ -1,8 +1,8 @@
-// C:\PROJECTS\Essay-Grader\src\Student\Results.jsx
+
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-// ─── MOCK AI GRADER ────────────────────────────────────────────────────────
+
 async function mockAiGrade({ essayText, assignment }) {
   await new Promise(r => setTimeout(r, 2500 + Math.random() * 1500))
   const words = essayText.trim().split(/\s+/).filter(Boolean)
@@ -46,7 +46,7 @@ async function mockAiGrade({ essayText, assignment }) {
   return { total_score: totalScore, ai_detection_percentage: aiPct, overall_feedback: feedbackLines.join('\n'), rubric_breakdown: breakdown }
 }
 
-// ─── SENTENCE-LEVEL AI DETECTION ───────────────────────────────────────────
+
 function analyzeSentences(text, overallAiPct) {
   if (!text || !overallAiPct) return []
   const genericPhrases = ['multifaceted','furthermore','it is important to note','plays a crucial role','in today\'s world','throughout history','significantly impacts','one must consider','it is worth noting','as mentioned above','on the other hand','has fundamentally transformed','the intersection of']
@@ -67,7 +67,7 @@ function analyzeSentences(text, overallAiPct) {
   })
 }
 
-// ─── RADAR CHART (pure SVG) ─────────────────────────────────────────────────
+
 function RadarChart({ breakdown, size = 200 }) {
   if (!breakdown || breakdown.length === 0) return null
   const cx = size / 2, cy = size / 2
@@ -108,7 +108,7 @@ function RadarChart({ breakdown, size = 200 }) {
   )
 }
 
-// ─── MOCK DATA ─────────────────────────────────────────────────────────────
+
 const MOCK_ASSIGNMENTS = [
   { id:1, title:'Climate Change & Society', description:'Analyse the socio-economic impacts of climate change on developing nations.', instructions:'Write a well-structured essay (500–800 words) discussing at least three specific socio-economic impacts of climate change on developing nations.', referenceMaterial:'Climate change disproportionately affects developing nations...', rubric:{ content:35, structure:25, grammar:20, evidence:20 }, max_score:100, due_date:'2026-04-15T23:59' },
   { id:2, title:'Artificial Intelligence in Education', description:'Discuss the benefits and challenges of integrating AI tools in secondary schools.', instructions:'Write an argumentative essay (400–600 words) presenting both sides of AI integration in secondary schools.', referenceMaterial:'AI in education benefits: personalised learning, automated grading...', rubric:{ argumentation:40, structure:25, grammar:20, evidence:15 }, max_score:100, due_date:'2026-04-20T23:59' },
@@ -129,7 +129,7 @@ const INITIAL_SUBMISSIONS = [
   { id:103, assignment_id:97, assignment_title:'Globalisation & Inequality', max_score:100, essay_text:`Globalisation represents a multifaceted phenomenon that has fundamentally transformed the economic landscape. The intersection of trade liberalisation, technological advancement, and capital mobility has created opportunities while exacerbating inequalities.`, submitted_at:'2026-03-03T11:00:00', submit_mode:'write', file_name:null, ai_score:0, ai_detection_score:81, final_score:null, ai_feedback:`⚠️ HIGH AI CONTENT DETECTED\n\nAn estimated 81% of this essay appears AI-generated.\n\nPer academic integrity policy, essays with ≥50% AI content receive a score of 0/100.\n\nIndicators:\n• Unnaturally uniform sentence structure\n• Generic phrasing with no personal examples\n\nPlease rewrite in your own voice with specific examples.`, teacher_feedback:null, status:'ai_graded', rubric_breakdown:[] },
 ]
 
-// ─── COLOUR TOKENS ─────────────────────────────────────────────────────────
+
 const NAVY      = '#1a2e5a'
 const NAVY_DARK = '#0f1d3a'
 const GOLD      = '#c9a227'
@@ -141,7 +141,7 @@ const badge = c => ({
   color:       c==='green'?'#16a34a':c==='red'?'#dc2626':c==='amber'?'#d97706':c==='purple'?'#9333ea':c==='gray'?'#64748b':'#2563eb',
 })
 
-// ─── SHEET ─────────────────────────────────────────────────────────────────
+
 function Sheet({ onClose, title, subtitle, children, footer }) {
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', display:'flex', alignItems:'flex-end', justifyContent:'center', zIndex:200, backdropFilter:'blur(4px)' }}>
@@ -163,7 +163,7 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
   )
 }
 
-// ─── UNDER DEV MODAL ───────────────────────────────────────────────────────
+
 function UnderDevelopmentModal({ feature, onClose }) {
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:300, backdropFilter:'blur(4px)', padding:20 }}>
@@ -182,7 +182,7 @@ function UnderDevelopmentModal({ feature, onClose }) {
   )
 }
 
-// ─── RESULT CARD ───────────────────────────────────────────────────────────
+
 function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
   const [hovered, setHovered] = useState(false)
   const pct = s.final_score !== null ? Math.round((s.final_score / s.max_score) * 100) : null
@@ -239,7 +239,7 @@ function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
   )
 }
 
-// ─── SENTENCE HIGHLIGHTER ──────────────────────────────────────────────────
+
 function SentenceHighlighter({ text, aiPct }) {
   const [showHighlight, setShowHighlight] = useState(false)
   const [sentences, setSentences]         = useState([])
@@ -302,7 +302,7 @@ function SentenceHighlighter({ text, aiPct }) {
   )
 }
 
-// ─── AI WRITING COACH ──────────────────────────────────────────────────────
+
 function ImprovementCoach({ submission }) {
   const [open, setOpen]           = useState(false)
   const [loading, setLoading]     = useState(false)
@@ -397,7 +397,7 @@ Give exactly 4 suggestions. Be specific, reference the actual essay content.`,
   )
 }
 
-// ─── MAIN COMPONENT ────────────────────────────────────────────────────────
+
 export default function Results() {
   const [tab, setTab]                 = useState('results')
   const [submissions, setSubmissions] = useState(INITIAL_SUBMISSIONS)
@@ -489,10 +489,10 @@ export default function Results() {
         </div>
       </nav>
 
-      {/* MAIN */}
+      {}
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>
 
-        {/* STATS */}
+        {}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12, marginBottom:28 }}>
           {[
             { label:'To Submit', value: MOCK_ASSIGNMENTS.filter(a => !submissions.find(s=>s.assignment_id===a.id) && new Date()<new Date(a.due_date)).length, icon:'📋', bg:`${NAVY}18` },
@@ -509,7 +509,7 @@ export default function Results() {
           ))}
         </div>
 
-        {/* TITLE ROW */}
+        {}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
           <div>
             <p style={{ fontSize:20, fontWeight:800, color:'#1e293b', margin:0 }}>My Results</p>
@@ -525,7 +525,7 @@ export default function Results() {
           </div>
         </div>
 
-        {/* CARDS */}
+        {}
         {submissions.length === 0 && (
           <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:'48px 24px', textAlign:'center' }}>
             <p style={{ fontSize:36, margin:'0 0 10px' }}>📭</p>
@@ -537,7 +537,7 @@ export default function Results() {
         </div>
       </div>
 
-      {/* DETAIL SHEET */}
+      {}
       {resultModal && (
         <Sheet
           onClose={() => setResultModal(null)}
@@ -555,14 +555,14 @@ export default function Results() {
             </div>
           }>
 
-          {/* TABS */}
+          {}
           <div style={{ display:'flex', gap:4, marginBottom:18, background:'#f8fafc', borderRadius:10, padding:4 }}>
             {[['overview','📊 Overview'],['ai analysis','🔬 AI Analysis'],['writing coach','🧠 Writing Coach']].map(([t,label]) => (
               <button key={t} onClick={() => setActiveTab(t)} className={`modal-tab ${activeTab===t?'active':'inactive'}`}>{label}</button>
             ))}
           </div>
 
-          {/* ── OVERVIEW TAB ── */}
+          {}
           {activeTab==='overview' && (
             <div className="fade-in">
               {resultModal.final_score !== null ? (() => {
@@ -634,7 +634,7 @@ export default function Results() {
             </div>
           )}
 
-          {/* ── AI ANALYSIS TAB ── */}
+          {}
           {activeTab==='ai analysis' && (
             <div className="fade-in">
               {resultModal.ai_detection_score !== null ? (
@@ -675,7 +675,7 @@ export default function Results() {
             </div>
           )}
 
-          {/* ── WRITING COACH TAB ── */}
+          {}
           {activeTab==='writing coach' && (
             <div className="fade-in">
               <div style={{ background:`linear-gradient(135deg,${NAVY}08,${GOLD}12)`, border:`1px solid ${NAVY}20`, borderRadius:14, padding:16, marginBottom:16 }}>
