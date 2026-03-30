@@ -192,7 +192,7 @@
 
 
 
-// src/components/student/WriteEssaySheet.jsx
+
 import { useRef, useState } from 'react';
 import { C, Sheet } from './shared.jsx';
 
@@ -240,7 +240,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
 
     try {
       if (file.type === 'text/plain') {
-        // ── Plain text ────────────────────────────────────────────────────
+        
         const r = new FileReader();
         r.onload = ev => {
           setUploadText(ev.target.result);
@@ -253,7 +253,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         r.readAsText(file);
 
       } else if (file.type === 'application/pdf') {
-        // ── PDF ───────────────────────────────────────────────────────────
+        
         const pdfjsLib = await loadPdfJs();
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -271,7 +271,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         file.name.toLowerCase().endsWith('.docx')
       ) {
-        // ── DOCX ──────────────────────────────────────────────────────────
+        
         const mammoth = await loadMammoth();
         const arrayBuffer = await file.arrayBuffer();
         const result = await mammoth.extractRawText({ arrayBuffer });
@@ -282,12 +282,12 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         file.type === 'application/msword' ||
         file.name.toLowerCase().endsWith('.doc')
       ) {
-        // ── Legacy .doc — cannot be parsed client-side ────────────────────
+        
         setUploadText('[Legacy .doc files cannot be read in the browser. Please save as .docx or .pdf and re-upload.]');
         setExtracting(false);
 
       } else {
-        // ── Unsupported ───────────────────────────────────────────────────
+        
         setUploadText(`[Unsupported file type: "${file.name}". Please upload a PDF, DOCX, or TXT file.]`);
         setExtracting(false);
       }
@@ -339,9 +339,9 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         </div>
       )}
 
-      {/* Write / Upload toggle */}
+      {}
       <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '10px', padding: '3px', marginBottom: '16px', gap: '2px' }}>
-        {[['write', '✏️ Write Essay'], ['upload', '📎 Upload File']].map(([m, l]) => (
+        {[['write', ' Write Essay'], ['upload', '📎 Upload File']].map(([m, l]) => (
           <button key={m} onClick={() => setSubmitMode(m)}
             style={{ flex: 1, padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: '700', background: submitMode === m ? '#fff' : 'transparent', color: submitMode === m ? '#6366f1' : '#64748b', boxShadow: submitMode === m ? '0 1px 4px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.2s' }}>
             {l}
@@ -349,13 +349,13 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         ))}
       </div>
 
-      {/* Instructions box */}
+      {}
       <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px' }}>
         <p style={{ ...C.sL, color: '#92400e', marginBottom: '4px' }}>Instructions</p>
         <p style={{ fontSize: '13px', color: '#78350f', margin: 0, lineHeight: 1.6 }}>{assignment.instructions}</p>
       </div>
 
-      {/* ── Write mode ── */}
+      {}
       {submitMode === 'write' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -374,7 +374,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
         </div>
       )}
 
-      {/* ── Upload mode ── */}
+      {}
       {submitMode === 'upload' && (
         <div>
           <p style={C.sL}>Upload Your Essay File</p>
@@ -412,14 +412,14 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
                 </button>
               </div>
 
-              {/* Extracting spinner */}
+              {}
               {extracting && (
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', textAlign: 'center', marginBottom: '12px' }}>
                   <p style={{ fontSize: '13px', color: '#6366f1', fontWeight: '700', margin: 0 }}>⏳ Extracting text from file...</p>
                 </div>
               )}
 
-              {/* Extracted text preview */}
+              {}
               {!extracting && uploadText && (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>

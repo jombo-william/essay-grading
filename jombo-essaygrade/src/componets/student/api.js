@@ -1,11 +1,10 @@
-// src/components/student/api.js
+
 
 const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/student';
 
 export async function apiFetch(path, options = {}) {
   const csrfToken = getCsrfToken();
 
-  // Map old PHP filenames to new Python routes
   const routeMap = {
     '/get_assignments.php': '/assignments',
     '/get_results.php':     '/results',
@@ -36,7 +35,7 @@ export async function apiFetch(path, options = {}) {
   return data;
 }
 
-// Reads csrf_token from cookie first, then falls back to sessionStorage
+
 function getCsrfToken() {
   const cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
