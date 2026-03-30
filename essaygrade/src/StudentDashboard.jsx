@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-// ─── MOCK AI GRADER (no backend needed) ────────────────────────────────────
+
 async function mockAiGrade({ essayText, assignment }) {
   await new Promise(r => setTimeout(r, 2500 + Math.random() * 1500));
 
@@ -83,7 +83,7 @@ async function mockAiGrade({ essayText, assignment }) {
   };
 }
 
-// ─── MOCK DATA ─────────────────────────────────────────────────────────────
+
 const MOCK_ASSIGNMENTS = [
   {
     id: 1,
@@ -117,7 +117,7 @@ const MOCK_ASSIGNMENTS = [
   },
 ];
 
-// Starts as pending, auto-grades on load to demo the full grading flow
+
 const PRE_SUBMISSION = {
   id: 100, assignment_id: 1, assignment_title: 'Climate Change & Society',
   max_score: 100,
@@ -160,7 +160,7 @@ const INITIAL_SUBMISSIONS = [
   },
 ];
 
-// ─── STYLES ────────────────────────────────────────────────────────────────
+
 const C = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans','Segoe UI',sans-serif" },
   header: { background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '0 20px', height: '62px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 8px rgba(0,0,0,0.05)' },
@@ -197,7 +197,7 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
 
 export default function StudentDashboard({ onBack }) {
   const [tab, setTab] = useState('assignments');
-  // Assignment 1 is already submitted via PRE_SUBMISSION
+  
   const [submittedIds, setSubmittedIds] = useState(new Set([1]));
   const [submissions, setSubmissions] = useState(INITIAL_SUBMISSIONS);
 
@@ -217,7 +217,7 @@ export default function StudentDashboard({ onBack }) {
 
   const showToast = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500); };
 
-  // Auto-grade PRE_SUBMISSION on mount to demo the pending → ai_graded flow
+  
   useEffect(() => {
     const assignment = MOCK_ASSIGNMENTS.find(a => a.id === PRE_SUBMISSION.assignment_id);
     mockAiGrade({ essayText: PRE_SUBMISSION.essay_text, assignment }).then(result => {
@@ -245,7 +245,7 @@ export default function StudentDashboard({ onBack }) {
     ? Math.round(graded.reduce((sum, s) => sum + (s.final_score / s.max_score) * 100, 0) / graded.length)
     : null;
 
-  // Only allow unsubmit if not yet graded AND deadline not passed
+  
   const canUnsubmit = sub => {
     const a = MOCK_ASSIGNMENTS.find(a => a.id === sub.assignment_id);
     return sub.final_score === null && a && new Date() < new Date(a.due_date);
@@ -338,14 +338,14 @@ export default function StudentDashboard({ onBack }) {
     <div style={C.page}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}} input[type=file]{display:none}`}</style>
 
-      {/* TOAST */}
+      {}
       {toast && (
         <div style={{ position:'fixed', top:'16px', left:'50%', transform:'translateX(-50%)', zIndex:999, background: toast.type==='error'?'#fef2f2':toast.type==='info'?'#eff6ff':'#f0fdf4', border:`1px solid ${toast.type==='error'?'#fecaca':toast.type==='info'?'#bfdbfe':'#bbf7d0'}`, color: toast.type==='error'?'#dc2626':toast.type==='info'?'#2563eb':'#15803d', padding:'10px 20px', borderRadius:'12px', fontSize:'13px', fontWeight:'700', boxShadow:'0 4px 20px rgba(0,0,0,0.12)', maxWidth:'90vw', textAlign:'center' }}>
           {toast.msg}
         </div>
       )}
 
-      {/* HEADER */}
+      {}
       <header style={C.header}>
         <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
           <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius:'11px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'19px', boxShadow:'0 2px 8px rgba(99,102,241,0.3)' }}>✍️</div>
@@ -364,7 +364,7 @@ export default function StudentDashboard({ onBack }) {
       </header>
 
       <div style={C.main}>
-        {/* STATS */}
+        {}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'24px' }}>
           {[
             { label:'To Submit', value: assignments.filter(a => !a.submitted && !a.isPast).length, icon:'📋', bg:'#eff6ff', fg:'#3b82f6' },
@@ -381,14 +381,14 @@ export default function StudentDashboard({ onBack }) {
           ))}
         </div>
 
-        {/* TABS */}
+        {}
         <div style={{ display:'flex', background:'#f1f5f9', borderRadius:'10px', padding:'4px', marginBottom:'20px', gap:'2px', width:'fit-content' }}>
           {[['assignments','📋 Assignments'],['results','📊 My Results']].map(([id,label]) => (
             <button key={id} style={C.tab(tab===id)} onClick={() => setTab(id)}>{label}</button>
           ))}
         </div>
 
-        {/* ══ ASSIGNMENTS TAB ══ */}
+        {}
         {tab === 'assignments' && (
           <div>
             <p style={{ fontSize:'18px', fontWeight:'800', color:'#1e293b', margin:'0 0 16px' }}>Your Assignments</p>
@@ -414,7 +414,7 @@ export default function StudentDashboard({ onBack }) {
                   <span style={{ fontSize:'18px', color:'#94a3b8', flexShrink:0 }}>→</span>
                 </div>
 
-                {/* Submission status bar */}
+                {}
                 {a.submitted && a.submission && (() => {
                   const sub = a.submission;
                   const isAI = sub.ai_detection_score >= 50;
@@ -449,7 +449,7 @@ export default function StudentDashboard({ onBack }) {
           </div>
         )}
 
-        {/* ══ RESULTS TAB ══ */}
+        {}
         {tab === 'results' && (
           <div>
             <p style={{ fontSize:'18px', fontWeight:'800', color:'#1e293b', margin:'0 0 12px' }}>My Results</p>
@@ -532,7 +532,7 @@ export default function StudentDashboard({ onBack }) {
         )}
       </div>
 
-      {/* ══ ASSIGNMENT DETAIL SHEET ══ */}
+      {}
       {assignmentModal && (
         <Sheet onClose={() => setAssignmentModal(null)} title={assignmentModal.title}
           subtitle={`Due ${new Date(assignmentModal.due_date).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${assignmentModal.max_score} pts`}
@@ -613,7 +613,7 @@ export default function StudentDashboard({ onBack }) {
         </Sheet>
       )}
 
-      {/* ══ WRITE / UPLOAD ESSAY SHEET ══ */}
+      {}
       {writeModal && (
         <Sheet onClose={() => { setWriteModal(null); setEssayText(''); setUploadFile(null); setUploadText(''); }}
           title={writeModal.title}
@@ -714,7 +714,7 @@ export default function StudentDashboard({ onBack }) {
         </Sheet>
       )}
 
-      {/* ══ VIEW SUBMITTED ESSAY ══ */}
+      {}
       {essayViewModal && (
         <Sheet onClose={() => setEssayViewModal(null)} title="Your Submitted Essay" subtitle={essayViewModal.assignment_title}
           footer={
@@ -748,7 +748,7 @@ export default function StudentDashboard({ onBack }) {
         </Sheet>
       )}
 
-      {/* ══ RESULT DETAIL SHEET ══ */}
+      {}
       {resultModal && (
         <Sheet onClose={() => setResultModal(null)} title={resultModal.assignment_title}
           subtitle={`Submitted ${new Date(resultModal.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`}
@@ -761,7 +761,7 @@ export default function StudentDashboard({ onBack }) {
             </div>
           }>
 
-          {/* Score banner */}
+          {}
           {resultModal.final_score !== null ? (() => {
             const pct = Math.round((resultModal.final_score/resultModal.max_score)*100);
             const bg = pct>=70?'linear-gradient(135deg,#6366f1,#8b5cf6)':pct>=50?'linear-gradient(135deg,#f59e0b,#d97706)':'linear-gradient(135deg,#ef4444,#dc2626)';
@@ -796,7 +796,7 @@ export default function StudentDashboard({ onBack }) {
             </div>
           )}
 
-          {/* AI Detection bar */}
+          {}
           {resultModal.ai_detection_score !== null && (
             <div style={{ marginBottom:'16px' }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
