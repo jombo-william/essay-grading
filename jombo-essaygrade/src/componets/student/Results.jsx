@@ -464,7 +464,7 @@ export default function Results() {
       )}
       {underDevModal && <UnderDevelopmentModal feature={underDevModal} onClose={() => setUnderDevModal(null)} />}
 
-      {/* NAV */}
+      {/* NAV
       <nav style={{ background:NAVY, position:'sticky', top:0, zIndex:100, boxShadow:'0 2px 16px rgba(0,0,0,0.18)' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', height:68 }}>
           <Link to="/" style={{ display:'flex', alignItems:'center', gap:14, textDecoration:'none' }}>
@@ -487,7 +487,7 @@ export default function Results() {
           </ul>
           <button className="hamburger" onClick={() => setMenuOpen(o=>!o)} aria-label="Menu"><span/><span/><span/></button>
         </div>
-      </nav>
+      </nav> */}
 
       {}
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>

@@ -37,16 +37,24 @@ export default function LoginPage() {
         return
       }
 
-      // Save to localStorage
-      localStorage.setItem('user', JSON.stringify(data))
-      localStorage.setItem('token', data.token)
+      // // Save to localStorage
+      // localStorage.setItem('user', JSON.stringify(data))
+      // localStorage.setItem('token', data.token)
 
-      setDetectedRole(data.role)
+      // setDetectedRole(data.role)
 
-      // Redirect based on role detected from database
-      setTimeout(() => {
-        navigate(data.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
-      }, 900)
+      // // Redirect based on role detected from database
+      // setTimeout(() => {
+      //   navigate(data.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+      // }, 900)
+
+localStorage.setItem('user', JSON.stringify(data.user))
+localStorage.setItem('token', data.csrf_token)
+localStorage.setItem('session_token', data.session_token) 
+setDetectedRole(data.user.role)
+setTimeout(() => {
+  navigate(data.user.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+}, 900)
 
     } catch (err) {
       showAlert('Cannot reach server. Make sure Python backend is running on port 8000.')
@@ -272,30 +280,3 @@ export default function LoginPage() {
 }
 
 
-export default function LoginPage({ onSelect }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", gap: "24px", fontFamily: "system-ui, sans-serif" }}>
-      
-      <p style={{ fontSize: "18px", fontWeight: "600", color: "#64748b", textAlign: "center" }}>
-        Will be done by Taona Nyasulu
-      </p>
-
-      <div style={{ display: "flex", gap: "16px" }}>
-        <button
-          onClick={() => onSelect('teacher', { name: 'William Jombo' })}
-          style={{ padding: "12px 28px", borderRadius: "12px", border: "none", background: "linear-gradient(135deg, #3b82f6, #38bdf8)", color: "#fff", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-        >
-          👨‍🏫 Teacher
-        </button>
-
-        <button
-          onClick={() => onSelect('student', { name: 'Alice Mwale' })}
-          style={{ padding: "12px 28px", borderRadius: "12px", border: "none", background: "linear-gradient(135deg, #10b981, #34d399)", color: "#fff", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-        >
-          🎓 Student
-        </button>
-      </div>
-
-    </div>
-  );
-}

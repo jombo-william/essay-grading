@@ -16,44 +16,103 @@ export default function LoginPage() {
     setTimeout(() => setAlert(null), 6000)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setAlert(null)
-    setDetectedRole(null)
 
-    try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setLoading(true)
+  setAlert(null)
+  setDetectedRole(null)
 
-      const data = await response.json()
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000) // 8s timeout
 
-      if (!response.ok) {
-        showAlert(data.detail || 'Invalid email or password')
-        setLoading(false)
-        return
-      }
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      signal: controller.signal,
+      // Remove credentials:'include' — your login doesn't need cookies sent
+    })
 
-      // Save to localStorage
-      localStorage.setItem('user', JSON.stringify(data))
-      localStorage.setItem('token', data.token)
+    clearTimeout(timeout)
 
-      setDetectedRole(data.role)
+    const data = await response.json()
 
-      // Redirect based on role detected from database
-      setTimeout(() => {
-        navigate(data.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
-      }, 900)
-
-    } catch (err) {
-      showAlert('Cannot reach server. Make sure Python backend is running on port 8000.')
+    if (!response.ok) {
+      showAlert(data.detail || 'Invalid email or password')
+      return
     }
 
-    setLoading(false)
+   localStorage.setItem('user',          JSON.stringify(data.user))
+localStorage.setItem('token',         data.csrf_token)
+localStorage.setItem('session_token', data.session_token)  // ← ADD THIS LINE
+setDetectedRole(data.user.role)
+
+    setTimeout(() => {
+      navigate(data.user.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+    }, 900)
+
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      showAlert('Request timed out. Is the Python backend running on port 8000?')
+    } else {
+      showAlert('Cannot reach server. Make sure Python backend is running on port 8000.')
+    }
+  } finally {
+    setLoading(false)  // ← Always runs, even on error
   }
+}
+
+
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault()
+//     setLoading(true)
+//     setAlert(null)
+//     setDetectedRole(null)
+
+//     try {
+//       const response = await fetch('http://localhost:8000/api/auth/login', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ email, password })
+//       })
+
+//       const data = await response.json()
+
+//       if (!response.ok) {
+//         showAlert(data.detail || 'Invalid email or password')
+//         setLoading(false)
+//         return
+//       }
+
+//       // // Save to localStorage
+//       // localStorage.setItem('user', JSON.stringify(data))
+//       // localStorage.setItem('token', data.token)
+
+//       // setDetectedRole(data.role)
+
+//       // // Redirect based on role detected from database
+//       // setTimeout(() => {
+//       //   navigate(data.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+//       // }, 900)
+
+
+// localStorage.setItem('user', JSON.stringify(data.user))
+// localStorage.setItem('token', data.csrf_token)
+// setDetectedRole(data.user.role)
+// setTimeout(() => {
+//   navigate(data.user.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+// }, 900)
+
+
+//     } catch (err) {
+//       showAlert('Cannot reach server. Make sure Python backend is running on port 8000.')
+//     }
+
+//     setLoading(false)
+//   }
 
   return (
     <>
@@ -269,33 +328,4 @@ export default function LoginPage() {
       </div>
     </>
   )
-}
-
-
-export default function LoginPage({ onSelect }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", gap: "24px", fontFamily: "system-ui, sans-serif" }}>
-      
-      <p style={{ fontSize: "18px", fontWeight: "600", color: "#64748b", textAlign: "center" }}>
-        Will be done by Taona Nyasulu
-      </p>
-
-      <div style={{ display: "flex", gap: "16px" }}>
-        <button
-          onClick={() => onSelect('teacher', { name: 'William Jombo' })}
-          style={{ padding: "12px 28px", borderRadius: "12px", border: "none", background: "linear-gradient(135deg, #3b82f6, #38bdf8)", color: "#fff", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-        >
-          👨‍🏫 Teacher
-        </button>
-
-        <button
-          onClick={() => onSelect('student', { name: 'Alice Mwale' })}
-          style={{ padding: "12px 28px", borderRadius: "12px", border: "none", background: "linear-gradient(135deg, #10b981, #34d399)", color: "#fff", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-        >
-          🎓 Student
-        </button>
-      </div>
-
-    </div>
-  );
 }

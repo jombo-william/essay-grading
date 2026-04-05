@@ -1,17 +1,13 @@
-
-
-
-
-
+// src/components/student/StudentDashboard.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch }         from './api.js';
 import { C, Toast }         from './shared.jsx';
 import AssignmentsTab       from './AssignmentsTab.jsx';
-import Results               from './Results.jsx';
+import ResultsTab           from './ResultsTab.jsx';
 import AssignmentDetail     from './AssignmentDetail.jsx';
 import WriteEssaySheet      from './WriteEssaySheet.jsx';
 import EssayViewSheet       from './EssayViewSheet.jsx';
-
+import ResultDetailSheet    from './ResultDetailSheet.jsx';
 
 const TABS = [
   { id: 'assignments', label: '📋 Assignments' },
@@ -27,7 +23,7 @@ export default function StudentDashboard({ user, onBack }) {
   const [submitting,  setSubmitting]  = useState(false);
   const [gradingStatus, setGradingStatus] = useState('');
 
-  
+  // Modals
   const [detailAssignment, setDetailAssignment] = useState(null);
   const [writeAssignment,  setWriteAssignment]  = useState(null);
   const [essayViewSub,     setEssayViewSub]     = useState(null);
@@ -38,7 +34,7 @@ export default function StudentDashboard({ user, onBack }) {
     setTimeout(() => setToast(null), 3500);
   };
 
-  
+  // ── Fetch ───────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -57,7 +53,7 @@ export default function StudentDashboard({ user, onBack }) {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  
+  // ── Poll while submissions are pending ──────────────────────────────────
   useEffect(() => {
     const hasPending = results.some(r => r.status === 'pending');
     if (!hasPending) return;
@@ -67,12 +63,12 @@ export default function StudentDashboard({ user, onBack }) {
         const updated = rData.results || [];
         setResults(updated);
         if (!updated.some(r => r.status === 'pending')) clearInterval(interval);
-      } catch { }
+      } catch { /* silently retry */ }
     }, 5000);
     return () => clearInterval(interval);
   }, [results]);
 
-  
+  // ── Derived ─────────────────────────────────────────────────────────────
   const enrichedAssignments = assignments.map(a => ({
     ...a,
     isPast:     new Date() > new Date(a.due_date),
@@ -89,7 +85,7 @@ export default function StudentDashboard({ user, onBack }) {
     return sub.final_score === null && a && new Date() < new Date(a.due_date);
   };
 
-  
+  // ── Submit essay ────────────────────────────────────────────────────────
   const handleSubmit = async ({ assignment, submitMode, essayText, uploadFile, uploadText, activeText }) => {
     const wordCount = activeText.trim().split(/\s+/).filter(Boolean).length;
     if (submitMode === 'write'  && wordCount < 50) { showToast('Please write at least 50 words.', 'error'); return; }
@@ -126,7 +122,7 @@ export default function StudentDashboard({ user, onBack }) {
     }
   };
 
-  
+  // ── Unsubmit essay ──────────────────────────────────────────────────────
   const handleUnsubmit = async sub => {
     try {
       const csrfToken = sessionStorage.getItem('csrf_token') || '';
@@ -158,7 +154,7 @@ export default function StudentDashboard({ user, onBack }) {
 
       <Toast toast={toast} />
 
-      {}
+      {/* ── Nav ── */}
       <header style={C.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '38px', height: '38px', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '19px', boxShadow: '0 2px 8px rgba(99,102,241,0.3)' }}>✍️</div>
@@ -178,7 +174,7 @@ export default function StudentDashboard({ user, onBack }) {
 
       <div style={C.main}>
 
-        {}
+        {/* ── Stats ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginBottom: '24px' }}>
           {stats.map(s => (
             <div key={s.label} style={{ background: '#fff', borderRadius: '16px', padding: '14px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
@@ -191,14 +187,14 @@ export default function StudentDashboard({ user, onBack }) {
           ))}
         </div>
 
-        {}
+        {/* ── Tabs ── */}
         <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '10px', padding: '4px', marginBottom: '20px', gap: '2px', width: 'fit-content' }}>
           {TABS.map(t => (
             <button key={t.id} style={C.tab(tab === t.id)} onClick={() => setTab(t.id)}>{t.label}</button>
           ))}
         </div>
 
-        {}
+        {/* ── Tab content ── */}
         {tab === 'assignments' && (
           <AssignmentsTab
             assignments={enrichedAssignments}
@@ -206,12 +202,16 @@ export default function StudentDashboard({ user, onBack }) {
             onOpenDetail={setDetailAssignment}
           />
         )}
-        {}
-
-        {tab === 'results' && <Results />}
+        {tab === 'results' && (
+          <ResultsTab
+            results={results}
+            loading={loading}
+            onOpenResult={setResultSub}
+          />
+        )}
       </div>
 
-      {}
+      {/* ── Modals ── */}
       <AssignmentDetail
         assignment={detailAssignment}
         onClose={() => setDetailAssignment(null)}
@@ -235,7 +235,15 @@ export default function StudentDashboard({ user, onBack }) {
         onUnsubmit={handleUnsubmit}
       />
 
-      {}
+      <ResultDetailSheet
+        sub={resultSub}
+        canUnsubmit={resultSub ? canUnsubmit(resultSub) : false}
+        onClose={() => setResultSub(null)}
+        onUnsubmit={handleUnsubmit}
+      />
     </div>
   );
 }
+
+
+
