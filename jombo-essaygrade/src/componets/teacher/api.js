@@ -66,14 +66,6 @@ export async function apiFetch(path, options = {}) {
   const csrfToken    = getToken('csrf_token', 'token');
   const sessionToken = getToken('session_token', 'session_token');
 
-  // TEMPORARY DEBUG - remove after fixing
-  console.log('=== apiFetch debug ===');
-  console.log('sessionToken:', sessionToken);
-  console.log('csrfToken:', csrfToken);
-  console.log('localStorage session_token:', localStorage.getItem('session_token'));
-  console.log('localStorage token:', localStorage.getItem('token'));
-  console.log('=== end debug ===');
-
   const routeMap = {
     // ── Legacy PHP → FastAPI mappings (kept for backward compat) ──────────
     '/get_assignments.php':     '/assignments',
@@ -82,12 +74,6 @@ export async function apiFetch(path, options = {}) {
     '/create_assignment.php':   '/assignments/create',
     '/update_assignment.php':   '/assignments/update',
     '/override_grade.php':      '/submissions/grade',
-
-    // ── Class routes ──────────────────────────────────────────────────────
-    '/api/teacher/classes':         '/classes',
-    '/api/teacher/classes/create':  '/classes/create',
-    '/api/teacher/classes/update':  '/classes/update',
-    '/api/teacher/classes/delete':  '/classes/delete',
   };
 
   const cleanPath  = path.startsWith('/') ? path : '/' + path;
