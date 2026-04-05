@@ -187,15 +187,7 @@
 
 
 
-//export default function StudentsTab() {
- // return (
-    //<div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "80px 24px" }}>
-      //<p style={{ fontSize: "18px", fontWeight: "600", color: "#64748b", textAlign: "center" }}>
-       // Will be done by Limbani Chipeni
-      //</p>
-    //</div>
-  //);
-//}
+
 import { useState, useMemo } from 'react';
 import './students.css';
 import './pending.css';

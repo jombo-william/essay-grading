@@ -497,7 +497,7 @@ export default function Results() {
           {[
             { label:'To Submit', value: MOCK_ASSIGNMENTS.filter(a => !submissions.find(s=>s.assignment_id===a.id) && new Date()<new Date(a.due_date)).length, icon:'📋', bg:`${NAVY}18` },
             { label:'Submitted', value: submissions.length, icon:'📝', bg:`${GOLD}20` },
-            { label:'Avg Score', value: avgPct!==null?`${avgPct}%`:'—', icon:'⭐', bg:'#f0fdf4' },
+            { label:'Avg Score', value: avgPct!==null?`${avgPct}%`:'—', icon:'', bg:'#f0fdf4' },
           ].map(s => (
             <div key={s.label} style={{ background:'#fff', borderRadius:16, padding:'14px 16px', border:'1px solid #e2e8f0', display:'flex', alignItems:'center', gap:12, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
               <div style={{ width:40, height:40, borderRadius:12, background:s.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:19, flexShrink:0 }}>{s.icon}</div>

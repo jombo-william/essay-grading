@@ -399,7 +399,7 @@ export default function StudentDashboard({ onBack }) {
           {[
             { label: 'To Submit', value: assignments.filter(a => !a.submitted && !a.isPast).length, icon: '📋', bg: '#eff6ff', fg: '#3b82f6' },
             { label: 'Submitted', value: submissions.length, icon: '📝', bg: '#fdf4ff', fg: '#9333ea' },
-            { label: 'Avg Score', value: avgPct !== null ? `${avgPct}%` : '—', icon: '⭐', bg: '#f0fdf4', fg: '#16a34a' },
+            { label: 'Avg Score', value: avgPct !== null ? `${avgPct}%` : '—', icon: '', bg: '#f0fdf4', fg: '#16a34a' },
           ].map(s => (
             <div key={s.label} style={{ background: '#fff', borderRadius: '16px', padding: '14px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
               <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: s.bg, color: s.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{s.icon}</div>

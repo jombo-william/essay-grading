@@ -42,3 +42,6 @@ function getCsrfToken() {
   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
   return sessionStorage.getItem('csrf_token') || '';
 }
+
+
+
