@@ -1,7 +1,8 @@
 // src/components/student/ResultDetailSheet.jsx
 import { C, Sheet, scoreColor, scoreLabel } from './shared.jsx';
+import ChatPanel from '../ChatPanel.jsx';
 
-export default function ResultDetailSheet({ sub, canUnsubmit, onClose, onUnsubmit }) {
+export default function ResultDetailSheet({ sub, user, canUnsubmit, onClose, onUnsubmit }) {
   if (!sub) return null;
 
   const pct   = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
@@ -101,6 +102,8 @@ export default function ResultDetailSheet({ sub, canUnsubmit, onClose, onUnsubmi
         </div>
         <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.85', margin: 0, whiteSpace: 'pre-wrap' }}>{sub.essay_text}</p>
       </div>
+
+      <ChatPanel submissionId={sub.id ?? sub.submission_id} user={user} />
     </Sheet>
   );
 }

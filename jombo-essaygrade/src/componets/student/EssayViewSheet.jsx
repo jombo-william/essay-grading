@@ -1,7 +1,8 @@
 
 import { C, Sheet } from './shared.jsx';
+import ChatPanel from '../ChatPanel.jsx';
 
-export default function EssayViewSheet({ sub, canUnsubmit, onClose, onUnsubmit }) {
+export default function EssayViewSheet({ sub, user, canUnsubmit, onClose, onUnsubmit }) {
   if (!sub) return null;
 
   return (
@@ -52,6 +53,8 @@ export default function EssayViewSheet({ sub, canUnsubmit, onClose, onUnsubmit }
       <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', fontSize: '14px', color: '#374151', lineHeight: '1.85', whiteSpace: 'pre-wrap' }}>
         {sub.essay_text}
       </div>
+
+      <ChatPanel submissionId={sub.id ?? sub.submission_id} user={user} />
     </Sheet>
   );
 }

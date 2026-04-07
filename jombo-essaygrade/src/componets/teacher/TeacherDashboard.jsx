@@ -368,6 +368,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
       {viewSub && (
         <SubmissionDetail
           sub={viewSub}
+          user={user}
           onClose={() => setViewSub(null)}
           onGrade={openGrade}
           onEditGrade={openEdit}

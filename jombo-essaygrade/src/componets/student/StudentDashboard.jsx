@@ -230,6 +230,7 @@ export default function StudentDashboard({ user, onBack }) {
 
       <EssayViewSheet
         sub={essayViewSub}
+        user={user}
         canUnsubmit={essayViewSub ? canUnsubmit(essayViewSub) : false}
         onClose={() => setEssayViewSub(null)}
         onUnsubmit={handleUnsubmit}
@@ -237,6 +238,7 @@ export default function StudentDashboard({ user, onBack }) {
 
       <ResultDetailSheet
         sub={resultSub}
+        user={user}
         canUnsubmit={resultSub ? canUnsubmit(resultSub) : false}
         onClose={() => setResultSub(null)}
         onUnsubmit={handleUnsubmit}
