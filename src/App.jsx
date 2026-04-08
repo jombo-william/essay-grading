@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import LandingPage from './Student/landingPage.jsx';
 import LoginPage from './Student/LoginPage.jsx';
+import ForgotPasswordPage from "./Student/ForgotPasswordPage.jsx";
 import TeacherDashboard from './componets/teacher/TeacherDashboard.jsx';
 import StudentDashboard from './componets/student/StudentDashboard.jsx';
 
@@ -21,6 +22,7 @@ export default function App() {
     setPage('landing');
     sessionStorage.clear();
   };
+  
 
 //   if (page === 'landing') return <LandingPage onLogin={() => setPage('login')} />;
 //   if (page === 'login')   return <LoginPage onSelect={handleSelect} />;
@@ -31,6 +33,7 @@ export default function App() {
 
 
 if (page === 'landing') return <LandingPage onLogin={() => setPage('login')} />;
+if (page === 'forgot-password') return <ForgotPasswordPage onBack={() => setPage('login')} />;
 if (page === 'login')   return <LoginPage onSelect={handleSelect} />;
 if (role === 'teacher') return <TeacherDashboard user={user} onBack={handleBack} />;
 return <StudentDashboard user={user} onBack={handleBack} />

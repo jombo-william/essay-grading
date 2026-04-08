@@ -1,5 +1,5 @@
-
 import { useState } from 'react'
+// import {Link} from "react-router-dom";
 // import { Link, useNavigate } from 'react-router-dom'
 
 // ── Supabase REMOVED — now using Python FastAPI backend ────────────────────
@@ -11,19 +11,17 @@ export default function LoginPage({ onSelect }) {
   const [showPwd, setShowPwd]         = useState(false)
   const [loading, setLoading]         = useState(false)
   const [alert, setAlert]             = useState(null)
-  const [detectedRole, setDetectedRole] = useState(null) // 'student' | 'teacher' | null
 
   const showAlert = (msg, type = 'error') => {
     setAlert({ msg, type })
     setTimeout(() => setAlert(null), 6000)
   }
 
-  // ── ONLY THIS FUNCTION CHANGED — everything else below is untouched ───────
+  // ── HANDLE LOGIN — silently redirects without showing role banner ───────
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setAlert(null)
-    setDetectedRole(null)
 
     try {
       const response = await fetch('http://localhost:8000/api/auth/login', {
@@ -44,18 +42,13 @@ export default function LoginPage({ onSelect }) {
       localStorage.setItem('user', JSON.stringify(data))
       localStorage.setItem('token', data.token)
 
-      setDetectedRole(data.role)
-
-      // Redirect based on role detected from database
-      setTimeout(() => {
-        onSelect(data.role, data)
-      }, 900)
+      // Silently redirect - no banner shown
+      onSelect(data.role, data)
 
     } catch (err) {
       showAlert('Cannot reach server. Make sure Python backend is running on port 8000.')
+      setLoading(false)
     }
-
-    setLoading(false)
   }
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -67,7 +60,6 @@ export default function LoginPage({ onSelect }) {
         @keyframes drift   { from { transform: translate(0,0) scale(1); }  to { transform: translate(30px,30px) scale(1.08); } }
         @keyframes spin    { from { transform: rotate(0deg); }             to { transform: rotate(360deg); } }
         @keyframes cardIn  { from { opacity:0; transform:translateY(24px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
-        @keyframes reveal  { from { opacity:0; transform:scale(0.85) translateY(-6px); } to { opacity:1; transform:scale(1) translateY(0); } }
         @media (max-width: 860px) { .lp-left { display: none !important; } }
       `}</style>
 
@@ -85,7 +77,6 @@ export default function LoginPage({ onSelect }) {
 
         {/* ── LEFT PANEL ── */}
         <div className="lp-left" style={{ display:'flex', flexDirection:'column', justifyContent:'center', padding:'48px 64px', position:'relative' }}>
-          {/* <Link to="/" style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, textDecoration:'none' }}> */}
           <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, textDecoration:'none' }}>
             <div style={{ position:'relative', width:64, height:64 }}>
               <div style={{ position:'absolute', inset:0, borderRadius:'50%', border:'2px solid rgba(201,162,39,0.4)', animation:'spin 12s linear infinite' }} />
@@ -142,21 +133,6 @@ export default function LoginPage({ onSelect }) {
               Your role is detected automatically
             </p>
 
-            {/* Role detected success banner */}
-            {detectedRole && (
-              <div style={{ background: detectedRole==='student'?'#f0fdf4':'#eff6ff', border:`1px solid ${detectedRole==='student'?'#86efac':'#bfdbfe'}`, borderRadius:12, padding:'14px 16px', marginBottom:20, display:'flex', alignItems:'center', gap:12, animation:'reveal 0.4s ease' }}>
-                <div style={{ width:42, height:42, borderRadius:'50%', background: detectedRole==='student'?'#dcfce7':'#dbeafe', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>
-                  {detectedRole === 'student' ? '🧑‍🎓' : '👩‍🏫'}
-                </div>
-                <div>
-                  <p style={{ fontWeight:800, fontSize:13, color: detectedRole==='student'?'#15803d':'#1d4ed8', margin:'0 0 2px' }}>
-                    {detectedRole === 'student' ? 'Student account detected!' : 'Teacher account detected!'}
-                  </p>
-                  <p style={{ fontSize:12, color:'#94a3b8', margin:0 }}>Redirecting you to your dashboard...</p>
-                </div>
-              </div>
-            )}
-
             {/* Error / info alert */}
             {alert && (
               <div style={{ padding:'10px 14px', borderRadius:8, fontSize:'0.83rem', marginBottom:16, display:'flex', alignItems:'center', gap:8, background: alert.type==='error'?'#fef0f0':'#f0fdf4', border:`1px solid ${alert.type==='error'?'#fca5a5':'#86efac'}`, color: alert.type==='error'?'#dc2626':'#16a34a' }}>
@@ -165,14 +141,12 @@ export default function LoginPage({ onSelect }) {
             )}
 
             {/* Info tip */}
-            {!detectedRole && (
-              <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:10, padding:'10px 14px', marginBottom:20, display:'flex', gap:8, alignItems:'flex-start' }}>
-                <span style={{ fontSize:15, flexShrink:0, marginTop:1 }}>💡</span>
-                <p style={{ fontSize:12, color:'#92400e', margin:0, lineHeight:1.6 }}>
-                  No need to select your role. Just enter your email and password — the system will detect whether you are a <strong>student</strong> or <strong>teacher</strong> automatically.
-                </p>
-              </div>
-            )}
+            <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:10, padding:'10px 14px', marginBottom:20, display:'flex', gap:8, alignItems:'flex-start' }}>
+              <span style={{ fontSize:15, flexShrink:0, marginTop:1 }}>💡</span>
+              <p style={{ fontSize:12, color:'#92400e', margin:0, lineHeight:1.6 }}>
+                No need to select your role. Just enter your email and password — the system will detect whether you are a <strong>student</strong> or <strong>teacher</strong> automatically.
+              </p>
+            </div>
 
             {/* FORM */}
             <form onSubmit={handleSubmit}>
@@ -186,9 +160,9 @@ export default function LoginPage({ onSelect }) {
                   <input
                     type="email" value={email} onChange={e => setEmail(e.target.value)} required
                     placeholder="Enter your email address"
-                    disabled={!!detectedRole}
-                    style={{ width:'100%', padding:'12px 14px 12px 42px', border:'1.5px solid #dde3ef', borderRadius:10, fontFamily:"'DM Sans',sans-serif", fontSize:'0.92rem', color:'#0f1d3a', background: detectedRole?'#f8fafc':'#fafbfd', outline:'none', transition:'all 0.2s' }}
-                    onFocus={e => { if(!detectedRole){ e.target.style.borderColor='#1a2e5a'; e.target.style.boxShadow='0 0 0 3px rgba(26,46,90,0.08)' }}}
+                    disabled={loading}
+                    style={{ width:'100%', padding:'12px 14px 12px 42px', border:'1.5px solid #dde3ef', borderRadius:10, fontFamily:"'DM Sans',sans-serif", fontSize:'0.92rem', color:'#0f1d3a', background: loading?'#f8fafc':'#fafbfd', outline:'none', transition:'all 0.2s' }}
+                    onFocus={e => { if(!loading){ e.target.style.borderColor='#1a2e5a'; e.target.style.boxShadow='0 0 0 3px rgba(26,46,90,0.08)' }}}
                     onBlur={e => { e.target.style.borderColor='#dde3ef'; e.target.style.boxShadow='none' }}
                   />
                 </div>
@@ -204,9 +178,9 @@ export default function LoginPage({ onSelect }) {
                   <input
                     type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required
                     placeholder="Enter your password"
-                    disabled={!!detectedRole}
-                    style={{ width:'100%', padding:'12px 42px 12px 42px', border:'1.5px solid #dde3ef', borderRadius:10, fontFamily:"'DM Sans',sans-serif", fontSize:'0.92rem', color:'#0f1d3a', background: detectedRole?'#f8fafc':'#fafbfd', outline:'none', transition:'all 0.2s' }}
-                    onFocus={e => { if(!detectedRole){ e.target.style.borderColor='#1a2e5a'; e.target.style.boxShadow='0 0 0 3px rgba(26,46,90,0.08)' }}}
+                    disabled={loading}
+                    style={{ width:'100%', padding:'12px 42px 12px 42px', border:'1.5px solid #dde3ef', borderRadius:10, fontFamily:"'DM Sans',sans-serif", fontSize:'0.92rem', color:'#0f1d3a', background: loading?'#f8fafc':'#fafbfd', outline:'none', transition:'all 0.2s' }}
+                    onFocus={e => { if(!loading){ e.target.style.borderColor='#1a2e5a'; e.target.style.boxShadow='0 0 0 3px rgba(26,46,90,0.08)' }}}
                     onBlur={e => { e.target.style.borderColor='#dde3ef'; e.target.style.boxShadow='none' }}
                   />
                   <button type="button" onClick={() => setShowPwd(s => !s)}
@@ -223,34 +197,40 @@ export default function LoginPage({ onSelect }) {
                     style={{ width:16, height:16, accentColor:'#1a2e5a', cursor:'pointer' }} />
                   Remember me
                 </label>
-                <a href="#" style={{ fontSize:'0.82rem', color:'#1a2e5a', textDecoration:'none', fontWeight:500 }}>Forgot password?</a>
+                {/* <a href="#" style={{ fontSize:'0.82rem', color:'#1a2e5a', textDecoration:'none', fontWeight:500 }}>Forgot password?</a> */}
+                {/* <Link 
+                  to="/forgot-password" 
+                  style={{ fontSize:'0.82rem', color:'#1a2e5a', textDecoration:'none', fontWeight:500 }}>
+                  Forgot password?
+                </Link> */}
+
+                <a 
+                  href="#" 
+                  onClick={(e) => {
+                  e.preventDefault();
+                  setPage('forgot-password');
+                  }}
+                  style={{ fontSize:'0.82rem', color:'#1a2e5a', textDecoration:'none', fontWeight:500 }}
+               >
+                  Forgot password?
+                </a>
               </div>
 
               {/* Submit */}
-              <button type="submit" disabled={loading || !!detectedRole}
+              <button type="submit" disabled={loading}
                 style={{
                   width:'100%', padding:14,
-                  background: detectedRole
-                    ? (detectedRole==='student' ? 'linear-gradient(135deg,#16a34a,#15803d)' : 'linear-gradient(135deg,#1d4ed8,#1e40af)')
-                    : 'linear-gradient(135deg,#1a2e5a,#1e3a6e)',
+                  background: loading ? 'linear-gradient(135deg,#3a4a6e,#2a3a5e)' : 'linear-gradient(135deg,#1a2e5a,#1e3a6e)',
                   color:'#fff', fontFamily:"'DM Sans',sans-serif", fontSize:'0.95rem', fontWeight:700,
                   border:'none', borderRadius:12,
-                  cursor: (loading || !!detectedRole) ? 'not-allowed' : 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                   display:'flex', alignItems:'center', justifyContent:'center', gap:10,
                   boxShadow:'0 6px 20px rgba(26,46,90,0.3)', transition:'all 0.4s',
                 }}>
-                {loading && !detectedRole && (
+                {loading && (
                   <div style={{ width:18, height:18, border:'2px solid rgba(255,255,255,0.3)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} />
                 )}
-                <span>
-                  {detectedRole === 'student'
-                    ? '🧑‍🎓 Redirecting to Student Dashboard...'
-                    : detectedRole === 'teacher'
-                    ? '👩‍🏫 Redirecting to Teacher Dashboard...'
-                    : loading
-                    ? 'Detecting your account...'
-                    : 'Sign In →'}
-                </span>
+                <span>{loading ? 'Signing in...' : 'Sign In →'}</span>
               </button>
             </form>
 
@@ -261,7 +241,7 @@ export default function LoginPage({ onSelect }) {
 
             <p style={{ textAlign:'center', fontSize:'0.85rem', color:'#8a95a8' }}>
               Don't have an account?{' '}
-              <a href="#"style={{ color:'#1a2e5a', fontWeight:600, textDecoration:'none' }}>Register here </a>
+              <a href="#" style={{ color:'#1a2e5a', fontWeight:600, textDecoration:'none' }}>Register here</a>
             </p>
 
             <div style={{ marginTop:24, paddingTop:20, borderTop:'1px solid #eef0f5', display:'flex', justifyContent:'center' }}>
