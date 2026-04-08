@@ -24,13 +24,17 @@ export default function App() {
   };
   
 
-//   if (page === 'landing') return <LandingPage onLogin={() => setPage('login')} />;
-//   if (page === 'login')   return <LoginPage onSelect={handleSelect} />;
-//   if (role === 'teacher') return <TeacherDashboard user={user} onBack={handleBack} />;
-//   if (role === 'student') return <StudentDashboard user={user} onBack={handleBack} />;
-// }
+  const handleLoginClick = () => {
+    setPage('login');
+  };
 
+  const handleForgotPasswordClick = () => {
+    setPage('forgot-password');
+  };
 
+  const handleBackToLogin = () => {
+    setPage('login');
+  };
 
 if (page === 'landing') return <LandingPage onLogin={() => setPage('login')} />;
 if (page === 'forgot-password') return <ForgotPasswordPage onBack={() => setPage('login')} />;
