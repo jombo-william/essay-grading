@@ -72,15 +72,15 @@ export function Sheet({ onClose, title, subtitle, children, footer, wide = false
           gap: "12px", padding: "6px 28px 18px", borderBottom: "1px solid #f1f5f9",
         }}>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontWeight: "800", fontSize: "18px", color: "#1e293b", margin: "0 0 4px", lineHeight: 1.3 }}>
+            <h2 style={{ fontWeight: "800", fontSize: "18px", color: "#1a2e5a", margin: "0 0 4px", lineHeight: 1.3 }}>
               {title}
             </h2>
-            {subtitle && <p style={{ fontSize: "13px", color: "#94a3b8", margin: 0 }}>{subtitle}</p>}
+            {subtitle && <p style={{ fontSize: "13px", color: "#1a2e5a", margin: 0 }}>{subtitle}</p>}
           </div>
           <button onClick={onClose} style={{
             width: "34px", height: "34px", borderRadius: "50%",
             background: "#f1f5f9", border: "none", cursor: "pointer",
-            fontSize: "20px", color: "#64748b", display: "flex",
+            fontSize: "20px", color: "#1a2e5a", display: "flex",
             alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>×</button>
         </div>

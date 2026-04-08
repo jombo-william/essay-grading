@@ -5,6 +5,7 @@ import { apiFetch } from "./api.js";
 import PendingTab        from "./PendingTab.jsx";
 import AssignmentsTab    from "./AssignmentsTab.jsx";
 import StudentsTab       from "./StudentsTab.jsx";
+import MessagesTab       from "./MessagesTab.jsx";
 import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 
@@ -12,6 +13,7 @@ const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
+  { id: "messages",    icon: "💬", label: "Messages"     },
 ];
 
 export default function TeacherDashboard({ user, onBack }) {
@@ -198,6 +200,9 @@ const students = Array.from(
         )}
         {tab === "students" && (
           <StudentsTab students={students} submissions={submissions} assignments={assignments} loading={loading} />
+        )}
+        {tab === "messages" && (
+          <MessagesTab onToast={showToast} />
         )}
       </div>
 

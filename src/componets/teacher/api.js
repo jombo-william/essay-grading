@@ -1,6 +1,6 @@
 // src/components/teacher/api.js
 
-const BASE_URL = 'http://localhost:8080/api/teacher';
+const BASE_URL = 'http://localhost:8000/api/teachers';
 
 export async function apiFetch(path, options = {}) {
   const csrfToken = getCsrfToken();
@@ -13,6 +13,8 @@ export async function apiFetch(path, options = {}) {
     '/create_assignment.php':  '/assignments/create',
     '/update_assignment.php':  '/assignments/update',
     '/override_grade.php':     '/submissions/grade',
+    '/messages':               '/messages',
+    '/send-message':           '/send-message',
   };
 
   const cleanPath = path.startsWith('/') ? path : '/' + path;
@@ -29,10 +31,15 @@ export async function apiFetch(path, options = {}) {
     ...options,
   });
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new Error(`Failed to parse response: ${res.statusText || 'Unknown error'}`);
+  }
 
-  if (!res.ok || data.success === false) {
-    throw new Error(data.message || `Request failed (${res.status})`);
+  if (!res.ok) {
+    throw new Error(data?.detail || data?.message || `Request failed (${res.status})`);
   }
 
   return data;
