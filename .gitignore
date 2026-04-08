@@ -25,3 +25,5 @@ dist-ssr
 backend/__pycache__/
 backend/models/__pycache__/
 backend/routes/__pycache__/
+*.pyc
+__pycache__/
