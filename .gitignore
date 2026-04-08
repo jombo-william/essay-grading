@@ -27,3 +27,4 @@ backend/models/__pycache__/
 backend/routes/__pycache__/
 *.pyc
 __pycache__/
+backend/backend-jombo-essaygrade/venv/
