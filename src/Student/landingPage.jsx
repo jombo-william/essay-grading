@@ -1,4 +1,4 @@
-// C:\PROJECTS\Essay-Grader\src\Student\landingPage.jsx
+/* C:\PROJECTS\Essay-Grader\src\Student\landingPage.jsx */
 import { useState, useEffect, useRef } from 'react'
 // import { Link } from 'react-router-dom'
 
@@ -160,19 +160,208 @@ export default function LandingPage({ onLogin }) {
         .badge-item { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.45); font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes orbit { from { transform: rotate(0deg) translateX(160px) rotate(0deg); } to { transform: rotate(360deg) translateX(160px) rotate(-360deg); } }
+        
+        /* ========== RESPONSIVE STYLES ========== */
+        
+        /* Tablet & Small Desktop (max-width: 1024px) */
+        @media (max-width: 1024px) {
+          .nav-inner { padding: 0 20px; }
+          .slide-content { padding: 0 32px; }
+          .slide-heading { max-width: 500px; }
+          .slide-desc { max-width: 420px; }
+          .hero-stats .stat-item { padding: 14px 16px; }
+          .stat-num { font-size: 1.5rem; }
+          .stat-label { font-size: 0.7rem; }
+          .hero { min-height: 520px; }
+          .features-grid { gap: 16px; }
+          .feature-card { padding: 20px; }
+          .footer-grid { gap: 30px; }
+        }
+        
+        /* Mobile Landscape & Tablet (max-width: 860px) */
         @media (max-width: 860px) {
           .nav-links { display: none; }
           .hamburger { display: flex; }
-          .nav-links.open { display: flex !important; flex-direction: column; position: absolute; top: 68px; left: 0; right: 0; background: var(--navy); padding: 16px; gap: 4px; z-index: 999; }
-          .footer-grid { grid-template-columns: 1fr 1fr; }
+          .nav-links.open { 
+            display: flex !important; 
+            flex-direction: column; 
+            position: absolute; 
+            top: 68px; 
+            left: 0; 
+            right: 0; 
+            background: var(--navy); 
+            padding: 16px; 
+            gap: 8px; 
+            z-index: 999; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          }
+          .nav-links.open li { width: 100%; }
+          .nav-links.open a, 
+          .nav-links.open button { 
+            display: block; 
+            width: 100%; 
+            text-align: left; 
+            padding: 12px 16px; 
+          }
+          .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
           .topbar { display: none; }
+          
+          /* Adjust hero for tablet */
+          .hero { height: auto; min-height: 600px; }
+          .slide { flex-direction: column; justify-content: center; padding: 80px 0 100px; }
+          .slide-content { text-align: center; padding: 0 24px; }
+          .slide-heading { max-width: 100%; margin-left: auto; margin-right: auto; }
+          .slide-desc { max-width: 100%; margin-left: auto; margin-right: auto; }
+          .slide-actions { justify-content: center; }
+          
+          /* Hide decorative elements on tablet to reduce clutter */
+          .slide > div:not(.slide-content):not(.slide-dots):not(.slide-arrow) { 
+            opacity: 0.5; 
+            transform: scale(0.8); 
+          }
+          .s1-shape1, .s1-shape2, .s1-shape3 { display: none; }
+          .slide-dots { bottom: 20px; right: 20px; flex-direction: row; gap: 8px; }
+          .dot.active { width: 28px; height: 8px; }
+          .slide-arrow { width: 40px; height: 40px; }
+          .arrow-prev { left: 12px; }
+          .arrow-next { right: 12px; }
+          .hero-stats .stat-item { padding: 10px 12px; }
+          .stat-num { font-size: 1.2rem; }
+          .stat-label { font-size: 0.6rem; }
         }
-        @media (max-width: 768px) { .features-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 560px) {
-          .footer-grid { grid-template-columns: 1fr; }
-          .slide-content { padding: 0 24px; }
+        
+        /* Mobile Portrait (max-width: 768px) */
+        @media (max-width: 768px) { 
+          section { padding: 60px 20px; }
+          .nav-inner { padding: 0 16px; height: 60px; }
+          .nav-brand-title { font-size: 0.85rem; }
+          .nav-brand-sub { font-size: 0.6rem; }
+          .nav-logo { width: 38px; height: 38px; font-size: 0.9rem; }
+          
+          .features-grid { grid-template-columns: 1fr; }
+          .steps-grid { gap: 20px; margin-top: 32px; }
+          .step-card { padding: 24px 20px; }
+          .step-num { font-size: 2.5rem; top: 12px; right: 16px; }
+          .step-icon { width: 44px; height: 44px; font-size: 1.2rem; margin-bottom: 16px; }
+          
+          .feature-card { padding: 16px; gap: 12px; }
+          .feature-icon-wrap { width: 40px; height: 40px; font-size: 1.1rem; }
+          
+          .who-cards { gap: 16px; margin-top: 32px; }
+          .who-card { padding: 24px; }
+          
+          .cta-section { padding: 60px 20px; }
+          .cta-buttons { flex-direction: column; align-items: center; gap: 12px; }
+          .cta-buttons .btn-primary-hero,
+          .cta-buttons .btn-outline-hero { width: 100%; max-width: 280px; justify-content: center; }
+          
+          .footer-grid { grid-template-columns: 1fr; gap: 28px; text-align: center; }
+          .footer-brand { text-align: center; }
+          .footer-brand p { max-width: 100%; margin-left: auto; margin-right: auto; }
+          .footer-brand > div { justify-content: center; }
+          .footer-bottom { flex-direction: column; text-align: center; }
+          
+          /* Hero adjustments for mobile */
+          .hero { min-height: 550px; }
+          .slide { padding: 60px 0 80px; }
+          .slide-badge { font-size: 0.7rem; padding: 4px 12px; margin-bottom: 16px; }
+          .slide-heading { font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 12px; }
+          .slide-desc { font-size: 0.9rem; margin-bottom: 24px; }
+          .btn-primary-hero, .btn-outline-hero { padding: 10px 20px; font-size: 0.85rem; }
           .hero-stats { display: none; }
           .slide-dots { display: none; }
+          
+          /* Hide complex decorative elements on mobile */
+          [style*="position: absolute"]:not(.slide-content):not(.slide-dots):not(.slide-arrow) {
+            display: none !important;
+          }
+        }
+        
+        /* Small Mobile (max-width: 560px) */
+        @media (max-width: 560px) {
+          .nav-brand-title { font-size: 0.75rem; }
+          .nav-brand-sub { font-size: 0.55rem; }
+          .nav-logo { width: 32px; height: 32px; font-size: 0.8rem; }
+          .nav-inner { height: 54px; }
+          .nav-links.open { top: 54px; }
+          
+          section { padding: 48px 16px; }
+          .section-title { font-size: clamp(1.4rem, 4vw, 1.8rem); }
+          .section-desc { font-size: 0.9rem; }
+          
+          .steps-grid { gap: 16px; }
+          .step-card { padding: 20px 16px; }
+          .step-text { font-size: 0.8rem; }
+          
+          .feature-card { flex-direction: column; align-items: flex-start; text-align: left; padding: 16px; }
+          .feature-icon-wrap { margin-bottom: 8px; }
+          .feature-body h3 { font-size: 0.9rem; }
+          .feature-body p { font-size: 0.8rem; }
+          
+          .who-card { padding: 20px; }
+          .who-icon { font-size: 1.8rem; }
+          .who-title { font-size: 1rem; }
+          .who-text { font-size: 0.8rem; }
+          
+          .cta-section h2 { font-size: clamp(1.4rem, 4vw, 1.8rem); }
+          .cta-section p { font-size: 0.9rem; padding: 0 8px; }
+          
+          .footer-col h4 { font-size: 0.75rem; margin-bottom: 12px; }
+          .footer-col ul li a { font-size: 0.8rem; }
+          .footer-bottom p { font-size: 0.7rem; }
+          .badge-item { font-size: 0.65rem; padding: 3px 8px; }
+          
+          .hero { min-height: 500px; }
+          .slide { padding: 40px 0 60px; }
+          .slide-content { padding: 0 16px; }
+          .slide-badge { font-size: 0.65rem; padding: 3px 10px; }
+          .slide-heading { font-size: clamp(1.3rem, 4vw, 1.6rem); }
+          .slide-desc { font-size: 0.85rem; }
+          .btn-primary-hero, .btn-outline-hero { padding: 8px 16px; font-size: 0.8rem; }
+          .slide-arrow { width: 32px; height: 32px; font-size: 0.9rem; }
+          .arrow-prev { left: 8px; }
+          .arrow-next { right: 8px; }
+        }
+        
+        /* Extra Small Mobile (max-width: 380px) */
+        @media (max-width: 380px) {
+          .nav-brand { gap: 8px; }
+          .nav-brand-title { font-size: 0.7rem; }
+          .nav-brand-sub { font-size: 0.5rem; }
+          .nav-logo { width: 28px; height: 28px; font-size: 0.7rem; }
+          
+          .hero { min-height: 480px; }
+          .slide-heading { font-size: clamp(1.2rem, 3.5vw, 1.4rem); }
+          .slide-desc { font-size: 0.8rem; }
+          .btn-primary-hero, .btn-outline-hero { padding: 6px 12px; font-size: 0.75rem; }
+          .slide-actions { gap: 10px; }
+          
+          .step-card { padding: 16px 12px; }
+          .step-icon { width: 36px; height: 36px; font-size: 1rem; }
+          .step-title { font-size: 0.85rem; }
+          .step-text { font-size: 0.75rem; }
+        }
+        
+        /* Touch-friendly adjustments for all mobile devices */
+        @media (hover: none) and (pointer: coarse) {
+          .btn-primary-hero, 
+          .btn-outline-hero,
+          .nav-links a,
+          .nav-links button,
+          .hamburger,
+          .dot,
+          .slide-arrow,
+          .step-card,
+          .feature-card,
+          .who-card {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+          }
+          
+          .btn-primary-hero:active,
+          .btn-outline-hero:active {
+            transform: scale(0.98);
+          }
         }
       `}</style>
 
@@ -401,8 +590,8 @@ export default function LandingPage({ onLogin }) {
           <p className="section-desc" style={{ color:'rgba(255,255,255,0.6)' }}>Designed to serve every stakeholder in the Education ecosystem.</p>
           <div className="who-cards">
             {[
-              { icon:'🧑‍🎓', title:'Students (form 1-4)', text:"Submit essays, receive instant detailed feedback, track your writing improvement and resubmit to improve your score." },
-              { icon:'👩‍🏫', title:'Computer Teachers', text:"Review AI grades, set rubrics, assign writing tasks, and spend more time on actual classroom teaching." },
+              { icon:'🧑‍🎓', title:'Students (classes 1-4)', text:"Submit essays, receive instant detailed feedback, track your writing improvement and resubmit to improve your score." },
+              { icon:'👩‍🏫', title:'English & History Teachers', text:"Review AI grades, set rubrics, assign writing tasks, and spend more time on actual classroom teaching." },
               { icon:'🏫', title:'School Administrators', text:"Monitor school-wide writing performance with analytics, track progress and generate reports effortlessly." },
             ].map(w => (
               <div key={w.title} className="who-card">
@@ -424,7 +613,7 @@ export default function LandingPage({ onLogin }) {
             {/* <Link to="/login" className="btn-primary-hero">Sign In to Portal →</Link>
             <Link to="/register" className="btn-outline-hero">Register Your School</Link> */}
              <button onClick={onLogin} className="btn-primary-hero">Sign In to Portal →</button>
-            <button className="btn-outline-hero">Register Your School</button>
+            {/* <button className="btn-outline-hero">Register Your School</button> */}
           </div>
         </div>
       </section>
@@ -441,7 +630,7 @@ export default function LandingPage({ onLogin }) {
               <p>An AI-powered essay grading platform developed for Malawian schools by students of the University of Malawi.</p>
             </div>
             {[
-              { title:'Platform', links:['Student Portal','Teacher Dashboard','Admin Panel','Login'] },
+              { title:'Platform', links:['Student Portal','Teacher Dashboard','Login'] },
               { title:'Project', links:['About','Methodology','Documentation','GitHub'] },
               { title:'UNIMA', links:['unima.ac.mw','School of Education','Student Resources','Contact'] },
             ].map(col => (
@@ -456,7 +645,7 @@ export default function LandingPage({ onLogin }) {
             <div className="footer-badge">
               {/* <span className="badge-item">React + Supabase</span>
               <span className="badge-item">Gemini AI & Hugging Face AI</span> */}
-              <span className="badge-item">BED/COM 2021–2022</span>
+              {/* <span className="badge-item">BED/COM 2021–2022</span> */}
             </div>
           </div>
         </div>

@@ -5,7 +5,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-// ─── MOCK AI GRADER ────────────────────────────────────────────────────────
 async function mockAiGrade({ essayText, assignment }) {
   await new Promise(r => setTimeout(r, 2500 + Math.random() * 1500));
 
