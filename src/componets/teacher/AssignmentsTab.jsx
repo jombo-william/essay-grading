@@ -75,15 +75,15 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <p style={{ fontSize: "20px", fontWeight: "800", color: "#1e293b", margin: 0 }}>Assignments</p>
+        <p style={{ fontSize: "20px", fontWeight: "800", color: "#1a2e5a", margin: 0 }}>Assignments</p>
         <button style={btn.primary} onClick={openCreate}>+ New Assignment</button>
       </div>
 
       {assignments.length === 0 && (
         <div style={{ background: "#fff", borderRadius: "20px", border: "1px solid #e2e8f0", textAlign: "center", padding: "64px 24px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
           <p style={{ fontSize: "48px", margin: "0 0 14px" }}>📋</p>
-          <p style={{ fontWeight: "700", color: "#64748b", fontSize: "16px", margin: "0 0 6px" }}>No assignments yet</p>
-          <p style={{ fontSize: "13px", color: "#94a3b8", margin: 0 }}>Create your first assignment to get started.</p>
+          <p style={{ fontWeight: "700", color: "#1a2e5a", fontSize: "16px", margin: "0 0 6px" }}>No assignments yet</p>
+          <p style={{ fontSize: "13px", color: "#1a2e5a", margin: 0 }}>Create your first assignment to get started.</p>
         </div>
       )}
 
@@ -102,18 +102,18 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "14px" }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
-                  <span style={{ fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>{a.title}</span>
+                  <span style={{ fontWeight: "800", fontSize: "15px", color: "#1a2e5a" }}>{a.title}</span>
                   <Badge color="blue">{a.max_score} pts</Badge>
                   {isPast ? <Badge color="gray">Closed</Badge> : <Badge color="green">Active</Badge>}
                 </div>
-                <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 10px", lineHeight: "1.6" }}>{a.description}</p>
+                <p style={{ fontSize: "13px", color: "#1a2e5a", margin: "0 0 10px", lineHeight: "1.6" }}>{a.description}</p>
                 <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                  <span style={{ fontSize: "12px", color: "#1a2e5a" }}>
                     {/* //📅 Due {new Date(a.due_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} */}
 
                     📅 Due {a.due_date ? new Date(a.due_date.replace(" ", "T")).toLocaleDateString("en-GB", { timeZone: "Africa/Blantyre", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "No date"}
                   </span>
-                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                  <span style={{ fontSize: "12px", color: "#1a2e5a" }}>
                     📝 {subCount} submitted · ✅ {gradedCount} graded
                   </span>
                 </div>

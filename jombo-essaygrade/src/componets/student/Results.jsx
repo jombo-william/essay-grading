@@ -2,7 +2,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> HomePage
 async function mockAiGrade({ essayText, assignment }) {
   await new Promise(r => setTimeout(r, 2500 + Math.random() * 1500))
   const words = essayText.trim().split(/\s+/).filter(Boolean)
@@ -108,7 +111,329 @@ function RadarChart({ breakdown, size = 200 }) {
   )
 }
 
+<<<<<<< HEAD
 
+=======
+// ─── TREND LINE CHART (pure SVG) ───────────────────────────────────────────
+function TrendLineChart({ dataPoints }) {
+  if (!dataPoints || dataPoints.length < 2) return null
+  const W = 420, H = 140, PAD = { top:16, right:16, bottom:32, left:36 }
+  const innerW = W - PAD.left - PAD.right
+  const innerH = H - PAD.top - PAD.bottom
+  const maxY = 100, minY = 0
+  const xScale = i => PAD.left + (i / (dataPoints.length - 1)) * innerW
+  const yScale = v => PAD.top + innerH - ((v - minY) / (maxY - minY)) * innerH
+  const pathD = dataPoints.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.score)}`).join(' ')
+  const areaD = `${pathD} L ${xScale(dataPoints.length-1)} ${PAD.top+innerH} L ${xScale(0)} ${PAD.top+innerH} Z`
+  const gridLines = [0, 25, 50, 75, 100]
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow:'visible' }}>
+      {/* Grid lines */}
+      {gridLines.map(g => (
+        <g key={g}>
+          <line x1={PAD.left} y1={yScale(g)} x2={W-PAD.right} y2={yScale(g)} stroke="#f1f5f9" strokeWidth="1" />
+          <text x={PAD.left - 6} y={yScale(g)} textAnchor="end" dominantBaseline="middle" fontSize="8" fill="#94a3b8">{g}</text>
+        </g>
+      ))}
+      {/* 70% pass line */}
+      <line x1={PAD.left} y1={yScale(70)} x2={W-PAD.right} y2={yScale(70)} stroke="#16a34a30" strokeWidth="1.5" strokeDasharray="4,3" />
+      <text x={W-PAD.right+4} y={yScale(70)} fontSize="8" fill="#16a34a" dominantBaseline="middle">Pass</text>
+      {/* Area fill */}
+      <path d={areaD} fill="url(#trendGrad)" opacity="0.25" />
+      <defs>
+        <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1a2e5a" />
+          <stop offset="100%" stopColor="#1a2e5a" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* Line */}
+      <path d={pathD} fill="none" stroke="#1a2e5a" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      {/* Points */}
+      {dataPoints.map((d, i) => (
+        <g key={i}>
+          <circle cx={xScale(i)} cy={yScale(d.score)} r="5" fill="#fff" stroke="#1a2e5a" strokeWidth="2.5" />
+          <text x={xScale(i)} y={yScale(d.score) - 10} textAnchor="middle" fontSize="9" fontWeight="800" fill="#1a2e5a">{d.score}%</text>
+          <text x={xScale(i)} y={H - PAD.bottom + 14} textAnchor="middle" fontSize="8" fill="#94a3b8">{d.label}</text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+// ─── AI LEARNING PROGRESS TRACKER ─────────────────────────────────────────
+function LearningProgressTracker({ submissions, studentName }) {
+  const [loading, setLoading]   = useState(false)
+  const [insights, setInsights] = useState(null)
+  const [error, setError]       = useState(null)
+  const [expanded, setExpanded] = useState(false)
+
+  // Only use submissions that have been scored (final or AI score, not flagged AI)
+  const scoredSubmissions = submissions.filter(s =>
+    (s.final_score !== null || (s.ai_score !== null && s.ai_score > 0)) &&
+    s.ai_detection_score < 50
+  ).sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at))
+
+  // Build trend data points
+  const trendData = scoredSubmissions.map(s => ({
+    label: s.assignment_title.split(' ').slice(0, 2).join(' '),
+    score: s.final_score !== null
+      ? Math.round((s.final_score / s.max_score) * 100)
+      : Math.round((s.ai_score / s.max_score) * 100),
+    title: s.assignment_title,
+  }))
+
+  // Compute improvement delta
+  const improvementDelta = trendData.length >= 2
+    ? trendData[trendData.length - 1].score - trendData[0].score
+    : null
+
+  // Aggregate rubric weakness across all submissions
+  const allRubric = {}
+  scoredSubmissions.forEach(s => {
+    s.rubric_breakdown?.forEach(b => {
+      if (!allRubric[b.criterion]) allRubric[b.criterion] = []
+      allRubric[b.criterion].push(b.pct)
+    })
+  })
+  const avgRubric = Object.entries(allRubric).map(([criterion, pcts]) => ({
+    criterion,
+    avg: Math.round(pcts.reduce((a,b) => a+b, 0) / pcts.length),
+  })).sort((a,b) => a.avg - b.avg)
+
+  const weakestArea   = avgRubric[0]
+  const strongestArea = avgRubric[avgRubric.length - 1]
+
+  const runAnalysis = async () => {
+    if (insights) { setExpanded(true); return }
+    setExpanded(true)
+    setLoading(true)
+    setError(null)
+
+    const essaySummary = scoredSubmissions.map((s, i) =>
+      `Essay ${i+1}: "${s.assignment_title}" — Score: ${s.final_score ?? s.ai_score}/${s.max_score} — Submitted: ${new Date(s.submitted_at).toLocaleDateString('en-GB')}${s.rubric_breakdown?.length ? '\n  Rubric: ' + s.rubric_breakdown.map(b => `${b.criterion} ${b.pct}%`).join(', ') : ''}`
+    ).join('\n')
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: `You are an encouraging academic progress advisor for university students. You analyse a student's essay submission history and return ONLY valid JSON — no markdown, no preamble — in this exact shape:
+{
+  "dna_title": "A creative 4-word writing style title e.g. 'The Analytical Evidence Builder'",
+  "dna_summary": "2-3 sentences describing this student's overall writing personality and patterns across all their essays",
+  "trend_insight": "1-2 sentences about their score trend — are they improving, consistent, or dropping? Be encouraging.",
+  "strengths": ["strength 1 observed across essays", "strength 2"],
+  "growth_areas": ["area needing work 1", "area needing work 2"],
+  "recommendations": [
+    { "title": "short action title", "detail": "1 concrete sentence on what to do before next essay" },
+    { "title": "short action title", "detail": "1 concrete sentence on what to do before next essay" },
+    { "title": "short action title", "detail": "1 concrete sentence on what to do before next essay" }
+  ]
+}
+Be specific to the actual essay titles and scores. Be warm and encouraging — never discouraging.`,
+          messages: [{
+            role: 'user',
+            content: `Student: ${studentName}\nNumber of essays: ${scoredSubmissions.length}\n\nSubmission history:\n${essaySummary}`
+          }]
+        })
+      })
+      const data = await res.json()
+      const text = data.content?.map(b => b.text || '').join('') || ''
+      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim())
+      setInsights(parsed)
+    } catch {
+      setError('Could not generate insights. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (scoredSubmissions.length < 2) return null
+
+  return (
+    <div style={{ marginTop: 40 }}>
+      {/* ── SECTION HEADER ── */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+        <div>
+          <p style={{ fontSize:20, fontWeight:800, color:'#1e293b', margin:0 }}>📈 AI Learning Progress Tracker</p>
+          <p style={{ fontSize:13, color:'#94a3b8', margin:'2px 0 0' }}>AI analysis of all your essays together — your growth over time</p>
+        </div>
+        <button
+          onClick={runAnalysis}
+          style={{ padding:'10px 20px', background:`linear-gradient(135deg,#1a2e5a,#2d4a8a)`, border:'none', borderRadius:12, color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:8, boxShadow:'0 4px 14px #1a2e5a50', whiteSpace:'nowrap', transition:'transform 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'}
+          onMouseLeave={e => e.currentTarget.style.transform='none'}>
+          🧠 {insights ? 'View My Insights' : 'Generate AI Insights'}
+        </button>
+      </div>
+
+      {/* ── QUICK STATS ROW ── */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:12, marginBottom:20 }}>
+        {[
+          {
+            icon:'📝', label:'Essays Analysed', value: scoredSubmissions.length,
+            bg:'#eff6ff', color:'#2563eb',
+          },
+          {
+            icon: improvementDelta > 0 ? '📈' : improvementDelta < 0 ? '📉' : '➡️',
+            label:'Score Change',
+            value: improvementDelta !== null ? `${improvementDelta > 0 ? '+' : ''}${improvementDelta}%` : '—',
+            bg: improvementDelta > 0 ? '#f0fdf4' : improvementDelta < 0 ? '#fef2f2' : '#f8fafc',
+            color: improvementDelta > 0 ? '#16a34a' : improvementDelta < 0 ? '#dc2626' : '#64748b',
+          },
+          {
+            icon:'💪', label:'Strongest Area',
+            value: strongestArea ? strongestArea.criterion.charAt(0).toUpperCase() + strongestArea.criterion.slice(1) : '—',
+            sub: strongestArea ? `${strongestArea.avg}% avg` : '',
+            bg:'#f0fdf4', color:'#15803d',
+          },
+          {
+            icon:'🎯', label:'Focus Area',
+            value: weakestArea ? weakestArea.criterion.charAt(0).toUpperCase() + weakestArea.criterion.slice(1) : '—',
+            sub: weakestArea ? `${weakestArea.avg}% avg` : '',
+            bg:'#fffbeb', color:'#d97706',
+          },
+        ].map((s, i) => (
+          <div key={i} style={{ background:'#fff', borderRadius:14, padding:'14px 16px', border:'1px solid #e2e8f0', boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+              <div style={{ width:32, height:32, borderRadius:8, background:s.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>{s.icon}</div>
+              <span style={{ fontSize:11, color:'#94a3b8', fontWeight:600 }}>{s.label}</span>
+            </div>
+            <p style={{ fontSize:20, fontWeight:900, color:s.color, margin:0, lineHeight:1 }}>{s.value}</p>
+            {s.sub && <p style={{ fontSize:10, color:'#94a3b8', margin:'2px 0 0' }}>{s.sub}</p>}
+          </div>
+        ))}
+      </div>
+
+      {/* ── TREND CHART ── */}
+      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:20, marginBottom:20, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+        <p style={{ fontSize:13, fontWeight:800, color:'#1e293b', margin:'0 0 16px' }}>Score Trend Across Submissions</p>
+        <TrendLineChart dataPoints={trendData} />
+        <p style={{ fontSize:11, color:'#94a3b8', margin:'10px 0 0', textAlign:'center' }}>
+          {improvementDelta > 0
+            ? `🎉 Great progress! Your score has improved by ${improvementDelta}% from your first to latest submission.`
+            : improvementDelta === 0
+            ? '➡️ Your scores have been consistent across submissions.'
+            : `Your scores have varied — the AI Writing Coach can help identify patterns.`}
+        </p>
+      </div>
+
+      {/* ── RUBRIC AVERAGE BARS ── */}
+      {avgRubric.length > 0 && (
+        <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:20, marginBottom:20, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+          <p style={{ fontSize:13, fontWeight:800, color:'#1e293b', margin:'0 0 14px' }}>Average Rubric Performance Across All Essays</p>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {avgRubric.slice().reverse().map(r => (
+              <div key={r.criterion}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+                  <span style={{ fontSize:12, fontWeight:700, color:'#475569', textTransform:'capitalize' }}>{r.criterion}</span>
+                  <span style={{ fontSize:12, fontWeight:800, color: r.avg >= 80 ? '#16a34a' : r.avg >= 65 ? '#d97706' : '#dc2626' }}>{r.avg}%</span>
+                </div>
+                <div style={{ height:8, background:'#f1f5f9', borderRadius:4, overflow:'hidden' }}>
+                  <div style={{ height:'100%', width:`${r.avg}%`, borderRadius:4, transition:'width 0.8s ease', background: r.avg >= 80 ? 'linear-gradient(90deg,#22c55e,#16a34a)' : r.avg >= 65 ? 'linear-gradient(90deg,#fbbf24,#d97706)' : 'linear-gradient(90deg,#f87171,#dc2626)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── AI INSIGHTS PANEL ── */}
+      {expanded && (
+        <div style={{ background:'#fff', borderRadius:16, border:`1.5px solid #1a2e5a25`, overflow:'hidden', boxShadow:'0 4px 20px rgba(26,46,90,0.10)' }}>
+          {/* Panel header */}
+          <div style={{ background:`linear-gradient(135deg,#1a2e5a,#2d4a8a)`, padding:'16px 20px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div>
+              <p style={{ fontSize:14, fontWeight:800, color:'#fff', margin:0 }}>🧠 Your AI Learning Insights</p>
+              <p style={{ fontSize:11, color:'rgba(255,255,255,0.65)', margin:'2px 0 0' }}>Generated by Claude AI — based on all {scoredSubmissions.length} of your essays</p>
+            </div>
+            <button onClick={() => setExpanded(false)} style={{ background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', fontSize:13, fontWeight:700, cursor:'pointer', padding:'4px 10px' }}>✕ Close</button>
+          </div>
+
+          <div style={{ padding:20 }}>
+            {loading && (
+              <div style={{ textAlign:'center', padding:'36px 0' }}>
+                <div style={{ width:40, height:40, border:'3px solid #1a2e5a20', borderTopColor:'#1a2e5a', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 14px' }} />
+                <p style={{ fontSize:13, color:'#64748b', margin:'0 0 4px', fontWeight:600 }}>Claude is analysing your essay journey...</p>
+                <p style={{ fontSize:11, color:'#94a3b8', margin:0 }}>Reading all {scoredSubmissions.length} submissions together</p>
+              </div>
+            )}
+
+            {error && (
+              <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:14, textAlign:'center' }}>
+                <p style={{ color:'#dc2626', fontSize:13, margin:0 }}>{error}</p>
+                <button onClick={() => { setInsights(null); runAnalysis() }} style={{ marginTop:10, padding:'6px 16px', background:'#dc2626', border:'none', borderRadius:8, color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer' }}>Retry</button>
+              </div>
+            )}
+
+            {insights && !loading && (
+              <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+
+                {/* Writing DNA */}
+                <div style={{ background:`linear-gradient(135deg,#1a2e5a08,#c9a22715)`, border:`1px solid #c9a22740`, borderRadius:14, padding:18 }}>
+                  <p style={{ fontSize:10, fontWeight:700, color:'#92400e', textTransform:'uppercase', letterSpacing:'0.08em', margin:'0 0 4px' }}>🧬 Your Writing DNA</p>
+                  <p style={{ fontSize:18, fontWeight:900, color:'#1a2e5a', margin:'0 0 8px' }}>{insights.dna_title}</p>
+                  <p style={{ fontSize:13, color:'#475569', margin:0, lineHeight:1.7 }}>{insights.dna_summary}</p>
+                </div>
+
+                {/* Trend insight */}
+                <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:12, padding:14 }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:'#1d4ed8', margin:'0 0 4px' }}>📈 Progress Insight</p>
+                  <p style={{ fontSize:13, color:'#1e3a8a', margin:0, lineHeight:1.6 }}>{insights.trend_insight}</p>
+                </div>
+
+                {/* Strengths & Growth areas */}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                  <div style={{ background:'#f0fdf4', border:'1px solid #86efac', borderRadius:12, padding:14 }}>
+                    <p style={{ fontSize:11, fontWeight:700, color:'#15803d', margin:'0 0 8px' }}>💪 Your Strengths</p>
+                    {insights.strengths?.map((s, i) => (
+                      <div key={i} style={{ display:'flex', gap:6, alignItems:'flex-start', marginBottom:6 }}>
+                        <span style={{ fontSize:10, color:'#16a34a', marginTop:2, flexShrink:0 }}>✓</span>
+                        <p style={{ fontSize:12, color:'#166534', margin:0, lineHeight:1.5 }}>{s}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:12, padding:14 }}>
+                    <p style={{ fontSize:11, fontWeight:700, color:'#d97706', margin:'0 0 8px' }}>🎯 Growth Areas</p>
+                    {insights.growth_areas?.map((s, i) => (
+                      <div key={i} style={{ display:'flex', gap:6, alignItems:'flex-start', marginBottom:6 }}>
+                        <span style={{ fontSize:10, color:'#d97706', marginTop:2, flexShrink:0 }}>→</span>
+                        <p style={{ fontSize:12, color:'#92400e', margin:0, lineHeight:1.5 }}>{s}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Study Recommendations */}
+                <div>
+                  <p style={{ fontSize:12, fontWeight:700, color:'#1e293b', margin:'0 0 10px' }}>📚 Personalised Study Recommendations</p>
+                  <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                    {insights.recommendations?.map((r, i) => (
+                      <div key={i} style={{ display:'flex', gap:12, alignItems:'flex-start', background:'#f8fafc', border:'1px solid #e2e8f0', borderRadius:10, padding:'12px 14px' }}>
+                        <div style={{ width:24, height:24, borderRadius:'50%', background:'#1a2e5a', color:'#fff', fontSize:11, fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>{i+1}</div>
+                        <div>
+                          <p style={{ fontSize:12, fontWeight:700, color:'#1a2e5a', margin:'0 0 2px' }}>{r.title}</p>
+                          <p style={{ fontSize:12, color:'#64748b', margin:0, lineHeight:1.5 }}>{r.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── MOCK DATA ─────────────────────────────────────────────────────────────
+>>>>>>> HomePage
 const MOCK_ASSIGNMENTS = [
   { id:1, title:'Climate Change & Society', description:'Analyse the socio-economic impacts of climate change on developing nations.', instructions:'Write a well-structured essay (500–800 words) discussing at least three specific socio-economic impacts of climate change on developing nations.', referenceMaterial:'Climate change disproportionately affects developing nations...', rubric:{ content:35, structure:25, grammar:20, evidence:20 }, max_score:100, due_date:'2026-04-15T23:59' },
   { id:2, title:'Artificial Intelligence in Education', description:'Discuss the benefits and challenges of integrating AI tools in secondary schools.', instructions:'Write an argumentative essay (400–600 words) presenting both sides of AI integration in secondary schools.', referenceMaterial:'AI in education benefits: personalised learning, automated grading...', rubric:{ argumentation:40, structure:25, grammar:20, evidence:15 }, max_score:100, due_date:'2026-04-20T23:59' },
@@ -141,7 +466,10 @@ const badge = c => ({
   color:       c==='green'?'#16a34a':c==='red'?'#dc2626':c==='amber'?'#d97706':c==='purple'?'#9333ea':c==='gray'?'#64748b':'#2563eb',
 })
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> HomePage
 function Sheet({ onClose, title, subtitle, children, footer }) {
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', display:'flex', alignItems:'flex-end', justifyContent:'center', zIndex:200, backdropFilter:'blur(4px)' }}>
@@ -163,7 +491,10 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
   )
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> HomePage
 function UnderDevelopmentModal({ feature, onClose }) {
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:300, backdropFilter:'blur(4px)', padding:20 }}>
@@ -182,7 +513,10 @@ function UnderDevelopmentModal({ feature, onClose }) {
   )
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> HomePage
 function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
   const [hovered, setHovered] = useState(false)
   const pct = s.final_score !== null ? Math.round((s.final_score / s.max_score) * 100) : null
@@ -239,18 +573,18 @@ function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
   )
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> HomePage
 function SentenceHighlighter({ text, aiPct }) {
   const [showHighlight, setShowHighlight] = useState(false)
   const [sentences, setSentences]         = useState([])
   const [tooltip, setTooltip]             = useState(null)
-
   useEffect(() => { setSentences(analyzeSentences(text, aiPct || 0)) }, [text, aiPct])
-
   const riskBg     = r => r >= 60 ? '#ef444428' : r >= 35 ? '#f59e0b22' : 'transparent'
   const riskBorder = r => r >= 60 ? '#ef4444'   : r >= 35 ? '#f59e0b'   : 'transparent'
   const riskLabel  = r => r >= 60 ? 'High AI risk' : r >= 35 ? 'Moderate AI risk' : 'Likely human'
-
   return (
     <div style={{ background:'#f8fafc', border:'1px solid #e2e8f0', borderRadius:12, padding:16 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
@@ -265,7 +599,6 @@ function SentenceHighlighter({ text, aiPct }) {
           </button>
         )}
       </div>
-
       {showHighlight && (
         <div style={{ display:'flex', gap:14, marginBottom:10, flexWrap:'wrap' }}>
           {[{bg:'#ef444428',border:'#ef4444',label:'High AI risk (≥60%)'},{bg:'#f59e0b22',border:'#f59e0b',label:'Moderate (35–59%)'},{bg:'transparent',border:'#d1d5db',label:'Likely human'}].map(l => (
@@ -276,14 +609,11 @@ function SentenceHighlighter({ text, aiPct }) {
           ))}
         </div>
       )}
-
       <div style={{ position:'relative' }}>
         {showHighlight ? (
           <p style={{ fontSize:13, color:'#475569', lineHeight:'2.1', margin:0 }}>
             {sentences.map((s, i) => (
-              <span key={i}
-                onMouseEnter={e => setTooltip({ idx:i, x:e.clientX, y:e.clientY })}
-                onMouseLeave={() => setTooltip(null)}
+              <span key={i} onMouseEnter={e => setTooltip({ idx:i, x:e.clientX, y:e.clientY })} onMouseLeave={() => setTooltip(null)}
                 style={{ background: riskBg(s.risk), borderBottom: s.risk >= 35 ? `2px solid ${riskBorder(s.risk)}` : 'none', borderRadius:3, padding: s.risk >= 35 ? '1px 2px' : '0', cursor: s.risk >= 35 ? 'help' : 'default', transition:'background 0.2s' }}>
                 {s.sentence}{i < sentences.length - 1 ? ' ' : ''}
               </span>
@@ -302,24 +632,24 @@ function SentenceHighlighter({ text, aiPct }) {
   )
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> HomePage
 function ImprovementCoach({ submission }) {
-  const [open, setOpen]           = useState(false)
-  const [loading, setLoading]     = useState(false)
+  const [open, setOpen]               = useState(false)
+  const [loading, setLoading]         = useState(false)
   const [suggestions, setSuggestions] = useState(null)
-  const [error, setError]         = useState(null)
-
+  const [error, setError]             = useState(null)
   const runCoach = async () => {
     setOpen(true)
     if (suggestions) return
     setLoading(true); setError(null)
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
+        method:'POST', headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1000,
+          model:'claude-sonnet-4-20250514', max_tokens:1000,
           system:`You are an academic writing coach for university students. Analyse the essay and return ONLY valid JSON — no markdown, no preamble — in this exact shape:
 {"overall":"2-sentence overall impression","suggestions":[{"type":"strength"|"weakness"|"tip","title":"short title","detail":"1-2 sentences of specific advice"}],"rewrite":{"original":"exact sentence from the essay that could be improved","improved":"your improved version of that sentence","why":"brief reason"}}
 Give exactly 4 suggestions. Be specific, reference the actual essay content.`,
@@ -328,24 +658,17 @@ Give exactly 4 suggestions. Be specific, reference the actual essay content.`,
       })
       const data = await res.json()
       const text = data.content?.map(b => b.text||'').join('') || ''
-      const parsed = JSON.parse(text.replace(/```json|```/g,'').trim())
-      setSuggestions(parsed)
-    } catch {
-      setError('Could not load suggestions. Please try again.')
-    } finally { setLoading(false) }
+      setSuggestions(JSON.parse(text.replace(/```json|```/g,'').trim()))
+    } catch { setError('Could not load suggestions. Please try again.') }
+    finally { setLoading(false) }
   }
-
   const typeStyle = t => ({ strength:{ bg:'#f0fdf4', border:'#86efac', icon:'💪', color:'#15803d' }, weakness:{ bg:'#fef2f2', border:'#fecaca', icon:'⚠️', color:'#dc2626' }, tip:{ bg:'#eff6ff', border:'#bfdbfe', icon:'💡', color:'#2563eb' } }[t] || { bg:'#f8fafc', border:'#e2e8f0', icon:'📝', color:'#64748b' })
-
   return (
     <div style={{ marginBottom:14 }}>
-      <button onClick={runCoach}
-        onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'}
-        onMouseLeave={e => e.currentTarget.style.transform='none'}
+      <button onClick={runCoach} onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'} onMouseLeave={e => e.currentTarget.style.transform='none'}
         style={{ width:'100%', padding:'13px 16px', background:`linear-gradient(135deg,${NAVY},#2d4a8a)`, border:'none', borderRadius:12, color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, boxShadow:`0 4px 14px ${NAVY}50`, transition:'transform 0.15s' }}>
         🧠 AI Writing Coach — Get Improvement Suggestions
       </button>
-
       {open && (
         <div style={{ marginTop:12, background:'#fff', border:`1.5px solid ${NAVY}25`, borderRadius:14, overflow:'hidden', boxShadow:'0 4px 20px rgba(26,46,90,0.10)' }}>
           <div style={{ background:`linear-gradient(135deg,${NAVY}10,${GOLD}15)`, padding:'12px 16px', borderBottom:`1px solid ${NAVY}15`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -353,38 +676,19 @@ Give exactly 4 suggestions. Be specific, reference the actual essay content.`,
             <button onClick={() => setOpen(false)} style={{ background:'none', border:'none', fontSize:16, cursor:'pointer', color:'#64748b' }}>×</button>
           </div>
           <div style={{ padding:16 }}>
-            {loading && (
-              <div style={{ textAlign:'center', padding:'28px 0' }}>
-                <div style={{ width:36, height:36, border:`3px solid ${NAVY}20`, borderTopColor:NAVY, borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
-                <p style={{ fontSize:13, color:'#64748b', margin:0 }}>Claude is analysing your essay...</p>
-              </div>
-            )}
+            {loading && <div style={{ textAlign:'center', padding:'28px 0' }}><div style={{ width:36, height:36, border:`3px solid ${NAVY}20`, borderTopColor:NAVY, borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} /><p style={{ fontSize:13, color:'#64748b', margin:0 }}>Claude is analysing your essay...</p></div>}
             {error && <p style={{ color:'#dc2626', fontSize:13, textAlign:'center' }}>{error}</p>}
             {suggestions && !loading && (
               <>
                 <p style={{ fontSize:13, color:'#475569', lineHeight:1.7, marginBottom:14, padding:'10px 14px', background:'#f8fafc', borderRadius:10, border:'1px solid #e2e8f0' }}>{suggestions.overall}</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
-                  {suggestions.suggestions?.map((s, i) => {
-                    const ts = typeStyle(s.type)
-                    return (
-                      <div key={i} style={{ background:ts.bg, border:`1px solid ${ts.border}`, borderRadius:10, padding:'10px 12px' }}>
-                        <p style={{ fontSize:12, fontWeight:700, color:ts.color, margin:'0 0 4px' }}>{ts.icon} {s.title}</p>
-                        <p style={{ fontSize:12, color:'#475569', margin:0, lineHeight:1.6 }}>{s.detail}</p>
-                      </div>
-                    )
-                  })}
+                  {suggestions.suggestions?.map((s, i) => { const ts = typeStyle(s.type); return <div key={i} style={{ background:ts.bg, border:`1px solid ${ts.border}`, borderRadius:10, padding:'10px 12px' }}><p style={{ fontSize:12, fontWeight:700, color:ts.color, margin:'0 0 4px' }}>{ts.icon} {s.title}</p><p style={{ fontSize:12, color:'#475569', margin:0, lineHeight:1.6 }}>{s.detail}</p></div> })}
                 </div>
                 {suggestions.rewrite && (
                   <div style={{ background:`${GOLD}12`, border:`1px solid ${GOLD}50`, borderRadius:10, padding:14 }}>
                     <p style={{ fontSize:11, fontWeight:700, color:'#92400e', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }}>✍️ Suggested Rewrite</p>
-                    <div style={{ background:'#fef2f2', borderRadius:8, padding:'8px 12px', marginBottom:8 }}>
-                      <p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 3px', fontWeight:600 }}>ORIGINAL</p>
-                      <p style={{ fontSize:12, color:'#7f1d1d', margin:0, fontStyle:'italic' }}>"{suggestions.rewrite.original}"</p>
-                    </div>
-                    <div style={{ background:'#f0fdf4', borderRadius:8, padding:'8px 12px', marginBottom:8 }}>
-                      <p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 3px', fontWeight:600 }}>IMPROVED</p>
-                      <p style={{ fontSize:12, color:'#14532d', margin:0, fontWeight:600 }}>"{suggestions.rewrite.improved}"</p>
-                    </div>
+                    <div style={{ background:'#fef2f2', borderRadius:8, padding:'8px 12px', marginBottom:8 }}><p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 3px', fontWeight:600 }}>ORIGINAL</p><p style={{ fontSize:12, color:'#7f1d1d', margin:0, fontStyle:'italic' }}>"{suggestions.rewrite.original}"</p></div>
+                    <div style={{ background:'#f0fdf4', borderRadius:8, padding:'8px 12px', marginBottom:8 }}><p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 3px', fontWeight:600 }}>IMPROVED</p><p style={{ fontSize:12, color:'#14532d', margin:0, fontWeight:600 }}>"{suggestions.rewrite.improved}"</p></div>
                     <p style={{ fontSize:11, color:'#92400e', margin:0 }}>💬 {suggestions.rewrite.why}</p>
                   </div>
                 )}
@@ -456,7 +760,6 @@ export default function Results() {
         }
       `}</style>
 
-      {/* TOAST */}
       {toast && (
         <div style={{ position:'fixed', top:16, left:'50%', transform:'translateX(-50%)', zIndex:999, background: toast.type==='error'?'#fef2f2':'#f0fdf4', border:`1px solid ${toast.type==='error'?'#fecaca':'#bbf7d0'}`, color: toast.type==='error'?'#dc2626':'#15803d', padding:'10px 20px', borderRadius:12, fontSize:13, fontWeight:700, boxShadow:'0 4px 20px rgba(0,0,0,0.12)', maxWidth:'90vw', textAlign:'center' }}>
           {toast.msg}
@@ -509,7 +812,11 @@ export default function Results() {
           ))}
         </div>
 
+<<<<<<< HEAD
         {}
+=======
+        {/* SECTION 1 — INDIVIDUAL ESSAY RESULTS*/}
+>>>>>>> HomePage
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
           <div>
             <p style={{ fontSize:20, fontWeight:800, color:'#1e293b', margin:0 }}>My Results</p>
@@ -525,7 +832,10 @@ export default function Results() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {}
+=======
+>>>>>>> HomePage
         {submissions.length === 0 && (
           <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:'48px 24px', textAlign:'center' }}>
             <p style={{ fontSize:36, margin:'0 0 10px' }}>📭</p>
@@ -535,6 +845,11 @@ export default function Results() {
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(480px,1fr))', gap:0 }}>
           {submissions.map(s => <ResultCard key={s.id} s={s} onClick={openModal} scoreColor={scoreColor} scoreLabel={scoreLabel} />)}
         </div>
+
+        {/* {
+            SECTION 2 — AI LEARNING PROGRESS TRACKER } */}
+        <LearningProgressTracker submissions={submissions} studentName={studentName} />
+
       </div>
 
       {}
@@ -555,14 +870,20 @@ export default function Results() {
             </div>
           }>
 
+<<<<<<< HEAD
           {}
+=======
+>>>>>>> HomePage
           <div style={{ display:'flex', gap:4, marginBottom:18, background:'#f8fafc', borderRadius:10, padding:4 }}>
             {[['overview','📊 Overview'],['ai analysis','🔬 AI Analysis'],['writing coach','🧠 Writing Coach']].map(([t,label]) => (
               <button key={t} onClick={() => setActiveTab(t)} className={`modal-tab ${activeTab===t?'active':'inactive'}`}>{label}</button>
             ))}
           </div>
 
+<<<<<<< HEAD
           {}
+=======
+>>>>>>> HomePage
           {activeTab==='overview' && (
             <div className="fade-in">
               {resultModal.final_score !== null ? (() => {
@@ -576,11 +897,7 @@ export default function Results() {
                       <span style={{ color:'rgba(255,255,255,0.85)', fontSize:16, fontWeight:700 }}>{pct}%</span>
                       <span style={{ background:'rgba(255,255,255,0.18)', color:'#fff', fontSize:12, fontWeight:700, padding:'2px 10px', borderRadius:20 }}>{scoreLabel(pct)}</span>
                     </div>
-                    {resultModal.rubric_breakdown?.length > 0 && (
-                      <div style={{ display:'flex', justifyContent:'center', marginTop:16 }}>
-                        <RadarChart breakdown={resultModal.rubric_breakdown} size={180} />
-                      </div>
-                    )}
+                    {resultModal.rubric_breakdown?.length > 0 && <div style={{ display:'flex', justifyContent:'center', marginTop:16 }}><RadarChart breakdown={resultModal.rubric_breakdown} size={180} /></div>}
                   </div>
                 )
               })() : resultModal.ai_detection_score >= 50 ? (
@@ -617,33 +934,23 @@ export default function Results() {
                   <p style={{ fontWeight:700, color:NAVY, margin:0 }}>🤖 Grading in progress...</p>
                 </div>
               )}
-
-              {resultModal.ai_feedback && (
-                <div style={{ background:`${NAVY}0a`, border:`1px solid ${NAVY}25`, borderRadius:12, padding:16, marginBottom:14 }}>
-                  <span style={{ ...sL, color:NAVY }}>🤖 AI Feedback</span>
-                  <p style={{ fontSize:13, color:'#1e293b', margin:0, lineHeight:'1.85', whiteSpace:'pre-wrap' }}>{resultModal.ai_feedback}</p>
-                </div>
-              )}
-              {resultModal.teacher_feedback && (
-                <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:12, padding:16, marginBottom:14 }}>
-                  <span style={{ ...sL, color:'#15803d' }}>👨‍🏫 Teacher Feedback</span>
-                  <p style={{ fontSize:13, color:'#1e293b', margin:0, lineHeight:'1.85' }}>{resultModal.teacher_feedback}</p>
-                </div>
-              )}
+              {resultModal.ai_feedback && <div style={{ background:`${NAVY}0a`, border:`1px solid ${NAVY}25`, borderRadius:12, padding:16, marginBottom:14 }}><span style={{ ...sL, color:NAVY }}>🤖 AI Feedback</span><p style={{ fontSize:13, color:'#1e293b', margin:0, lineHeight:'1.85', whiteSpace:'pre-wrap' }}>{resultModal.ai_feedback}</p></div>}
+              {resultModal.teacher_feedback && <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:12, padding:16, marginBottom:14 }}><span style={{ ...sL, color:'#15803d' }}>👨‍🏫 Teacher Feedback</span><p style={{ fontSize:13, color:'#1e293b', margin:0, lineHeight:'1.85' }}>{resultModal.teacher_feedback}</p></div>}
               <SentenceHighlighter text={resultModal.essay_text} aiPct={null} />
             </div>
           )}
 
+<<<<<<< HEAD
           {}
+=======
+>>>>>>> HomePage
           {activeTab==='ai analysis' && (
             <div className="fade-in">
               {resultModal.ai_detection_score !== null ? (
                 <>
                   <div style={{ background: resultModal.ai_detection_score>=50?'#fef2f2':'#f0fdf4', border:`1px solid ${resultModal.ai_detection_score>=50?'#fecaca':'#bbf7d0'}`, borderRadius:14, padding:20, marginBottom:16, textAlign:'center' }}>
                     <p style={{ fontSize:48, fontWeight:900, color: resultModal.ai_detection_score>=50?'#dc2626':'#16a34a', margin:'0 0 4px' }}>{resultModal.ai_detection_score}%</p>
-                    <p style={{ fontSize:13, fontWeight:700, color:'#475569', margin:'0 0 14px' }}>
-                      {resultModal.ai_detection_score>=50?'🚨 High AI Content — Policy Violation':resultModal.ai_detection_score>=30?'⚠️ Moderate AI Signals Detected':'✅ Largely Human-Written'}
-                    </p>
+                    <p style={{ fontSize:13, fontWeight:700, color:'#475569', margin:'0 0 14px' }}>{resultModal.ai_detection_score>=50?'🚨 High AI Content — Policy Violation':resultModal.ai_detection_score>=30?'⚠️ Moderate AI Signals Detected':'✅ Largely Human-Written'}</p>
                     <div style={{ height:12, background:'#e2e8f0', borderRadius:6, overflow:'hidden', position:'relative' }}>
                       <div style={{ height:'100%', width:`${resultModal.ai_detection_score}%`, background: resultModal.ai_detection_score>=50?'linear-gradient(90deg,#f59e0b,#ef4444)':'linear-gradient(90deg,#22c55e,#16a34a)', borderRadius:6 }} />
                       <div style={{ position:'absolute', top:0, left:'50%', width:2, height:'100%', background:'#94a3b8' }} />
@@ -654,13 +961,11 @@ export default function Results() {
                       <span style={{ fontSize:10, color:'#94a3b8' }}>100% AI</span>
                     </div>
                   </div>
-
                   <div style={{ marginBottom:16 }}>
                     <p style={{ fontSize:13, fontWeight:700, color:'#1e293b', marginBottom:6 }}>🔬 Sentence-Level AI Scan</p>
                     <p style={{ fontSize:12, color:'#64748b', marginBottom:10 }}>Toggle "Show AI Scan" to see which sentences were flagged. Red = high risk, amber = moderate risk.</p>
                     <SentenceHighlighter text={resultModal.essay_text} aiPct={resultModal.ai_detection_score} />
                   </div>
-
                   <div style={{ background:`${NAVY}08`, border:`1px solid ${NAVY}20`, borderRadius:12, padding:14 }}>
                     <p style={{ fontSize:12, fontWeight:700, color:NAVY, margin:'0 0 8px' }}>ℹ️ How AI Detection Works</p>
                     <p style={{ fontSize:12, color:'#475569', margin:0, lineHeight:1.7 }}>The system analyses sentence uniformity, generic academic phrasing, vocabulary density, personal voice, and specificity of examples — all signals of AI-generated text. Scores ≥50% trigger an automatic zero pending teacher review.</p>
@@ -675,7 +980,10 @@ export default function Results() {
             </div>
           )}
 
+<<<<<<< HEAD
           {}
+=======
+>>>>>>> HomePage
           {activeTab==='writing coach' && (
             <div className="fade-in">
               <div style={{ background:`linear-gradient(135deg,${NAVY}08,${GOLD}12)`, border:`1px solid ${NAVY}20`, borderRadius:14, padding:16, marginBottom:16 }}>
