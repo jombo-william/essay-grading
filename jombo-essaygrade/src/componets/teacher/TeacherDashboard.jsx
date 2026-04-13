@@ -10,13 +10,15 @@ import AssignmentsTab    from "./AssignmentsTab.jsx";
 import StudentsTab       from "./StudentsTab.jsx";
 import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
-import ExamsTab from "./ExamsTab.jsx";
+// import ExamsTab from "./ExamsTab.jsx";
+import IntegrationsTab from "./IntegrationsTab.jsx";
 
 const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
   { id: "exams", icon: "📝", label: "Exams" },
+  { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 
 const CLASS_PALETTES = [
@@ -359,9 +361,16 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             onEditGrade={openEdit}
           />
         )}
-        {tab === "exams" && (
+        {/* {tab === "exams" && (
         <ExamsTab selectedClass={selectedClass} showToast={showToast} />
-          )}
+          )} */}
+          {tab === "integrations" && (
+  <IntegrationsTab
+    selectedClass={selectedClass}
+    showToast={showToast}
+    assignments={assignments}
+  />
+)}
       </div>
 
       {/* Modals */}
