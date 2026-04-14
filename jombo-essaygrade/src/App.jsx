@@ -1,44 +1,4 @@
 
-
-
-// import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import { useState } from 'react';
-// import LandingPage from './componets/auth/landingPage.jsx';
-// import LoginPage from './componets/auth/LoginPage.jsx';
-// import TeacherDashboard from './componets/teacher/TeacherDashboard.jsx';
-// import StudentDashboard from './componets/student/StudentDashboard.jsx';
-
-// function AppContent() {
-//   const [user] = useState(() => 
-//     JSON.parse(localStorage.getItem('user') || 'null')
-//   );
-  
-//   const handleBack = () => {
-//     localStorage.clear();
-//     sessionStorage.clear();
-//     window.location.href = '/';
-//   };
-
-//   return (
-//     <Routes>
-//       <Route path="/" element={<LandingPage />} />
-//       <Route path="/login" element={<LoginPage />} />
-//       <Route path="/teacher-dashboard" element={<TeacherDashboard user={user} onBack={handleBack} />} />
-//       <Route path="/dashboard" element={<StudentDashboard user={user} onBack={handleBack} />} />
-//     </Routes>
-//   );
-// }
-
-// export default function App() {
-//   return (
-//     <BrowserRouter>
-//       <AppContent />
-//     </BrowserRouter>
-//   );
-// }
-
-
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import LandingPage      from './componets/auth/landingPage.jsx';
@@ -47,10 +7,6 @@ import ClassSelector    from './componets/teacher/ClassSelector.jsx';
 import TeacherDashboard from './componets/teacher/TeacherDashboard.jsx';
 import StudentDashboard from './componets/student/StudentDashboard.jsx';
 
-// ── Teacher flow wrapper ──────────────────────────────────────────────────────
-// Sits at /teacher-dashboard and manages the two-step flow:
-//   Step 1 → ClassSelector  (pick / create a class)
-//   Step 2 → TeacherDashboard (scoped to that class)
 
 function TeacherRoute() {
   const [user] = useState(() =>

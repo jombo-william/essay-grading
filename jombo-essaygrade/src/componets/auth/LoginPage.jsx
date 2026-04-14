@@ -45,8 +45,10 @@ const handleSubmit = async (e) => {
     }
 
    localStorage.setItem('user',          JSON.stringify(data.user))
-localStorage.setItem('token',         data.csrf_token)
-localStorage.setItem('session_token', data.session_token)  // ← ADD THIS LINE
+   localStorage.setItem('token', data.csrf_token)
+    localStorage.setItem('session_token', data.session_token)
+    sessionStorage.setItem('csrf_token', data.csrf_token)
+    sessionStorage.setItem('session_token', data.session_token)
 setDetectedRole(data.user.role)
 
     setTimeout(() => {

@@ -11,6 +11,9 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
   const [selectedLocalId, setSelectedLocalId] = useState("");
   const [gcLoading,       setGcLoading]       = useState(false);
   const [gcResults,       setGcResults]       = useState(null);
+  const [linkClassId, setLinkClassId] = useState("");
+  const [linking, setLinking] = useState(false);
+  const [classes, setClasses] = useState([]);
 
   // ── Moodle state ───────────────────────────────────────────────────────
   const [moodleToken,    setMoodleToken]    = useState("");
@@ -31,18 +34,37 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
-  const loadGcCourses = async () => {
-    setGcLoading(true);
-    try {
-      const res = await apiFetch("/classroom/courses");
-      setGcCourses(res.courses || []);
-      showToast(`Found ${res.courses.length} courses`, "success");
-    } catch (err) {
-      showToast(err.message || "Failed to load courses", "error");
-    } finally {
-      setGcLoading(false);
-    }
-  };
+  // const loadGcCourses = async () => {
+  //   setGcLoading(true);
+  //   try {
+  //     const res = await apiFetch("/classroom/courses");
+  //     setGcCourses(res.courses || []);
+  //     showToast(`Found ${res.courses.length} courses`, "success");
+  //   } catch (err) {
+  //     showToast(err.message || "Failed to load courses", "error");
+  //   } finally {
+  //     setGcLoading(false);
+  //   }
+  // };
+
+const loadGcCourses = async () => {
+  setGcLoading(true);
+  try {
+    const [gcRes, clsRes] = await Promise.all([
+      apiFetch("/classroom/courses"),
+      apiFetch("/classes"),
+    ]);
+    setGcCourses(gcRes.courses || []);
+    setClasses(clsRes.classes || []);
+    showToast(`Found ${gcRes.courses.length} courses`, "success");
+  } catch (err) {
+    showToast(err.message || "Failed to load courses", "error");
+  } finally {
+    setGcLoading(false);
+  }
+};
+
+
 
   const loadGcAssignments = async (courseId) => {
     setGcLoading(true);
@@ -77,6 +99,33 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
       setGcLoading(false);
     }
   };
+
+
+const loadClasses = async () => {
+  try {
+    const res = await apiFetch("/classes");
+    setClasses(res.classes || []);
+  } catch (err) {}
+};
+
+const linkCourseToClass = async (courseId) => {
+  if (!linkClassId) {
+    showToast("Please select a class to link", "error");
+    return;
+  }
+  setLinking(true);
+  try {
+    await apiFetch(`/classes/${linkClassId}/link-google`, {
+      method: "POST",
+      body: JSON.stringify({ gc_course_id: courseId }),
+    });
+    showToast("✅ Course linked to class! Assignments will now sync.", "success");
+  } catch (err) {
+    showToast(err.message || "Failed to link", "error");
+  } finally {
+    setLinking(false);
+  }
+};
 
   // ── Moodle handlers ────────────────────────────────────────────────────
 
@@ -194,7 +243,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
         </div>
 
         {/* Step 3 — Select course */}
-        {gcCourses.length > 0 && (
+        {/* {gcCourses.length > 0 && (
           <div style={{ marginBottom: "16px" }}>
             <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
               Step 3 — Select a course
@@ -210,7 +259,54 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
               ))}
             </select>
           </div>
-        )}
+        )} */}
+
+{gcCourses.length > 0 && (
+  <div style={{ marginBottom: "16px" }}>
+    <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
+      Step 3 — Link each Google Classroom course to a local class
+    </p>
+    {gcCourses.map(course => (
+      <div key={course.id} style={{
+        padding: "12px", border: "1px solid #e2e8f0",
+        borderRadius: "10px", marginBottom: "10px",
+        background: "#f8fafc",
+      }}>
+        <p style={{ margin: "0 0 8px", fontWeight: "700", fontSize: "13px", color: "#1e293b" }}>
+          🎓 {course.name} {course.section}
+        </p>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <select
+            onChange={e => setLinkClassId(e.target.value)}
+            defaultValue=""
+            style={{ ...select, marginBottom: 0, flex: 1 }}
+          >
+            <option value="" disabled>Select local class to link...</option>
+            {classes.map(c => (
+              <option key={c.id} value={c.id}>{c.name} — {c.subject}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => linkCourseToClass(course.id)}
+            disabled={linking}
+            style={{ ...btn("#10b981"), whiteSpace: "nowrap" }}
+          >
+            {linking ? "Linking..." : "🔗 Link"}
+          </button>
+          <button
+            onClick={() => loadGcAssignments(course.id)}
+            style={{ ...btn("#6366f1"), whiteSpace: "nowrap" }}
+          >
+            View Assignments
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
+
+
 
         {/* Step 4 — Select Google assignment */}
         {gcAssignments.length > 0 && (
