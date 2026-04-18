@@ -13,11 +13,13 @@ import WriteEssaySheet      from './WriteEssaySheet.jsx';
 import EssayViewSheet       from './EssayViewSheet.jsx';
 import ResultDetailSheet    from './ResultDetailSheet.jsx';
 import ExamTakeSheet        from './ExamTakeSheet.jsx';
+import StudentClassroomTab from "./StudentClassroomTab.jsx";
 
 const TABS = [
   { id: 'assignments', label: '📋 Assignments' },
   { id: 'results',     label: '📊 My Results'  },
   { id: 'exams',       label: '📝 Exams'        },
+  { id: 'classroom',   label: '🎓 Classroom'    },
 ];
 
 export default function StudentDashboard({ user, onBack }) {
@@ -213,6 +215,14 @@ export default function StudentDashboard({ user, onBack }) {
             onStartExam={exam => setActiveExam(exam)}
           />
         )}
+
+        {tab === 'classroom' && (
+  <StudentClassroomTab
+    assignments={assignments}
+    showToast={showToast}
+    onSubmitted={() => { fetchAll(); setTab('results'); }}
+  />
+)}
       </div>
 
       {/* ── Essay Modals ── */}

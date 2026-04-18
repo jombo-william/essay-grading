@@ -6,6 +6,9 @@ export async function apiFetch(path, options = {}) {
   const csrfToken    = getToken('csrf_token', 'token');
   const sessionToken = getToken('session_token', 'session_token');
 
+   console.log('csrfToken:', csrfToken);        // ← ADD THIS
+  console.log('sessionToken:', sessionToken);  // ← ADD THIS
+
   const routeMap = {
     // ── Legacy PHP → FastAPI mappings (kept for backward compat) ──────────
     '/get_assignments.php':     '/assignments',
