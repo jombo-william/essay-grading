@@ -17,7 +17,7 @@ const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
-  { id: "exams", icon: "📝", label: "Exams" },
+  // { id: "exams", icon: "📝", label: "Exams" },
   { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 

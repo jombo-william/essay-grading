@@ -7,18 +7,18 @@ import { apiFetch }         from './api.js';
 import { C, Toast }         from './shared.jsx';
 import AssignmentsTab       from './AssignmentsTab.jsx';
 import ResultsTab           from './ResultsTab.jsx';
-import ExamsTab             from './ExamsTab.jsx';
+// import ExamsTab             from './ExamsTab.jsx';
 import AssignmentDetail     from './AssignmentDetail.jsx';
 import WriteEssaySheet      from './WriteEssaySheet.jsx';
 import EssayViewSheet       from './EssayViewSheet.jsx';
 import ResultDetailSheet    from './ResultDetailSheet.jsx';
-import ExamTakeSheet        from './ExamTakeSheet.jsx';
+// import ExamTakeSheet        from './ExamTakeSheet.jsx';
 import StudentClassroomTab from "./StudentClassroomTab.jsx";
 
 const TABS = [
   { id: 'assignments', label: '📋 Assignments' },
   { id: 'results',     label: '📊 My Results'  },
-  { id: 'exams',       label: '📝 Exams'        },
+  // { id: 'exams',       label: '📝 Exams'        },
   { id: 'classroom',   label: '🎓 Classroom'    },
 ];
 
