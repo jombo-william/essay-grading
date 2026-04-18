@@ -2,10 +2,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-<<<<<<< HEAD
-
-=======
->>>>>>> HomePage
 async function mockAiGrade({ essayText, assignment }) {
   await new Promise(r => setTimeout(r, 2500 + Math.random() * 1500))
   const words = essayText.trim().split(/\s+/).filter(Boolean)
@@ -111,9 +107,6 @@ function RadarChart({ breakdown, size = 200 }) {
   )
 }
 
-<<<<<<< HEAD
-
-=======
 // ─── TREND LINE CHART (pure SVG) ───────────────────────────────────────────
 function TrendLineChart({ dataPoints }) {
   if (!dataPoints || dataPoints.length < 2) return null
@@ -433,7 +426,6 @@ Be specific to the actual essay titles and scores. Be warm and encouraging — n
 }
 
 // ─── MOCK DATA ─────────────────────────────────────────────────────────────
->>>>>>> HomePage
 const MOCK_ASSIGNMENTS = [
   { id:1, title:'Climate Change & Society', description:'Analyse the socio-economic impacts of climate change on developing nations.', instructions:'Write a well-structured essay (500–800 words) discussing at least three specific socio-economic impacts of climate change on developing nations.', referenceMaterial:'Climate change disproportionately affects developing nations...', rubric:{ content:35, structure:25, grammar:20, evidence:20 }, max_score:100, due_date:'2026-04-15T23:59' },
   { id:2, title:'Artificial Intelligence in Education', description:'Discuss the benefits and challenges of integrating AI tools in secondary schools.', instructions:'Write an argumentative essay (400–600 words) presenting both sides of AI integration in secondary schools.', referenceMaterial:'AI in education benefits: personalised learning, automated grading...', rubric:{ argumentation:40, structure:25, grammar:20, evidence:15 }, max_score:100, due_date:'2026-04-20T23:59' },
@@ -466,10 +458,6 @@ const badge = c => ({
   color:       c==='green'?'#16a34a':c==='red'?'#dc2626':c==='amber'?'#d97706':c==='purple'?'#9333ea':c==='gray'?'#64748b':'#2563eb',
 })
 
-<<<<<<< HEAD
-
-=======
->>>>>>> HomePage
 function Sheet({ onClose, title, subtitle, children, footer }) {
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', display:'flex', alignItems:'flex-end', justifyContent:'center', zIndex:200, backdropFilter:'blur(4px)' }}>
@@ -491,10 +479,6 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
   )
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> HomePage
 function UnderDevelopmentModal({ feature, onClose }) {
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:300, backdropFilter:'blur(4px)', padding:20 }}>
@@ -513,10 +497,6 @@ function UnderDevelopmentModal({ feature, onClose }) {
   )
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> HomePage
 function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
   const [hovered, setHovered] = useState(false)
   const pct = s.final_score !== null ? Math.round((s.final_score / s.max_score) * 100) : null
@@ -573,10 +553,6 @@ function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
   )
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> HomePage
 function SentenceHighlighter({ text, aiPct }) {
   const [showHighlight, setShowHighlight] = useState(false)
   const [sentences, setSentences]         = useState([])
@@ -632,10 +608,6 @@ function SentenceHighlighter({ text, aiPct }) {
   )
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> HomePage
 function ImprovementCoach({ submission }) {
   const [open, setOpen]               = useState(false)
   const [loading, setLoading]         = useState(false)
@@ -767,30 +739,7 @@ export default function Results() {
       )}
       {underDevModal && <UnderDevelopmentModal feature={underDevModal} onClose={() => setUnderDevModal(null)} />}
 
-      {/* NAV
-      <nav style={{ background:NAVY, position:'sticky', top:0, zIndex:100, boxShadow:'0 2px 16px rgba(0,0,0,0.18)' }}>
-        <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', height:68 }}>
-          <Link to="/" style={{ display:'flex', alignItems:'center', gap:14, textDecoration:'none' }}>
-            <div style={{ width:46, height:46, background:GOLD, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Playfair Display',serif", fontSize:'1.1rem', fontWeight:700, color:NAVY_DARK, flexShrink:0 }}>U</div>
-            <div style={{ display:'flex', flexDirection:'column' }}>
-              <span style={{ fontFamily:"'Playfair Display',serif", fontSize:'1rem', color:'#fff', lineHeight:1.2, fontWeight:700 }}>AI Essay Grader</span>
-              <span style={{ fontSize:'0.68rem', color:GOLD_L, letterSpacing:'0.08em', textTransform:'uppercase' }}>University of Malawi</span>
-            </div>
-          </Link>
-          <ul className={`nav-links-row${menuOpen?' open':''}`} style={{ display:'flex', alignItems:'center', gap:4, listStyle:'none', margin:0, padding:0 }}>
-            <li><Link to="/" className="nav-link">Home</Link></li>
-            <li><button onClick={() => setTab('results')} className="nav-link" style={{ border:'none', cursor:'pointer', background: tab==='results'?'rgba(255,255,255,0.12)':'transparent', color: tab==='results'?'#fff':'rgba(255,255,255,0.82)', fontFamily:'inherit' }}>📊 My Results</button></li>
-            <li><button onClick={() => setUnderDevModal('Assignments')} className="nav-link" style={{ border:'none', cursor:'pointer', background:'transparent', color:'rgba(255,255,255,0.82)', fontFamily:'inherit' }}>📋 Assignments</button></li>
-            <li>
-              <div className="profile-pill">
-                <div style={{ width:28, height:28, background:`linear-gradient(135deg,${GOLD},#a07a18)`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:NAVY_DARK, flexShrink:0 }}>{studentName.charAt(0).toUpperCase()}</div>
-                <span style={{ fontSize:13, color:'#fff', fontWeight:600 }}>{studentName}</span>
-              </div>
-            </li>
-          </ul>
-          <button className="hamburger" onClick={() => setMenuOpen(o=>!o)} aria-label="Menu"><span/><span/><span/></button>
-        </div>
-      </nav> */}
+     
 
       {}
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>
@@ -812,11 +761,7 @@ export default function Results() {
           ))}
         </div>
 
-<<<<<<< HEAD
-        {}
-=======
         {/* SECTION 1 — INDIVIDUAL ESSAY RESULTS*/}
->>>>>>> HomePage
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
           <div>
             <p style={{ fontSize:20, fontWeight:800, color:'#1e293b', margin:0 }}>My Results</p>
@@ -832,10 +777,6 @@ export default function Results() {
           </div>
         </div>
 
-<<<<<<< HEAD
-        {}
-=======
->>>>>>> HomePage
         {submissions.length === 0 && (
           <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:'48px 24px', textAlign:'center' }}>
             <p style={{ fontSize:36, margin:'0 0 10px' }}>📭</p>
@@ -870,20 +811,12 @@ export default function Results() {
             </div>
           }>
 
-<<<<<<< HEAD
-          {}
-=======
->>>>>>> HomePage
           <div style={{ display:'flex', gap:4, marginBottom:18, background:'#f8fafc', borderRadius:10, padding:4 }}>
             {[['overview','📊 Overview'],['ai analysis','🔬 AI Analysis'],['writing coach','🧠 Writing Coach']].map(([t,label]) => (
               <button key={t} onClick={() => setActiveTab(t)} className={`modal-tab ${activeTab===t?'active':'inactive'}`}>{label}</button>
             ))}
           </div>
 
-<<<<<<< HEAD
-          {}
-=======
->>>>>>> HomePage
           {activeTab==='overview' && (
             <div className="fade-in">
               {resultModal.final_score !== null ? (() => {
@@ -940,10 +873,6 @@ export default function Results() {
             </div>
           )}
 
-<<<<<<< HEAD
-          {}
-=======
->>>>>>> HomePage
           {activeTab==='ai analysis' && (
             <div className="fade-in">
               {resultModal.ai_detection_score !== null ? (
@@ -980,10 +909,6 @@ export default function Results() {
             </div>
           )}
 
-<<<<<<< HEAD
-          {}
-=======
->>>>>>> HomePage
           {activeTab==='writing coach' && (
             <div className="fade-in">
               <div style={{ background:`linear-gradient(135deg,${NAVY}08,${GOLD}12)`, border:`1px solid ${NAVY}20`, borderRadius:14, padding:16, marginBottom:16 }}>
