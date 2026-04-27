@@ -231,24 +231,7 @@ const linkCourseToClass = async (courseId) => {
           </button>
         </div>
 
-        {/* Step 3 — Select course */}
-        {/* {gcCourses.length > 0 && (
-          <div style={{ marginBottom: "16px" }}>
-            <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
-              Step 3 — Select a course
-            </p>
-            <select
-              style={select}
-              onChange={e => loadGcAssignments(e.target.value)}
-              defaultValue=""
-            >
-              <option value="" disabled>Choose a Google Classroom course...</option>
-              {gcCourses.map(c => (
-                <option key={c.id} value={c.id}>{c.name} {c.section}</option>
-              ))}
-            </select>
-          </div>
-        )} */}
+       
 
 {gcCourses.length > 0 && (
   <div style={{ marginBottom: "16px" }}>

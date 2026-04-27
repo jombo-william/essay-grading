@@ -333,12 +333,14 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
 
         {/* Tab content */}
         {tab === "pending" && (
+         
           <PendingTab
             pending={pending}
             loading={loading}
             onViewEssay={setViewSub}
-            onGrade={openGrade}
+            onGrade={() => fetchAll()}
           />
+
         )}
        
 

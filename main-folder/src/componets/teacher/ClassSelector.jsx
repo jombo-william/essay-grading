@@ -275,16 +275,7 @@ export default function ClassSelector({ user, onSelectClass, onBack }) {
               </span>
             )}
           </h2>
-          {/* <button onClick={() => setShowForm(true)} style={{
-            padding: "10px 22px", borderRadius: "12px", border: "none",
-            background: "linear-gradient(135deg,#3b82f6,#38bdf8)",
-            color: "#fff", fontWeight: "700", fontSize: "13px",
-            cursor: "pointer", fontFamily: "inherit",
-            boxShadow: "0 4px 14px rgba(59,130,246,0.35)",
-            display: "flex", alignItems: "center", gap: "7px",
-          }}>
-            ➕ New Class
-          </button> */}
+          
         </div>
 
         {/* Loading */}
