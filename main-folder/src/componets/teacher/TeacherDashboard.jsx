@@ -12,6 +12,7 @@ import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 // import ExamsTab from "./ExamsTab.jsx";
 import IntegrationsTab from "./IntegrationsTab.jsx";
+import { GoGraph } from "react-icons/go";
 
 const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
@@ -154,7 +155,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     { icon: "📋", label: "Assignments", value: assignments.length },
     { icon: "⏳", label: "Pending",     value: pending.length     },
     { icon: "📝", label: "Submissions", value: submissions.length  },
-    { icon: "📊", label: "Class Avg",   value: classAvg !== null ? `${classAvg}%` : "—" },
+    { icon:<GoGraph />, label: "Class Avg",   value: classAvg !== null ? `${classAvg}%` : "—" },
   ];
 
   return (
