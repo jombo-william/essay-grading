@@ -34,18 +34,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
-  // const loadGcCourses = async () => {
-  //   setGcLoading(true);
-  //   try {
-  //     const res = await apiFetch("/classroom/courses");
-  //     setGcCourses(res.courses || []);
-  //     showToast(`Found ${res.courses.length} courses`, "success");
-  //   } catch (err) {
-  //     showToast(err.message || "Failed to load courses", "error");
-  //   } finally {
-  //     setGcLoading(false);
-  //   }
-  // };
+  
 
 const loadGcCourses = async () => {
   setGcLoading(true);

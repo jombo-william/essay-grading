@@ -18,6 +18,7 @@ const TABS = [
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
   // { id: "exams", icon: "📝", label: "Exams" },
+  { id: "archived",     icon: "📦", label: "Archived"      },
   { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 
@@ -339,7 +340,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             onGrade={openGrade}
           />
         )}
-        {tab === "assignments" && (
+        {/* {tab === "assignments" && (
           <AssignmentsTab
             assignments={assignments}
             submissions={submissions}
@@ -349,7 +350,21 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             onUpdated={fetchAll}
             showToast={showToast}
           />
+        )} */}
+
+      {tab === "assignments" && (
+          <AssignmentsTab
+            assignments={assignments.filter(a => a.is_active !== false && a.is_active !== 0)}
+            submissions={submissions}
+            loading={loading}
+            selectedClass={selectedClass}
+            onCreated={fetchAll}
+            onUpdated={fetchAll}
+            showToast={showToast}
+          />
         )}
+
+
         {tab === "students" && (
           <StudentsTab
             students={students}
@@ -361,16 +376,31 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             onEditGrade={openEdit}
           />
         )}
+
+        {tab === "archived" && (
+            <AssignmentsTab
+              //assignments={assignments.filter(a => a.is_active === false)}
+              assignments={assignments.filter(a => a.is_active === false || a.is_active === 0)}
+              submissions={submissions}
+              loading={loading}
+              selectedClass={selectedClass}
+              onCreated={fetchAll}
+              onUpdated={fetchAll}
+              showToast={showToast}
+              archivedOnly={true}
+            />
+          )}
+
         {/* {tab === "exams" && (
         <ExamsTab selectedClass={selectedClass} showToast={showToast} />
           )} */}
-          {tab === "integrations" && (
-  <IntegrationsTab
-    selectedClass={selectedClass}
-    showToast={showToast}
-    assignments={assignments}
-  />
-)}
+              {tab === "integrations" && (
+                  <IntegrationsTab
+                    selectedClass={selectedClass}
+                    showToast={showToast}
+                    assignments={assignments}
+                  />
+                )}
       </div>
 
       {/* Modals */}
