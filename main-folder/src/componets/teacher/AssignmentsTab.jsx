@@ -55,6 +55,7 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
 }
 
 
+
 function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExport }) {
   const subCount    = submissions.filter(s => s.assignment_id === assignment.id).length;
   const gradedCount = submissions.filter(s => s.assignment_id === assignment.id && s.final_score !== null).length;
@@ -64,178 +65,187 @@ function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExp
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 400,
-      background: "rgba(0,0,0,0.45)",
-      display: "flex", alignItems: "center", justifyContent: "center",
+      background: "rgba(0,0,0,0.5)",
+      display: "flex", alignItems: "stretch", justifyContent: "center",
       padding: "20px",
     }}>
       <div style={{
-        background: "#fff", borderRadius: "24px",
-        width: "100%", maxWidth: "680px", maxHeight: "90vh",
-        overflow: "hidden", display: "flex", flexDirection: "column",
-        boxShadow: "0 16px 60px rgba(0,0,0,0.2)",
+        background: "#fff", borderRadius: "20px",
+        width: "100%", maxWidth: "1100px",
+        display: "flex", flexDirection: "column",
+        overflow: "hidden",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
         fontFamily: "'Inter', system-ui, sans-serif",
       }}>
-        {/* Header */}
+
+        {/* ── Header ── */}
         <div style={{
-          padding: "24px 28px 20px",
-          borderBottom: "1px solid #e2e8f0",
-          display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "14px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "16px 24px", borderBottom: "1px solid #e2e8f0",
+          background: "#f8fafc", flexShrink: 0,
         }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
-              <span style={{
-                fontSize: "10px", fontWeight: "800", textTransform: "uppercase",
-                letterSpacing: "0.5px", color: "#3b82f6",
-                background: "#eff6ff", padding: "3px 10px", borderRadius: "20px",
-              }}>
-                {isArchived ? "📦 Archived" : isPast ? "Closed" : "✅ Active"}
-              </span>
-              <span style={{
-                fontSize: "10px", fontWeight: "700", color: "#7c3aed",
-                background: "#f5f3ff", padding: "3px 10px", borderRadius: "20px",
-              }}>
-                {assignment.max_score} pts
-              </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: "12px",
+              background: isArchived
+                ? "linear-gradient(135deg,#94a3b8,#cbd5e1)"
+                : isPast
+                  ? "linear-gradient(135deg,#f59e0b,#fbbf24)"
+                  : "linear-gradient(135deg,#3b82f6,#38bdf8)",
+              color: "#fff", fontSize: 18,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {isArchived ? "📦" : isPast ? "🔒" : "📋"}
             </div>
-            <h2 style={{ margin: "0 0 4px", fontSize: "20px", fontWeight: "900", color: "#1e293b" }}>
-              {assignment.title}
-            </h2>
-            <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
-              📅 Due {assignment.due_date
-                ? new Date(assignment.due_date.replace(" ", "T")).toLocaleDateString("en-GB", {
-                    timeZone: "Africa/Blantyre", day: "numeric", month: "long",
-                    year: "numeric", hour: "2-digit", minute: "2-digit",
-                  })
-                : "No date"
-              }
-            </p>
+            <div>
+              <p style={{ fontWeight: 800, fontSize: 15, color: "#0f172a", margin: 0 }}>{assignment.title}</p>
+              <p style={{ fontSize: 12, color: "#64748b", margin: 0 }}>
+                {isArchived ? "Archived" : isPast ? "Closed" : "Active"} &nbsp;·&nbsp; {assignment.max_score} pts &nbsp;·&nbsp;
+                Due {assignment.due_date
+                  ? new Date(assignment.due_date.replace(" ", "T")).toLocaleDateString("en-GB", {
+                      timeZone: "Africa/Blantyre", day: "numeric", month: "short", year: "numeric",
+                    })
+                  : "No date"}
+              </p>
+            </div>
           </div>
           <button onClick={onClose} style={{
-            width: "36px", height: "36px", borderRadius: "10px",
-            border: "1px solid #e2e8f0", background: "#f8fafc",
-            color: "#64748b", fontSize: "18px", fontWeight: "700",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
+            width: 36, height: 36, borderRadius: 10,
+            border: "1px solid #e2e8f0", background: "#fff",
+            fontSize: 18, cursor: "pointer", color: "#64748b",
+            display: "flex", alignItems: "center", justifyContent: "center",
           }}>×</button>
         </div>
 
-        {/* Stats row */}
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "1px", background: "#e2e8f0", borderBottom: "1px solid #e2e8f0",
-        }}>
-          {[
-            { label: "Submissions", value: subCount, icon: "📝" },
-            { label: "Graded",      value: gradedCount, icon: "✅" },
-            { label: "Pending",     value: subCount - gradedCount, icon: "⏳" },
-          ].map(stat => (
-            <div key={stat.label} style={{
-              background: "#f8fafc", padding: "14px 20px", textAlign: "center",
-            }}>
-              <p style={{ margin: "0 0 2px", fontSize: "20px", fontWeight: "900", color: "#1e293b" }}>
-                {stat.icon} {stat.value}
-              </p>
-              <p style={{ margin: 0, fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>{stat.label}</p>
-            </div>
-          ))}
-        </div>
+        {/* ── Body — side by side ── */}
+        <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
 
-        {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "20px" }}>
-
-          {/* Description */}
-          {assignment.description && (
-            <div>
-              <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Description
-              </p>
-              <p style={{ margin: 0, fontSize: "14px", color: "#475569", lineHeight: "1.7" }}>
-                {assignment.description}
-              </p>
-            </div>
-          )}
-
-          {/* Instructions */}
-          <div>
-            <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          {/* LEFT — Assignment content */}
+          <div style={{
+            flex: 1, overflowY: "auto", padding: "24px",
+            borderRight: "1px solid #e2e8f0",
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px", margin: "0 0 16px" }}>
               Essay Instructions
             </p>
+
+            {assignment.description && (
+              <p style={{ fontSize: 14, color: "#64748b", margin: "0 0 16px", lineHeight: 1.6 }}>
+                {assignment.description}
+              </p>
+            )}
+
+            {/* Instructions rendered like a document */}
             <div style={{
-              background: "#f8fafc", borderRadius: "14px", padding: "18px 20px",
-              border: "1px solid #e2e8f0", fontSize: "14px", color: "#1e293b",
-              lineHeight: "1.8", whiteSpace: "pre-wrap",
+              background: "#fffef7",
+              border: "1px solid #e2e8f0",
+              borderRadius: 12,
+              padding: "28px 32px",
+              fontSize: 14,
+              lineHeight: "1.9",
+              color: "#1e293b",
+              whiteSpace: "pre-wrap",
+              minHeight: "300px",
+              fontFamily: "Georgia, serif",
+              boxShadow: "inset 0 1px 4px rgba(0,0,0,0.03)",
+              marginBottom: 20,
             }}>
               {assignment.instructions}
             </div>
+
+            {/* Reference material */}
+            {assignment.reference_material && (
+              <details style={{
+                background: "#faf5ff", border: "1px solid #e9d5ff",
+                borderRadius: 12, padding: "12px 16px",
+              }}>
+                <summary style={{ fontSize: 12, fontWeight: 700, color: "#7c3aed", cursor: "pointer", userSelect: "none" }}>
+                  🤖 View AI Reference Material
+                </summary>
+                <p style={{ fontSize: 13, color: "#6b21a8", lineHeight: 1.7, margin: "10px 0 0", whiteSpace: "pre-wrap" }}>
+                  {assignment.reference_material}
+                </p>
+              </details>
+            )}
           </div>
 
-          {/* Rubric */}
-          {assignment.rubric && (
-            <div>
-              <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Grading Rubric
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {/* RIGHT — Details & actions panel */}
+          <div style={{
+            width: "300px", flexShrink: 0,
+            overflowY: "auto", padding: "24px",
+            background: "#f8fafc",
+            display: "flex", flexDirection: "column", gap: 16,
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px", margin: 0 }}>
+              Overview
+            </p>
+
+            {/* Stats */}
+            {[
+              { icon: "📝", label: "Submissions", value: subCount, color: "#2563eb" },
+              { icon: "✅", label: "Graded",      value: gradedCount, color: "#16a34a" },
+              { icon: "⏳", label: "Pending",     value: subCount - gradedCount, color: "#d97706" },
+            ].map(stat => (
+              <div key={stat.label} style={{
+                background: "#fff", border: "1px solid #e2e8f0",
+                borderRadius: 12, padding: "14px 16px",
+                display: "flex", alignItems: "center", gap: 12,
+              }}>
+                <span style={{ fontSize: 22 }}>{stat.icon}</span>
+                <div>
+                  <p style={{ fontSize: 22, fontWeight: 900, color: stat.color, margin: 0, lineHeight: 1 }}>{stat.value}</p>
+                  <p style={{ fontSize: 11, color: "#94a3b8", margin: "3px 0 0" }}>{stat.label}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Rubric */}
+            {assignment.rubric && (
+              <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 16px" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", margin: "0 0 12px" }}>Rubric</p>
                 {Object.entries(assignment.rubric).map(([k, v]) => (
-                  <div key={k} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ fontSize: "13px", fontWeight: "600", color: "#475569", textTransform: "capitalize", width: "90px", flexShrink: 0 }}>{k}</span>
-                    <div style={{ flex: 1, height: "8px", background: "#e2e8f0", borderRadius: "4px", overflow: "hidden" }}>
-                      <div style={{ height: "8px", background: "linear-gradient(90deg,#3b82f6,#38bdf8)", borderRadius: "4px", width: `${v}%` }} />
+                  <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#475569", textTransform: "capitalize", width: 70, flexShrink: 0 }}>{k}</span>
+                    <div style={{ flex: 1, height: 6, background: "#e2e8f0", borderRadius: 3, overflow: "hidden" }}>
+                      <div style={{ height: "100%", borderRadius: 3, width: `${v}%`, background: "linear-gradient(90deg,#3b82f6,#38bdf8)" }} />
                     </div>
-                    <span style={{ fontSize: "13px", fontWeight: "800", color: "#3b82f6", width: "36px", textAlign: "right" }}>{v}%</span>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: "#3b82f6", width: 32, textAlign: "right" }}>{v}%</span>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Reference material */}
-          {assignment.reference_material && (
-            <div>
-              <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                🤖 AI Reference Material
-              </p>
-              <div style={{
-                background: "#faf5ff", borderRadius: "14px", padding: "16px 18px",
-                border: "1px solid #e9d5ff", fontSize: "13px", color: "#6b21a8",
-                lineHeight: "1.7", maxHeight: "160px", overflowY: "auto",
-                whiteSpace: "pre-wrap",
-              }}>
-                {assignment.reference_material}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Footer actions */}
+        {/* ── Footer ── */}
         <div style={{
-          padding: "18px 28px", borderTop: "1px solid #e2e8f0",
-          display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10,
+          padding: "14px 24px", borderTop: "1px solid #e2e8f0",
+          background: "#f8fafc", flexShrink: 0,
         }}>
           <button onClick={() => onExport(assignment)} style={{
-            padding: "9px 18px", borderRadius: "10px",
+            padding: "9px 18px", borderRadius: 10,
             border: "1.5px solid #3b82f6", background: "#eff6ff",
-            color: "#3b82f6", fontSize: "13px", fontWeight: "700",
+            color: "#3b82f6", fontSize: 13, fontWeight: 700,
             cursor: "pointer", fontFamily: "inherit",
-            display: "flex", alignItems: "center", gap: "6px",
           }}>
             📄 Export as PDF
           </button>
 
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div style={{ display: "flex", gap: 8 }}>
             <button onClick={onClose} style={{
-              padding: "9px 18px", borderRadius: "10px",
-              border: "1px solid #e2e8f0", background: "#f8fafc",
-              color: "#64748b", fontSize: "13px", fontWeight: "700",
+              padding: "9px 18px", borderRadius: 10,
+              border: "1px solid #e2e8f0", background: "#fff",
+              color: "#64748b", fontSize: 13, fontWeight: 700,
               cursor: "pointer", fontFamily: "inherit",
             }}>
               Close
             </button>
             {!isArchived && (
               <button onClick={() => { onClose(); onEdit(assignment); }} style={{
-                padding: "9px 18px", borderRadius: "10px",
+                padding: "9px 18px", borderRadius: 10,
                 border: "none", background: "linear-gradient(135deg,#3b82f6,#38bdf8)",
-                color: "#fff", fontSize: "13px", fontWeight: "700",
+                color: "#fff", fontSize: 13, fontWeight: 700,
                 cursor: "pointer", fontFamily: "inherit",
               }}>
                 ✏️ Edit Assignment
@@ -247,6 +257,7 @@ function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExp
     </div>
   );
 }
+
 
 
 
@@ -570,39 +581,164 @@ const handleExport = (a) => {
         </div>
       )}
 
-      {/* ── Create Modal ── */}
+
+{/* ── Create Modal ── */}
       {createOpen && (
-        <Sheet onClose={() => setCreateOpen(false)} title="Create New Assignment"
-          footer={
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button style={btn.ghost} onClick={() => setCreateOpen(false)}>Cancel</button>
-              <button style={btn.primary} onClick={handleCreate} disabled={saving}>{saving ? "Publishing…" : "✅ Publish Assignment"}</button>
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 500,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "stretch", justifyContent: "center",
+          padding: "20px",
+        }}>
+          <div style={{
+            background: "#fff", borderRadius: "20px",
+            width: "100%", maxWidth: "1100px",
+            display: "flex", flexDirection: "column",
+            overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            fontFamily: "'Inter', system-ui, sans-serif",
+          }}>
+            {/* Header */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "16px 24px", borderBottom: "1px solid #e2e8f0",
+              background: "#f8fafc", flexShrink: 0,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: "12px",
+                  background: "linear-gradient(135deg,#3b82f6,#38bdf8)",
+                  color: "#fff", fontSize: 18,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>📋</div>
+                <div>
+                  <p style={{ fontWeight: 800, fontSize: 15, color: "#0f172a", margin: 0 }}>Create New Assignment</p>
+                  <p style={{ fontSize: 12, color: "#64748b", margin: 0 }}>Fill in the details below and publish</p>
+                </div>
+              </div>
+              <button onClick={() => setCreateOpen(false)} style={{
+                width: 36, height: 36, borderRadius: 10,
+                border: "1px solid #e2e8f0", background: "#fff",
+                fontSize: 18, cursor: "pointer", color: "#64748b",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>×</button>
             </div>
-          }>
-          <AssignmentForm
-            form={form} setForm={setForm}
-            attachments={attachments} setAttachments={setAttachments}
-            onAttachFile={handleAttachFile} assignmentId={null}
-          />
-        </Sheet>
+
+            {/* Body */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+              <AssignmentForm
+                form={form} setForm={setForm}
+                attachments={attachments} setAttachments={setAttachments}
+                onAttachFile={handleAttachFile} assignmentId={null}
+              />
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              display: "flex", justifyContent: "flex-end", gap: 10,
+              padding: "14px 24px", borderTop: "1px solid #e2e8f0",
+              background: "#f8fafc", flexShrink: 0,
+            }}>
+              <button onClick={() => setCreateOpen(false)} style={{
+                padding: "10px 20px", borderRadius: 10,
+                border: "1px solid #e2e8f0", background: "#fff",
+                color: "#64748b", fontSize: 13, fontWeight: 700,
+                cursor: "pointer", fontFamily: "inherit",
+              }}>Cancel</button>
+              <button onClick={handleCreate} disabled={saving} style={{
+                padding: "10px 22px", borderRadius: 10, border: "none",
+                background: saving ? "#93c5fd" : "linear-gradient(135deg,#3b82f6,#38bdf8)",
+                color: "#fff", fontSize: 13, fontWeight: 700,
+                cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit",
+              }}>
+                {saving ? "Publishing…" : "✅ Publish Assignment"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* ── Edit Modal ── */}
+
+
+
+     
+
+{/* ── Edit Modal ── */}
       {editTarget && (
-        <Sheet onClose={() => setEditTarget(null)} title="Edit Assignment"
-          footer={
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button style={btn.ghost} onClick={() => setEditTarget(null)}>Cancel</button>
-              <button style={btn.primary} onClick={handleEditSave} disabled={saving}>{saving ? "Saving…" : "💾 Save Changes"}</button>
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 500,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "stretch", justifyContent: "center",
+          padding: "20px",
+        }}>
+          <div style={{
+            background: "#fff", borderRadius: "20px",
+            width: "100%", maxWidth: "1100px",
+            display: "flex", flexDirection: "column",
+            overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            fontFamily: "'Inter', system-ui, sans-serif",
+          }}>
+            {/* Header */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "16px 24px", borderBottom: "1px solid #e2e8f0",
+              background: "#f8fafc", flexShrink: 0,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: "12px",
+                  background: "linear-gradient(135deg,#f59e0b,#fbbf24)",
+                  color: "#fff", fontSize: 18,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>✏️</div>
+                <div>
+                  <p style={{ fontWeight: 800, fontSize: 15, color: "#0f172a", margin: 0 }}>Edit Assignment</p>
+                  <p style={{ fontSize: 12, color: "#64748b", margin: 0 }}>{editTarget?.title}</p>
+                </div>
+              </div>
+              <button onClick={() => setEditTarget(null)} style={{
+                width: 36, height: 36, borderRadius: 10,
+                border: "1px solid #e2e8f0", background: "#fff",
+                fontSize: 18, cursor: "pointer", color: "#64748b",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>×</button>
             </div>
-          }>
-          <AssignmentForm
-            form={form} setForm={setForm}
-            attachments={attachments} setAttachments={setAttachments}
-            onAttachFile={handleAttachFile} assignmentId={editTarget.id}
-          />
-        </Sheet>
+
+            {/* Body */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+              <AssignmentForm
+                form={form} setForm={setForm}
+                attachments={attachments} setAttachments={setAttachments}
+                onAttachFile={handleAttachFile} assignmentId={editTarget.id}
+              />
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              display: "flex", justifyContent: "flex-end", gap: 10,
+              padding: "14px 24px", borderTop: "1px solid #e2e8f0",
+              background: "#f8fafc", flexShrink: 0,
+            }}>
+              <button onClick={() => setEditTarget(null)} style={{
+                padding: "10px 20px", borderRadius: 10,
+                border: "1px solid #e2e8f0", background: "#fff",
+                color: "#64748b", fontSize: 13, fontWeight: 700,
+                cursor: "pointer", fontFamily: "inherit",
+              }}>Cancel</button>
+              <button onClick={handleEditSave} disabled={saving} style={{
+                padding: "10px 22px", borderRadius: 10, border: "none",
+                background: saving ? "#93c5fd" : "linear-gradient(135deg,#3b82f6,#38bdf8)",
+                color: "#fff", fontSize: 13, fontWeight: 700,
+                cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit",
+              }}>
+                {saving ? "Saving…" : "💾 Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
+
 
       {/* ── Delete Confirmation ── */}
       {deleteTarget && (
