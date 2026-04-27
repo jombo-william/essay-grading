@@ -43,13 +43,7 @@ export async function apiFetch(path, options = {}) {
   return data;
 }
 
-// function getToken(cookieName, localKey) {
-//   const cookieMatch = document.cookie.match(
-//     new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]+)')
-//   );
-//   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-//   return localStorage.getItem(localKey) || '';
-// }
+
 
 
 function getToken(cookieName, localKey) {
