@@ -54,6 +54,202 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
   );
 }
 
+
+function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExport }) {
+  const subCount    = submissions.filter(s => s.assignment_id === assignment.id).length;
+  const gradedCount = submissions.filter(s => s.assignment_id === assignment.id && s.final_score !== null).length;
+  const isPast      = new Date() > new Date(assignment.due_date);
+  const isArchived  = assignment.is_active === false;
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 400,
+      background: "rgba(0,0,0,0.45)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "20px",
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: "24px",
+        width: "100%", maxWidth: "680px", maxHeight: "90vh",
+        overflow: "hidden", display: "flex", flexDirection: "column",
+        boxShadow: "0 16px 60px rgba(0,0,0,0.2)",
+        fontFamily: "'Inter', system-ui, sans-serif",
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: "24px 28px 20px",
+          borderBottom: "1px solid #e2e8f0",
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "14px",
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
+              <span style={{
+                fontSize: "10px", fontWeight: "800", textTransform: "uppercase",
+                letterSpacing: "0.5px", color: "#3b82f6",
+                background: "#eff6ff", padding: "3px 10px", borderRadius: "20px",
+              }}>
+                {isArchived ? "📦 Archived" : isPast ? "Closed" : "✅ Active"}
+              </span>
+              <span style={{
+                fontSize: "10px", fontWeight: "700", color: "#7c3aed",
+                background: "#f5f3ff", padding: "3px 10px", borderRadius: "20px",
+              }}>
+                {assignment.max_score} pts
+              </span>
+            </div>
+            <h2 style={{ margin: "0 0 4px", fontSize: "20px", fontWeight: "900", color: "#1e293b" }}>
+              {assignment.title}
+            </h2>
+            <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
+              📅 Due {assignment.due_date
+                ? new Date(assignment.due_date.replace(" ", "T")).toLocaleDateString("en-GB", {
+                    timeZone: "Africa/Blantyre", day: "numeric", month: "long",
+                    year: "numeric", hour: "2-digit", minute: "2-digit",
+                  })
+                : "No date"
+              }
+            </p>
+          </div>
+          <button onClick={onClose} style={{
+            width: "36px", height: "36px", borderRadius: "10px",
+            border: "1px solid #e2e8f0", background: "#f8fafc",
+            color: "#64748b", fontSize: "18px", fontWeight: "700",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>×</button>
+        </div>
+
+        {/* Stats row */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "1px", background: "#e2e8f0", borderBottom: "1px solid #e2e8f0",
+        }}>
+          {[
+            { label: "Submissions", value: subCount, icon: "📝" },
+            { label: "Graded",      value: gradedCount, icon: "✅" },
+            { label: "Pending",     value: subCount - gradedCount, icon: "⏳" },
+          ].map(stat => (
+            <div key={stat.label} style={{
+              background: "#f8fafc", padding: "14px 20px", textAlign: "center",
+            }}>
+              <p style={{ margin: "0 0 2px", fontSize: "20px", fontWeight: "900", color: "#1e293b" }}>
+                {stat.icon} {stat.value}
+              </p>
+              <p style={{ margin: 0, fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Scrollable content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "20px" }}>
+
+          {/* Description */}
+          {assignment.description && (
+            <div>
+              <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Description
+              </p>
+              <p style={{ margin: 0, fontSize: "14px", color: "#475569", lineHeight: "1.7" }}>
+                {assignment.description}
+              </p>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div>
+            <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Essay Instructions
+            </p>
+            <div style={{
+              background: "#f8fafc", borderRadius: "14px", padding: "18px 20px",
+              border: "1px solid #e2e8f0", fontSize: "14px", color: "#1e293b",
+              lineHeight: "1.8", whiteSpace: "pre-wrap",
+            }}>
+              {assignment.instructions}
+            </div>
+          </div>
+
+          {/* Rubric */}
+          {assignment.rubric && (
+            <div>
+              <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Grading Rubric
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {Object.entries(assignment.rubric).map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <span style={{ fontSize: "13px", fontWeight: "600", color: "#475569", textTransform: "capitalize", width: "90px", flexShrink: 0 }}>{k}</span>
+                    <div style={{ flex: 1, height: "8px", background: "#e2e8f0", borderRadius: "4px", overflow: "hidden" }}>
+                      <div style={{ height: "8px", background: "linear-gradient(90deg,#3b82f6,#38bdf8)", borderRadius: "4px", width: `${v}%` }} />
+                    </div>
+                    <span style={{ fontSize: "13px", fontWeight: "800", color: "#3b82f6", width: "36px", textAlign: "right" }}>{v}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reference material */}
+          {assignment.reference_material && (
+            <div>
+              <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                🤖 AI Reference Material
+              </p>
+              <div style={{
+                background: "#faf5ff", borderRadius: "14px", padding: "16px 18px",
+                border: "1px solid #e9d5ff", fontSize: "13px", color: "#6b21a8",
+                lineHeight: "1.7", maxHeight: "160px", overflowY: "auto",
+                whiteSpace: "pre-wrap",
+              }}>
+                {assignment.reference_material}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer actions */}
+        <div style={{
+          padding: "18px 28px", borderTop: "1px solid #e2e8f0",
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px",
+        }}>
+          <button onClick={() => onExport(assignment)} style={{
+            padding: "9px 18px", borderRadius: "10px",
+            border: "1.5px solid #3b82f6", background: "#eff6ff",
+            color: "#3b82f6", fontSize: "13px", fontWeight: "700",
+            cursor: "pointer", fontFamily: "inherit",
+            display: "flex", alignItems: "center", gap: "6px",
+          }}>
+            📄 Export as PDF
+          </button>
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button onClick={onClose} style={{
+              padding: "9px 18px", borderRadius: "10px",
+              border: "1px solid #e2e8f0", background: "#f8fafc",
+              color: "#64748b", fontSize: "13px", fontWeight: "700",
+              cursor: "pointer", fontFamily: "inherit",
+            }}>
+              Close
+            </button>
+            {!isArchived && (
+              <button onClick={() => { onClose(); onEdit(assignment); }} style={{
+                padding: "9px 18px", borderRadius: "10px",
+                border: "none", background: "linear-gradient(135deg,#3b82f6,#38bdf8)",
+                color: "#fff", fontSize: "13px", fontWeight: "700",
+                cursor: "pointer", fontFamily: "inherit",
+              }}>
+                ✏️ Edit Assignment
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 //export default function AssignmentsTab({ assignments, submissions, loading, onCreated, onUpdated, showToast, selectedClassId, selectedClass }) {
   export default function AssignmentsTab({ assignments, submissions, loading, onCreated, onUpdated, showToast, selectedClassId, selectedClass, archivedOnly = false }) {
    const classId = selectedClassId ?? selectedClass?.id;
@@ -67,6 +263,7 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
   const [deleteTarget,  setDeleteTarget]  = useState(null);   // assignment to delete
   const [archiveTarget, setArchiveTarget] = useState(null);   // assignment to archive/restore
   const [actionLoading, setActionLoading] = useState(false);
+  const [viewTarget, setViewTarget] = useState(null);   // assignment detail view
   const [showArchived,  setShowArchived]  = useState(false);
 
   const handleAttachFile = e => {
@@ -119,6 +316,44 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
       setActionLoading(false);
     }
   };
+
+
+// ── Export assignment as PDF (print dialog) ───────────────────────────────
+const handleExport = (a) => {
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <html>
+      <head>
+        <title>${a.title}</title>
+        <style>
+          body { font-family: 'Segoe UI', sans-serif; max-width: 750px; margin: 40px auto; color: #1e293b; line-height: 1.7; }
+          h1 { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+          .meta { color: #64748b; font-size: 13px; margin-bottom: 28px; }
+          .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin: 24px 0 8px; }
+          .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; font-size: 14px; white-space: pre-wrap; }
+          .rubric-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+          .rubric-row:last-child { border-bottom: none; }
+        </style>
+      </head>
+      <body>
+        <h1>${a.title}</h1>
+        <p class="meta">Max Score: ${a.max_score} pts &nbsp;|&nbsp; Due: ${a.due_date ? new Date(a.due_date.replace(" ","T")).toLocaleString() : "N/A"}</p>
+        ${a.description ? `<p class="section-title">Description</p><p>${a.description}</p>` : ""}
+        <p class="section-title">Essay Instructions</p>
+        <div class="box">${a.instructions}</div>
+        ${a.rubric ? `
+          <p class="section-title">Grading Rubric</p>
+          <div class="box">
+            ${Object.entries(a.rubric).map(([k, v]) => `<div class="rubric-row"><span style="text-transform:capitalize">${k}</span><strong>${v}%</strong></div>`).join("")}
+          </div>` : ""}
+      </body>
+    </html>
+  `);
+  win.document.close();
+  win.print();
+};
+
+
 
   // ── Create / Edit handlers (unchanged) ───────────────────────────────────
   const handleCreate = async () => {
@@ -212,7 +447,14 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "14px" }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
-              <span style={{ fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>{a.title}</span>
+              {/* <span style={{ fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>{a.title}</span>
+              */}
+              <span
+                      onClick={() => setViewTarget(a)}
+                      style={{ fontWeight: "800", fontSize: "15px", color: "#1e293b", cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted", textDecorationColor: "#94a3b8" }}
+                    >
+                      {a.title}
+                    </span>
               <Badge color="blue">{a.max_score} pts</Badge>
               {isArchived
                 ? <Badge color="gray">📦 Archived</Badge>
@@ -295,14 +537,7 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
         </div>
       </div>
 
-      {/* Active assignments
-      {activeAssignments.length === 0 && !showArchived && (
-        <div style={{ background: "#fff", borderRadius: "20px", border: "1px solid #e2e8f0", textAlign: "center", padding: "64px 24px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
-          <p style={{ fontSize: "48px", margin: "0 0 14px" }}>📋</p>
-          <p style={{ fontWeight: "700", color: "#64748b", fontSize: "16px", margin: "0 0 6px" }}>No assignments yet</p>
-          <p style={{ fontSize: "13px", color: "#94a3b8", margin: 0 }}>Create your first assignment to get started.</p>
-        </div>
-      )} */}
+      
 
 
         {/* Active assignments */}
@@ -398,6 +633,17 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#ef4444", 
           confirmColor={archiveTarget.is_active === false ? "#16a34a" : "#64748b"}
           onConfirm={handleArchive}
           onCancel={() => setArchiveTarget(null)}
+        />
+      )}
+
+            {/* ── Assignment Detail Modal ── */}
+      {viewTarget && (
+        <AssignmentDetailModal
+          assignment={viewTarget}
+          submissions={submissions}
+          onClose={() => setViewTarget(null)}
+          onEdit={(a) => { openEdit(a); }}
+          onExport={handleExport}
         />
       )}
     </div>

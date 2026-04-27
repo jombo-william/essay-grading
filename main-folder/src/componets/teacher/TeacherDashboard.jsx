@@ -340,17 +340,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             onGrade={openGrade}
           />
         )}
-        {/* {tab === "assignments" && (
-          <AssignmentsTab
-            assignments={assignments}
-            submissions={submissions}
-            loading={loading}
-            selectedClass={selectedClass}
-            onCreated={fetchAll}
-            onUpdated={fetchAll}
-            showToast={showToast}
-          />
-        )} */}
+       
 
       {tab === "assignments" && (
           <AssignmentsTab
