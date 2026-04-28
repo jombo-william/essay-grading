@@ -39,3 +39,65 @@ In your teacher.py route where assignments are created, add a call to Google Cla
 
 🔧 Fix 4: Student submission flow
 Students submit through your system → your backend posts it to Google Classroom as a student submission.
+
+
+
+moodle token keys 
+
+https://essaygrade.moodlecloud.com/my/?mcssotoken=AAAAAAA4GQSmAbMRZhPsmEkMsAGYwzk5
+
+
+
+
+token 
+
+b31af5ab7968d76559983a1df6dbfcf1
+
+
+Wqazxcvb.W/@Tw8   password for wissah 
+
+
+
+Skip to main content
+Your site
+Home
+Dashboard
+My courses
+Site administration
+Active Users
+Storage
+Edit mode
+ 
+Web services
+Manage tokens
+Your site
+Search
+Search
+General
+Users
+Courses
+Grades
+Plugins
+Appearance
+Server
+Reports
+Development
+Manage tokens
+Copy the token now. It won't be shown again once you leave this page.
+essaygrade
+b31af5ab7968d76559983a1df6dbfcf1
+Tokens
+Name
+User
+ID number
+Email address
+Service
+IP restriction
+Valid until 
+Last access
+Creator
+Missing capabilities
+Actions
+essaygrade	william jombo		williamjombo2@gmail.com	Moodle mobile web service
+moodle_mobile_app
+This token has no expiry date.	Never	william jombo		
