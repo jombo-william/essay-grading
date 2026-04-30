@@ -1,6 +1,3 @@
-
-
-
 // src/componets/student/StudentDashboard.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch }         from './api.js';
@@ -36,7 +33,7 @@ export default function StudentDashboard({ user, onBack }) {
   const [writeAssignment,  setWriteAssignment]  = useState(null);
   const [essayViewSub,     setEssayViewSub]     = useState(null);
   const [resultSub,        setResultSub]        = useState(null);
-  const [activeExam,       setActiveExam]       = useState(null); // ← exam being taken
+  const [activeExam,       setActiveExam]       = useState(null);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -47,13 +44,17 @@ export default function StudentDashboard({ user, onBack }) {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
+      console.log('Fetching student data...');
       const [aData, rData] = await Promise.all([
-        apiFetch('/get_assignments.php'),
-        apiFetch('/get_results.php'),
+        apiFetch('/assignments'),  // Fixed: removed .php
+        apiFetch('/results'),      // Fixed: removed .php
       ]);
+      console.log('Assignments:', aData);
+      console.log('Results:', rData);
       setAssignments(aData.assignments || []);
       setResults(rData.results || []);
     } catch (err) {
+      console.error('Fetch error:', err);
       showToast(err.message || 'Failed to load data.', 'error');
     } finally {
       setLoading(false);
@@ -68,7 +69,7 @@ export default function StudentDashboard({ user, onBack }) {
     if (!hasPending) return;
     const interval = setInterval(async () => {
       try {
-        const rData  = await apiFetch('/get_results.php');
+        const rData = await apiFetch('/results');
         const updated = rData.results || [];
         setResults(updated);
         if (!updated.some(r => r.status === 'pending')) clearInterval(interval);
@@ -105,13 +106,12 @@ export default function StudentDashboard({ user, onBack }) {
 
     try {
       setGradingStatus('🤖 AI is grading your essay...');
-      const csrfToken = sessionStorage.getItem('csrf_token') || '';
-      await apiFetch('/submit_essay.php', {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      await apiFetch('/submit', {  // Fixed: removed .php
         method: 'POST',
         body: JSON.stringify({
           assignment_id: assignment.id,
           essay_text:    activeText,
-          csrf_token:    csrfToken,
         }),
       });
       setWriteAssignment(null);
@@ -119,6 +119,7 @@ export default function StudentDashboard({ user, onBack }) {
       showToast('✅ Submitted and AI-graded! Awaiting teacher approval.');
       await fetchAll();
     } catch (err) {
+      console.error('Submit error:', err);
       showToast(err.message || 'Submission failed. Please try again.', 'error');
     } finally {
       setSubmitting(false);
@@ -129,16 +130,17 @@ export default function StudentDashboard({ user, onBack }) {
   // ── Unsubmit essay ──────────────────────────────────────────────────────
   const handleUnsubmit = async sub => {
     try {
-      const csrfToken = sessionStorage.getItem('csrf_token') || '';
-      await apiFetch('/unsubmit_essay.php', {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      await apiFetch('/unsubmit', {  // Fixed: removed .php
         method: 'POST',
-        body: JSON.stringify({ submission_id: sub.id, csrf_token: csrfToken }),
+        body: JSON.stringify({ submission_id: sub.id }),
       });
       setEssayViewSub(null);
       setResultSub(null);
       showToast('↩ Essay unsubmitted. You can rewrite before the deadline.');
       await fetchAll();
     } catch (err) {
+      console.error('Unsubmit error:', err);
       showToast(err.message || 'Could not unsubmit. Please try again.', 'error');
     }
   };
@@ -210,19 +212,14 @@ export default function StudentDashboard({ user, onBack }) {
             onOpenResult={setResultSub}
           />
         )}
-        {tab === 'exams' && (
-          <ExamsTab
-            onStartExam={exam => setActiveExam(exam)}
-          />
-        )}
 
         {tab === 'classroom' && (
-  <StudentClassroomTab
-    assignments={assignments}
-    showToast={showToast}
-    onSubmitted={() => { fetchAll(); setTab('results'); }}
-  />
-)}
+          <StudentClassroomTab
+            assignments={assignments}
+            showToast={showToast}
+            onSubmitted={() => { fetchAll(); setTab('results'); }}
+          />
+        )}
       </div>
 
       {/* ── Essay Modals ── */}
@@ -254,16 +251,6 @@ export default function StudentDashboard({ user, onBack }) {
         onClose={() => setResultSub(null)}
         onUnsubmit={handleUnsubmit}
       />
-
-      {/* ── Exam modal ── */}
-      {activeExam && (
-        <ExamTakeSheet
-          exam={activeExam}
-          onClose={() => setActiveExam(null)}
-          onSubmitted={() => { setActiveExam(null); setTab('exams'); }}
-          showToast={showToast}
-        />
-      )}
     </div>
   );
 }

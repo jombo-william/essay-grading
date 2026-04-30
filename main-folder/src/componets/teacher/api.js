@@ -1,16 +1,10 @@
-
-
+// src/componets/teacher/api.js
 const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
 
 export async function apiFetch(path, options = {}) {
-  const csrfToken    = getToken('csrf_token', 'token');
-  const sessionToken = getToken('session_token', 'session_token');
-
-   console.log('csrfToken:', csrfToken);        // ← ADD THIS
-  console.log('sessionToken:', sessionToken);  // ← ADD THIS
-
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  
   const routeMap = {
-    // ── Legacy PHP → FastAPI mappings (kept for backward compat) ──────────
     '/get_assignments.php':     '/assignments',
     '/get_submissions.php':     '/submissions',
     '/get_pending_grading.php': '/submissions/pending',
@@ -23,13 +17,18 @@ export async function apiFetch(path, options = {}) {
   const mappedPath = routeMap[cleanPath] || cleanPath;
   const url        = `${BASE_URL}${mappedPath}`;
 
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+  
+  // Add authorization header if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
-    headers: {
-      'Content-Type':  'application/json',
-      ...(csrfToken    ? { 'X-CSRF-Token':  csrfToken    } : {}),
-      ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
-      ...(options.headers || {}),
-    },
+    headers,
     credentials: 'include',
     ...options,
   });
@@ -37,20 +36,11 @@ export async function apiFetch(path, options = {}) {
   const data = await res.json();
 
   if (!res.ok || data.success === false) {
-    throw new Error(data.message || `Request failed (${res.status})`);
+    throw new Error(data.message || data.detail || `Request failed (${res.status})`);
   }
 
   return data;
 }
-
-// function getToken(cookieName, localKey) {
-//   const cookieMatch = document.cookie.match(
-//     new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]+)')
-//   );
-//   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-//   return localStorage.getItem(localKey) || '';
-// }
-
 
 function getToken(cookieName, localKey) {
   const cookieMatch = document.cookie.match(

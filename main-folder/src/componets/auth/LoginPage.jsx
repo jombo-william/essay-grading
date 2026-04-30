@@ -1,3 +1,4 @@
+// src/componets/auth/LoginPage.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -15,28 +16,54 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const res  = await fetch('http://localhost:8000/api/auth/login', {
-        method:  'POST',
+      const res = await fetch('http://127.0.0.1:8000/api/auth/login', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',  // Important for cookies
       })
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.detail || 'Invalid email or password')
+        // Handle specific error messages
+        if (res.status === 401) {
+          setError('Invalid email or password. Please check your credentials.')
+        } else if (res.status === 500) {
+          setError('Server error. Please try again later.')
+        } else {
+          setError(data.detail || 'Login failed. Please try again.')
+        }
         return
       }
 
-      localStorage.setItem('user',          JSON.stringify(data.user))
-      localStorage.setItem('token',         data.csrf_token)
-      localStorage.setItem('session_token', data.session_token)
-      sessionStorage.setItem('csrf_token',    data.csrf_token)
-      sessionStorage.setItem('session_token', data.session_token)
+      // ✅ FIX: Match backend response structure
+      const userData = {
+        id: data.user_id || data.id,
+        name: data.full_name || data.name,
+        email: data.email,
+        role: data.role,
+        registration_number: data.registration_number,
+      }
 
-      navigate(data.user.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+      // Store user data
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      // Store token for API calls
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+        sessionStorage.setItem('token', data.token)
+      }
 
-    } catch {
-      setError('Cannot reach server. Make sure the backend is running on port 8000.')
+      // Redirect based on role
+      if (data.role === 'teacher') {
+        navigate('/teacher-dashboard')
+      } else {
+        navigate('/dashboard')
+      }
+
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Cannot reach server. Make sure the backend is running on http://127.0.0.1:8000')
     } finally {
       setLoading(false)
     }
@@ -74,6 +101,17 @@ export default function LoginPage() {
           <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#888' }}>
             University of Malawi
           </p>
+        </div>
+
+        {/* Test Credentials Hint */}
+        <div style={{
+          background: '#f0fdf4', border: '1px solid #bbf7d0',
+          borderRadius: 8, padding: '10px 14px', marginBottom: 16,
+          fontSize: '0.75rem', color: '#15803d',
+        }}>
+          <strong>💡 Test Credentials:</strong><br />
+          Student: test@example.com / password123<br />
+          Teacher: teacher@example.com / teacher123
         </div>
 
         {/* Error */}
@@ -134,7 +172,7 @@ export default function LoginPage() {
                   background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#aab3c6',
                 }}
               >
-                {showPwd ? '🙈' : '👁️'}
+                {showPwd ? '' : ''}
               </button>
             </div>
           </div>

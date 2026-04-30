@@ -72,10 +72,10 @@ export default function LandingPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             {[
-              { n: '01', icon: '📤', title: 'Submit Essay', text: 'Students log in and upload or type their essay directly in the portal.' },
-              { n: '02', icon: '🤖', title: 'AI Analysis', text: 'The AI evaluates grammar, content, structure, and vocabulary against the rubric.' },
-              { n: '03', icon: '📊', title: 'Feedback Generated', text: 'A detailed score and personalised feedback is ready within 2 minutes.' },
-              { n: '04', icon: '✅', title: 'Teacher Reviews', text: 'Teachers review AI grades, make adjustments, and track class performance.' },
+              { n: '01', icon: '', title: 'Submit Essay', text: 'Students log in and upload or type their essay directly in the portal.' },
+              { n: '02', icon: '', title: 'AI Analysis', text: 'The AI evaluates grammar, content, structure, and vocabulary against the rubric.' },
+              { n: '03', icon: '', title: 'Feedback Generated', text: 'A detailed score and personalised feedback is ready within 2 minutes.' },
+              { n: '04', icon: '', title: 'Teacher Reviews', text: 'Teachers review AI grades, make adjustments, and track class performance.' },
             ].map(s => (
               <div key={s.n} style={{ background: '#fff', borderRadius: 12, padding: '24px 20px', border: '1px solid rgba(26,46,90,0.07)', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: 16, right: 20, fontFamily: "'Playfair Display', serif", fontSize: '2.5rem', color: 'rgba(201,162,39,0.12)', fontWeight: 700, lineHeight: 1 }}>{s.n}</div>
@@ -97,12 +97,12 @@ export default function LandingPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
             {[
-              { icon: '⚡', title: 'Instant Grading', text: 'Results in under 2 minutes, no more waiting weeks.' },
-              { icon: '🎯', title: '85%+ Accuracy', text: 'Matches human teacher assessments, validated on MSCE rubrics.' },
-              { icon: '📋', title: 'Custom Rubrics', text: 'Teachers set grading criteria per assignment.' },
-              { icon: '🔍', title: 'Plagiarism Detection', text: 'Flags copied or suspicious content automatically.' },
-              { icon: '📈', title: 'Progress Tracking', text: 'Visual dashboards show student improvement over time.' },
-              { icon: '📱', title: 'Mobile Friendly', text: 'Works on smartphones, even on low-bandwidth connections.' },
+              { icon: '', title: 'Instant Grading', text: 'Results in under 2 minutes, no more waiting weeks.' },
+              { icon: '', title: '85%+ Accuracy', text: 'Matches human teacher assessments, validated on MSCE rubrics.' },
+              { icon: '', title: 'Custom Rubrics', text: 'Teachers set grading criteria per assignment.' },
+              { icon: '', title: 'Plagiarism Detection', text: 'Flags copied or suspicious content automatically.' },
+              { icon: '', title: 'Progress Tracking', text: 'Visual dashboards show student improvement over time.' },
+              { icon: '', title: 'Mobile Friendly', text: 'Works on smartphones, even on low-bandwidth connections.' },
             ].map(f => (
               <div key={f.title} style={{ display: 'flex', gap: 14, padding: '18px', border: '1px solid rgba(26,46,90,0.08)', borderRadius: 10, alignItems: 'flex-start' }}>
                 <div style={{ fontSize: '1.2rem', flexShrink: 0, marginTop: 2 }}>{f.icon}</div>
@@ -125,9 +125,9 @@ export default function LandingPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
             {[
-              { icon: '🧑‍🎓', title: 'Students', text: 'Submit essays, get instant feedback, and track your writing improvement.' },
-              { icon: '👩‍🏫', title: 'Teachers', text: 'Review AI grades, set rubrics, and focus on actual teaching.' },
-              { icon: '🏫', title: 'Administrators', text: 'Monitor school-wide performance with easy-to-read analytics.' },
+              { icon: '', title: 'Students', text: 'Submit essays, get instant feedback, and track your writing improvement.' },
+              { icon: '', title: 'Teachers', text: 'Review AI grades, set rubrics, and focus on actual teaching.' },
+              { icon: '', title: 'Administrators', text: 'Monitor school-wide performance with easy-to-read analytics.' },
             ].map(w => (
               <div key={w.title} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px 20px' }}>
                 <div style={{ fontSize: '1.6rem', marginBottom: 10 }}>{w.icon}</div>
@@ -153,7 +153,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer style={{ background: '#0a1425', padding: '24px 20px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
         <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
-          © 2026 AI Essay Grading System · University of Malawi · Fourth Year Project — Group 30
+          © 2026 AI Essay Grading System 
         </p>
       </footer>
     </div>
