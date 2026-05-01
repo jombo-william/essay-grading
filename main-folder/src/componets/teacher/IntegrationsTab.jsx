@@ -1,4 +1,8 @@
 
+
+
+
+
 import { useState } from "react";
 import { apiFetch } from "./api.js";
 
@@ -37,14 +41,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
   // ── Moodle handlers ────────────────────────────────────────────────────
 
   const connectMoodle = async () => {
-    if (!moodleToken) {
-      showToast("Please enter your Moodle token", "error");
-      return;
-    }
-    if (!moodleSiteUrl) {
-      showToast("Please enter your Moodle site URL", "error");
-      return;
-    }
+    if (!moodleToken) { showToast("Please enter your Moodle token", "error"); return; }
+    if (!moodleSiteUrl) { showToast("Please enter your Moodle site URL", "error"); return; }
     setMoodleLoading(true);
     try {
       const res = await apiFetch(
@@ -186,6 +184,21 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
+  const syncFromGc = async (courseId) => {
+    setGcLoading(true);
+    try {
+      const res = await apiFetch(
+        `/classroom/courses/${courseId}/sync`,
+        { method: "POST" }
+      );
+      showToast(`✅ ${res.message}`, "success");
+    } catch (err) {
+      showToast(err.message || "Sync failed", "error");
+    } finally {
+      setGcLoading(false);
+    }
+  };
+
   const gradeFromClassroom = async () => {
     if (!selectedCourse || !selectedGcWork || !selectedLocalId) {
       showToast("Please select a course, assignment, and local assignment", "error");
@@ -237,16 +250,16 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
   };
 
   const btn = (color = "#3b82f6") => ({
-    padding:     "10px 20px",
-    background:  color,
-    color:       "#fff",
-    border:      "none",
-    borderRadius:"10px",
-    fontWeight:  "700",
-    fontSize:    "13px",
-    cursor:      "pointer",
-    fontFamily:  "inherit",
-    opacity:     gcLoading || moodleLoading ? 0.7 : 1,
+    padding:      "10px 20px",
+    background:   color,
+    color:        "#fff",
+    border:       "none",
+    borderRadius: "10px",
+    fontWeight:   "700",
+    fontSize:     "13px",
+    cursor:       "pointer",
+    fontFamily:   "inherit",
+    opacity:      gcLoading || moodleLoading ? 0.7 : 1,
   });
 
   const input = {
@@ -260,10 +273,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     boxSizing:    "border-box",
   };
 
-  const select = {
-    ...input,
-    background: "#f8fafc",
-  };
+  const select = { ...input, background: "#f8fafc" };
 
   const label = {
     fontWeight:   "700",
@@ -298,6 +308,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         </div>
 
+        {/* Step 1 */}
         <div style={{ marginBottom: "16px" }}>
           <p style={label}>Step 1 — Connect your Google account</p>
           <button onClick={connectGoogle} style={btn("linear-gradient(135deg,#4285f4,#34a853)")}>
@@ -305,6 +316,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </button>
         </div>
 
+        {/* Step 2 */}
         <div style={{ marginBottom: "16px" }}>
           <p style={label}>Step 2 — Load your courses</p>
           <button onClick={loadGcCourses} disabled={gcLoading} style={btn("#6366f1")}>
@@ -312,6 +324,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </button>
         </div>
 
+        {/* Step 3 — Course list */}
         {gcCourses.length > 0 && (
           <div style={{ marginBottom: "16px" }}>
             <p style={label}>Step 3 — Link each course to a local class</p>
@@ -323,7 +336,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
                 <p style={{ margin: "0 0 8px", fontWeight: "700", fontSize: "13px", color: "#1e293b" }}>
                   🎓 {course.name} {course.section}
                 </p>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                   <select
                     onChange={e => setLinkClassId(e.target.value)}
                     defaultValue=""
@@ -334,13 +347,29 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
                       <option key={c.id} value={c.id}>{c.name} — {c.subject}</option>
                     ))}
                   </select>
-                  <button onClick={() => linkCourseToClass(course.id)} disabled={linking}
-                    style={{ ...btn("#10b981"), whiteSpace: "nowrap" }}>
+
+                  <button
+                    onClick={() => linkCourseToClass(course.id)}
+                    disabled={linking}
+                    style={{ ...btn("#10b981"), whiteSpace: "nowrap" }}
+                  >
                     {linking ? "Linking..." : "🔗 Link"}
                   </button>
-                  <button onClick={() => loadGcAssignments(course.id)}
-                    style={{ ...btn("#6366f1"), whiteSpace: "nowrap" }}>
-                    View Assignments
+
+                  <button
+                    onClick={() => loadGcAssignments(course.id)}
+                    disabled={gcLoading}
+                    style={{ ...btn("#6366f1"), whiteSpace: "nowrap" }}
+                  >
+                    📋 View Assignments
+                  </button>
+
+                  <button
+                    onClick={() => syncFromGc(course.id)}
+                    disabled={gcLoading}
+                    style={{ ...btn("#f59e0b"), whiteSpace: "nowrap" }}
+                  >
+                    {gcLoading ? "⏳ Syncing..." : "🔄 Sync from GC"}
                   </button>
                 </div>
               </div>
@@ -348,6 +377,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
+        {/* Step 4 — Pick GC assignment */}
         {gcAssignments.length > 0 && (
           <div style={{ marginBottom: "16px" }}>
             <p style={label}>Step 4 — Select the Google Classroom assignment</p>
@@ -360,6 +390,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
+        {/* Step 5 — Match local assignment */}
         {gcAssignments.length > 0 && (
           <div style={{ marginBottom: "16px" }}>
             <p style={label}>Step 5 — Match to your local assignment (for rubric)</p>
@@ -372,6 +403,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
+        {/* Grade button */}
         {selectedGcWork && selectedLocalId && (
           <button onClick={gradeFromClassroom} disabled={gcLoading} style={{
             ...btn("linear-gradient(135deg,#10b981,#34d399)"),
@@ -381,6 +413,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </button>
         )}
 
+        {/* Results */}
         {gcResults && (
           <div style={{
             marginTop: "16px", background: "#f0fdf4",
@@ -421,7 +454,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         </div>
 
-        {/* Step 1a — Site URL */}
         <p style={label}>Step 1 — Enter your Moodle site URL</p>
         <input
           style={input}
@@ -431,7 +463,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           onChange={e => setMoodleSiteUrl(e.target.value)}
         />
 
-        {/* Step 1b — Token */}
         <p style={label}>Step 2 — Enter your Moodle API token</p>
         <input
           style={input}
@@ -441,7 +472,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           onChange={e => setMoodleToken(e.target.value)}
         />
 
-        {/* Connect + Open buttons */}
         <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
           <button onClick={connectMoodle} disabled={moodleLoading}
             style={btn("linear-gradient(135deg,#f98012,#e85d04)")}>
@@ -457,7 +487,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </a>
         </div>
 
-        {/* Connected badge */}
         {moodleConnected && (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
@@ -470,7 +499,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
-        {/* Step 3 — Select course */}
         {moodleConnected && moodleCourses.length > 0 && (
           <div style={{ marginBottom: "16px" }}>
             <p style={label}>Step 3 — Select your Moodle course</p>
@@ -492,7 +520,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
-        {/* Step 4 — Select assignment */}
         {moodleAssignments.length > 0 && (
           <div style={{ marginBottom: "16px" }}>
             <p style={label}>Step 4 — Select the Moodle assignment</p>
@@ -505,7 +532,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
-        {/* Step 5 — Match local assignment */}
         {selectedMoodleAssign && (
           <div style={{ marginBottom: "16px" }}>
             <p style={label}>Step 5 — Match to your local assignment (for rubric)</p>
@@ -518,7 +544,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </div>
         )}
 
-        {/* Step 6 — Grade button */}
         {selectedMoodleAssign && moodleLocalId && (
           <button onClick={gradeFromMoodle} disabled={moodleLoading} style={{
             ...btn("linear-gradient(135deg,#f98012,#e85d04)"),
@@ -528,7 +553,6 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
           </button>
         )}
 
-        {/* Results */}
         {moodleResults && (
           <div style={{
             marginTop: "16px", background: "#fff7ed",
