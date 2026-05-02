@@ -25,7 +25,6 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        // Handle specific error messages
         if (res.status === 401) {
           setError('Invalid email or password. Please check your credentials.')
         } else if (res.status === 500) {
@@ -36,26 +35,33 @@ export default function LoginPage() {
         return
       }
 
-      // ✅ FIX: Match backend response structure
+      // ✅ Handle both master (session_token) and promise (token) response structures
+      const token = data.token || data.session_token
+      if (token) {
+        localStorage.setItem('token', token)
+        sessionStorage.setItem('token', token)
+      }
+
+      // ✅ Save csrf_token for authenticated API calls
+      if (data.csrf_token) {
+        localStorage.setItem('csrf_token', data.csrf_token)
+      }
+
+      // ✅ Handle both flat and nested user response structures
+      const user = data.user || {}
       const userData = {
-        id: data.user_id || data.id,
-        name: data.full_name || data.name,
-        email: data.email,
-        role: data.role,
-        registration_number: data.registration_number,
+        id:                  user.id   || data.user_id || data.id,
+        name:                user.name || data.full_name || data.name,
+        email:               user.email || data.email,
+        role:                user.role  || data.role,
+        registration_number: user.registration_number || data.registration_number,
       }
 
       // Store user data
       localStorage.setItem('user', JSON.stringify(userData))
-      
-      // Store token for API calls
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-        sessionStorage.setItem('token', data.token)
-      }
 
-      // Redirect based on role
-      if (data.role === 'teacher') {
+      // ✅ Use userData.role for redirect (works for both response structures)
+      if (userData.role === 'teacher') {
         navigate('/teacher-dashboard')
       } else {
         navigate('/dashboard')
@@ -172,7 +178,7 @@ export default function LoginPage() {
                   background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#aab3c6',
                 }}
               >
-                {showPwd ? '' : ''}
+                {showPwd ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
