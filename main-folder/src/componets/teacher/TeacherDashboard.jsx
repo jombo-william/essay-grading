@@ -340,6 +340,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             loading={loading}
             onViewEssay={setViewSub}
             onGrade={() => fetchAll()}
+             classId={selectedClass.id}
           />
 
         )}

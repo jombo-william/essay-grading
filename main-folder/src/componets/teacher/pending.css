@@ -414,3 +414,15 @@
 .score--amber { color: var(--amber); font-weight: 800; }
 .score--red   { color: var(--red);   font-weight: 800; }
 .score--blue  { color: var(--blue);  font-weight: 700; }
+
+
+
+.pg-card-neutral {
+  border-left: 4px solid #cbd5e1;
+  background: #fff;
+}
+
+.pg-avatar-lg--gray {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  color: #fff;
+}
