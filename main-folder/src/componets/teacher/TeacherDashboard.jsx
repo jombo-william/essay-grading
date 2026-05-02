@@ -12,12 +12,14 @@ import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 // import ExamsTab from "./ExamsTab.jsx";
 import IntegrationsTab from "./IntegrationsTab.jsx";
+import { GoGraph } from "react-icons/go";
 
 const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
   // { id: "exams", icon: "📝", label: "Exams" },
+  { id: "archived",     icon: "📦", label: "Archived"      },
   { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 
@@ -154,7 +156,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     { icon: "📋", label: "Assignments", value: assignments.length },
     { icon: "⏳", label: "Pending",     value: pending.length     },
     { icon: "📝", label: "Submissions", value: submissions.length  },
-    { icon: "📊", label: "Class Avg",   value: classAvg !== null ? `${classAvg}%` : "—" },
+    { icon:<GoGraph />, label: "Class Avg",   value: classAvg !== null ? `${classAvg}%` : "—" },
   ];
 
   return (
@@ -332,16 +334,21 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
 
         {/* Tab content */}
         {tab === "pending" && (
+         
           <PendingTab
             pending={pending}
             loading={loading}
             onViewEssay={setViewSub}
-            onGrade={openGrade}
+            onGrade={() => fetchAll()}
+             classId={selectedClass.id}
           />
+
         )}
-        {tab === "assignments" && (
+       
+
+      {tab === "assignments" && (
           <AssignmentsTab
-            assignments={assignments}
+            assignments={assignments.filter(a => a.is_active !== false && a.is_active !== 0)}
             submissions={submissions}
             loading={loading}
             selectedClass={selectedClass}
@@ -350,6 +357,8 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             showToast={showToast}
           />
         )}
+
+
         {tab === "students" && (
           <StudentsTab
             students={students}
@@ -361,16 +370,31 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             onEditGrade={openEdit}
           />
         )}
+
+        {tab === "archived" && (
+            <AssignmentsTab
+              //assignments={assignments.filter(a => a.is_active === false)}
+              assignments={assignments.filter(a => a.is_active === false || a.is_active === 0)}
+              submissions={submissions}
+              loading={loading}
+              selectedClass={selectedClass}
+              onCreated={fetchAll}
+              onUpdated={fetchAll}
+              showToast={showToast}
+              archivedOnly={true}
+            />
+          )}
+
         {/* {tab === "exams" && (
         <ExamsTab selectedClass={selectedClass} showToast={showToast} />
           )} */}
-          {tab === "integrations" && (
-  <IntegrationsTab
-    selectedClass={selectedClass}
-    showToast={showToast}
-    assignments={assignments}
-  />
-)}
+              {tab === "integrations" && (
+                  <IntegrationsTab
+                    selectedClass={selectedClass}
+                    showToast={showToast}
+                    assignments={assignments}
+                  />
+                )}
       </div>
 
       {/* Modals */}

@@ -1,4 +1,6 @@
 // src/components/teacher/ClassSelector.jsx
+// Shown right after login — teacher picks (or creates) a class before entering the dashboard.
+
 import { useState, useEffect } from "react";
 import { apiFetch } from "./api.js";
 
@@ -55,6 +57,8 @@ function CreateClassModal({ onClose, onCreate }) {
     if (!form.name.trim()) { setError("Class name is required."); return; }
     setSaving(true); setError("");
     try {
+      // ✅ Short path — BASE_URL already contains /api/teacher
+      //    Final URL → http://127.0.0.1:8000/api/teacher/classes/create
       const data = await apiFetch("/classes/create", {
         method: "POST",
         body: JSON.stringify(form),
@@ -165,14 +169,10 @@ export default function ClassSelector({ user, onSelectClass, onBack }) {
   const fetchClasses = async () => {
     setLoading(true); setError("");
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      console.log('Fetching classes with token:', token ? 'Present' : 'Missing');
-      
+      // ✅ Short path — becomes http://127.0.0.1:8000/api/teacher/classes
       const data = await apiFetch("/classes");
-      console.log('Classes response:', data);
       setClasses(data.classes || []);
     } catch (err) {
-      console.error('Fetch classes error:', err);
       setError(err.message || "Failed to load classes.");
     } finally {
       setLoading(false);
@@ -275,6 +275,7 @@ export default function ClassSelector({ user, onSelectClass, onBack }) {
               </span>
             )}
           </h2>
+          
         </div>
 
         {/* Loading */}
@@ -344,6 +345,7 @@ export default function ClassSelector({ user, onSelectClass, onBack }) {
                 <div
                   key={cls.id}
                   className="class-card"
+                  // ✅ passes the class object AND its index (for palette colouring in dashboard)
                   onClick={() => onSelectClass(cls, idx)}
                   style={{
                     borderRadius: "22px", overflow: "hidden",
@@ -379,7 +381,7 @@ export default function ClassSelector({ user, onSelectClass, onBack }) {
                     <div style={{ display: "flex", gap: "16px", marginBottom: "18px" }}>
                       <div>
                         <p style={{ margin: 0, fontSize: "22px", fontWeight: "900", color: "#1e293b" }}>
-                          {cls.total_assignments || 0}
+                          {cls.total_assignments}
                         </p>
                         <p style={{ margin: 0, fontSize: "11px", color: "#94a3b8", fontWeight: "600" }}>
                           Assignments
@@ -388,7 +390,7 @@ export default function ClassSelector({ user, onSelectClass, onBack }) {
                       <div style={{ width: "1px", background: "#f1f5f9" }} />
                       <div>
                         <p style={{ margin: 0, fontSize: "22px", fontWeight: "900", color: "#1e293b" }}>
-                          {cls.total_students || 0}
+                          {cls.total_students}
                         </p>
                         <p style={{ margin: 0, fontSize: "11px", color: "#94a3b8", fontWeight: "600" }}>
                           Students
