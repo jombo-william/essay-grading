@@ -1,29 +1,86 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
-import LandingPage from './Student/landingPage.jsx';
-import LoginPage from './Student/LoginPage.jsx';
+import LandingPage      from './componets/auth/landingPage.jsx';
+import LoginPage        from './componets/auth/LoginPage.jsx';
+import ClassSelector    from './componets/teacher/ClassSelector.jsx';
 import TeacherDashboard from './componets/teacher/TeacherDashboard.jsx';
 import StudentDashboard from './componets/student/StudentDashboard.jsx';
 
-export default function App() {
-  const [page, setPage] = useState('landing');  // 'landing' | 'login' | 'dashboard'
-  const [role, setRole] = useState(null);
-  const [user, setUser] = useState(null);
+function TeacherRoute() {
+  const [user] = useState(() =>
+    JSON.parse(localStorage.getItem('user') || 'null')
+  );
 
-  const handleSelect = (selectedRole, userData) => {
-    setRole(selectedRole);
-    setUser(userData);
-    setPage('dashboard');
-  };
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [classIndex,    setClassIndex]    = useState(0);
 
-  const handleBack = () => {
-    setRole(null);
-    setUser(null);
-    setPage('landing');
+  if (!user || user.role !== 'teacher') {
+    return <Navigate to="/" replace />;
+  }
+
+  const handleLogout = () => {
+    localStorage.clear();
     sessionStorage.clear();
+    window.location.href = '/';
   };
 
-  if (page === 'landing') return <LandingPage onLogin={() => setPage('login')} />;
-  if (page === 'login')   return <LoginPage onSelect={handleSelect} />;
-  if (role === 'teacher') return <TeacherDashboard user={user} onBack={handleBack} />;
-  if (role === 'student') return <StudentDashboard user={user} onBack={handleBack} />;
+  const handleSelectClass = (cls, idx = 0) => {
+    setSelectedClass(cls);
+    setClassIndex(idx);
+  };
+
+  const handleChangeClass = () => {
+    setSelectedClass(null);
+  };
+
+  if (!selectedClass) {
+    return (
+      <ClassSelector
+        user={user}
+        onSelectClass={handleSelectClass}
+        onBack={handleLogout}
+      />
+    );
+  }
+
+  return (
+    <TeacherDashboard
+      user={user}
+      selectedClass={selectedClass}
+      classIndex={classIndex}
+      onBack={handleLogout}
+      onChangeClass={handleChangeClass}
+    />
+  );
+}
+
+function StudentRoute() {
+  const [user] = useState(() =>
+    JSON.parse(localStorage.getItem('user') || 'null')
+  );
+
+  if (!user || user.role !== 'student') {
+    return <Navigate to="/" replace />;
+  }
+
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = '/';
+  };
+
+  return <StudentDashboard user={user} onBack={handleLogout} />;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/"                  element={<LandingPage />} />
+        <Route path="/login"             element={<LoginPage />} />
+        <Route path="/teacher-dashboard" element={<TeacherRoute />} />
+        <Route path="/dashboard"         element={<StudentRoute />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }

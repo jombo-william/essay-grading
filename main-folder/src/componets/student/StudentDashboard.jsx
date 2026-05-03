@@ -1,21 +1,41 @@
 
 
 
+<<<<<<< HEAD
 
 // src/components/student/StudentDashboard.jsx
+=======
+// src/componets/student/StudentDashboard.jsx
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch }         from './api.js';
 import { C, Toast }         from './shared.jsx';
 import AssignmentsTab       from './AssignmentsTab.jsx';
+<<<<<<< HEAD
 import Results               from './Results.jsx';
 import AssignmentDetail     from './AssignmentDetail.jsx';
 import WriteEssaySheet      from './WriteEssaySheet.jsx';
 import EssayViewSheet       from './EssayViewSheet.jsx';
 // import ResultDetailSheet    from './ResultDetailSheet.jsx';
+=======
+import ResultsTab           from './ResultsTab.jsx';
+// import ExamsTab             from './ExamsTab.jsx';
+import AssignmentDetail     from './AssignmentDetail.jsx';
+import WriteEssaySheet      from './WriteEssaySheet.jsx';
+import EssayViewSheet       from './EssayViewSheet.jsx';
+import ResultDetailSheet    from './ResultDetailSheet.jsx';
+// import ExamTakeSheet        from './ExamTakeSheet.jsx';
+import StudentClassroomTab from "./StudentClassroomTab.jsx";
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 
 const TABS = [
   { id: 'assignments', label: '📋 Assignments' },
   { id: 'results',     label: '📊 My Results'  },
+<<<<<<< HEAD
+=======
+  // { id: 'exams',       label: '📝 Exams'        },
+  { id: 'classroom',   label: '🎓 Classroom'    },
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 ];
 
 export default function StudentDashboard({ user, onBack }) {
@@ -32,6 +52,10 @@ export default function StudentDashboard({ user, onBack }) {
   const [writeAssignment,  setWriteAssignment]  = useState(null);
   const [essayViewSub,     setEssayViewSub]     = useState(null);
   const [resultSub,        setResultSub]        = useState(null);
+<<<<<<< HEAD
+=======
+  const [activeExam,       setActiveExam]       = useState(null); // ← exam being taken
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -100,10 +124,15 @@ export default function StudentDashboard({ user, onBack }) {
 
     try {
       setGradingStatus('🤖 AI is grading your essay...');
+<<<<<<< HEAD
 
       const csrfToken = sessionStorage.getItem('csrf_token') || '';
 
       const data = await apiFetch('/submit_essay.php', {
+=======
+      const csrfToken = sessionStorage.getItem('csrf_token') || '';
+      await apiFetch('/submit_essay.php', {
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
         method: 'POST',
         body: JSON.stringify({
           assignment_id: assignment.id,
@@ -111,12 +140,18 @@ export default function StudentDashboard({ user, onBack }) {
           csrf_token:    csrfToken,
         }),
       });
+<<<<<<< HEAD
 
       setWriteAssignment(null);
       setTab('results');
 
       showToast('✅ Submitted and AI-graded! Awaiting teacher approval.');
 
+=======
+      setWriteAssignment(null);
+      setTab('results');
+      showToast('✅ Submitted and AI-graded! Awaiting teacher approval.');
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       await fetchAll();
     } catch (err) {
       showToast(err.message || 'Submission failed. Please try again.', 'error');
@@ -132,10 +167,14 @@ export default function StudentDashboard({ user, onBack }) {
       const csrfToken = sessionStorage.getItem('csrf_token') || '';
       await apiFetch('/unsubmit_essay.php', {
         method: 'POST',
+<<<<<<< HEAD
         body: JSON.stringify({
           submission_id: sub.id,
           csrf_token:    csrfToken,
         }),
+=======
+        body: JSON.stringify({ submission_id: sub.id, csrf_token: csrfToken }),
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       });
       setEssayViewSub(null);
       setResultSub(null);
@@ -206,18 +245,42 @@ export default function StudentDashboard({ user, onBack }) {
             onOpenDetail={setDetailAssignment}
           />
         )}
+<<<<<<< HEAD
         {/* {tab === 'results' && (
+=======
+        {tab === 'results' && (
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
           <ResultsTab
             results={results}
             loading={loading}
             onOpenResult={setResultSub}
           />
+<<<<<<< HEAD
         )} */}
 
         {tab === 'results' && <Results />}
       </div>
 
       {/* ── Modals ── */}
+=======
+        )}
+        {tab === 'exams' && (
+          <ExamsTab
+            onStartExam={exam => setActiveExam(exam)}
+          />
+        )}
+
+        {tab === 'classroom' && (
+  <StudentClassroomTab
+    assignments={assignments}
+    showToast={showToast}
+    onSubmitted={() => { fetchAll(); setTab('results'); }}
+  />
+)}
+      </div>
+
+      {/* ── Essay Modals ── */}
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       <AssignmentDetail
         assignment={detailAssignment}
         onClose={() => setDetailAssignment(null)}
@@ -225,7 +288,10 @@ export default function StudentDashboard({ user, onBack }) {
         onViewEssay={sub => { setDetailAssignment(null); setEssayViewSub(sub); }}
         onViewResult={sub => { setDetailAssignment(null); setResultSub(sub); }}
       />
+<<<<<<< HEAD
 
+=======
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       <WriteEssaySheet
         assignment={writeAssignment}
         onClose={() => setWriteAssignment(null)}
@@ -233,13 +299,20 @@ export default function StudentDashboard({ user, onBack }) {
         submitting={submitting}
         gradingStatus={gradingStatus}
       />
+<<<<<<< HEAD
 
       <EssayViewSheet
         sub={essayViewSub}
+=======
+      <EssayViewSheet
+        sub={essayViewSub}
+        user={user}
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
         canUnsubmit={essayViewSub ? canUnsubmit(essayViewSub) : false}
         onClose={() => setEssayViewSub(null)}
         onUnsubmit={handleUnsubmit}
       />
+<<<<<<< HEAD
 
       {/* <ResultDetailSheet
         sub={resultSub}
@@ -250,3 +323,25 @@ export default function StudentDashboard({ user, onBack }) {
     </div>
   );
 }
+=======
+      <ResultDetailSheet
+        sub={resultSub}
+        user={user}
+        canUnsubmit={resultSub ? canUnsubmit(resultSub) : false}
+        onClose={() => setResultSub(null)}
+        onUnsubmit={handleUnsubmit}
+      />
+
+      {/* ── Exam modal ── */}
+      {activeExam && (
+        <ExamTakeSheet
+          exam={activeExam}
+          onClose={() => setActiveExam(null)}
+          onSubmitted={() => { setActiveExam(null); setTab('exams'); }}
+          showToast={showToast}
+        />
+      )}
+    </div>
+  );
+}
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63

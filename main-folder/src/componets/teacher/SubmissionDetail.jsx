@@ -4,8 +4,14 @@
 
 // src/componets/teacher/SubmissionDetail.jsx
 import { Sheet, ScoreBar, btn, label, colors } from "./shared.jsx";
+<<<<<<< HEAD
 
 export default function SubmissionDetail({ sub, onClose, onGrade, onEditGrade }) {
+=======
+import ChatPanel from "../ChatPanel.jsx";
+
+export default function SubmissionDetail({ sub, user, onClose, onGrade, onEditGrade }) {
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
   return (
     <Sheet onClose={onClose} title={sub.student_name} subtitle={sub.assignment_title}
       footer={
@@ -77,6 +83,11 @@ export default function SubmissionDetail({ sub, onClose, onGrade, onEditGrade })
         <p style={{ fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 12px" }}>Essay Text</p>
         <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.9", margin: 0, whiteSpace: "pre-wrap" }}>{sub.essay_text}</p>
       </div>
+<<<<<<< HEAD
+=======
+
+      <ChatPanel submissionId={sub.id ?? sub.submission_id} user={user} />
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
     </Sheet>
   );
 }

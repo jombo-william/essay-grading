@@ -1,5 +1,5 @@
 // C:\PROJECTS\Essay-Grader\src\Student\landingPage.jsx
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 
 export default function LandingPage() {
@@ -12,11 +12,11 @@ export default function LandingPage() {
   const DURATION = 5000
   const total = 3
 
-  const goToSlide = (n) => {
+  const goToSlide = useCallback((n) => {
     setCurrent(n)
-  }
-  const nextSlide = () => setCurrent(c => (c + 1) % total)
-  const prevSlide = () => setCurrent(c => (c - 1 + total) % total)
+  }, [])
+  const nextSlide = useCallback(() => setCurrent(c => (c + 1) % total), [total])
+  const prevSlide = useCallback(() => setCurrent(c => (c - 1 + total) % total), [total])
 
   useEffect(() => {
     clearInterval(progressRef.current)
@@ -43,7 +43,7 @@ export default function LandingPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [nextSlide, prevSlide])
 
   const touchXRef = useRef(0)
 
@@ -201,7 +201,7 @@ export default function LandingPage() {
             <li><a href="#who">Who It's For</a></li>
             <li><Link to="/login" className="btn-nav">Sign In →</Link></li>
           </ul>
-          <button className="hamburger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
+          <button type="button" className="hamburger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
             <span /><span /><span />
           </button>
         </div>
@@ -311,13 +311,13 @@ export default function LandingPage() {
         {/* Dots */}
         <div className="slide-dots">
           {[0,1,2].map(i => (
-            <button key={i} className={`dot${current === i ? ' active' : ''}`} onClick={() => goToSlide(i)} />
+            <button type="button" key={i} className={`dot${current === i ? ' active' : ''}`} onClick={() => goToSlide(i)} />
           ))}
         </div>
 
         {/* Arrows */}
-        <button className="slide-arrow arrow-prev" onClick={prevSlide} aria-label="Previous">&#8592;</button>
-        <button className="slide-arrow arrow-next" onClick={nextSlide} aria-label="Next">&#8594;</button>
+        <button type="button" className="slide-arrow arrow-prev" onClick={prevSlide} aria-label="Previous">←</button>
+        <button type="button" className="slide-arrow arrow-next" onClick={nextSlide} aria-label="Next">→</button>
 
         {/* Progress bar */}
         <div style={{ position:'absolute', bottom:0, left:0, height:3, background:'#c9a227', width:`${progress}%`, zIndex:50, transition:'width 0.1s linear' }} />
@@ -358,53 +358,52 @@ export default function LandingPage() {
       </section>
 
       {/* FEATURES */}
-      <section id="features">
-        <div className="section-inner">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64, alignItems:'center' }}>
-            <div>
-              <div className="section-label">Features</div>
-              <h2 className="section-title">Everything You Need for Smarter Grading</h2>
-              <p className="section-desc">Built specifically for the Malawian School curriculum, with tools for both students and teachers.</p>
-            </div>
-            <div />
-          </div>
-          <div className="features-grid">
+      <section id="features" style={{ padding: '64px 20px', background: '#fff' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <p style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a227', marginBottom: 8 }}>Features</p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: '#1a2e5a', marginBottom: 8 }}>Built for Malawian Schools</h2>
+          <p style={{ color: '#6b7a99', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: 40 }}>Tools designed around the MSCE curriculum and local needs.</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
             {[
-              { icon:'⚡', title:'Instant Grading', text:"Essays are graded in under 2 minutes — no more waiting 2–3 weeks for feedback. Learning happens in real-time." },
-              { icon:'🎯', title:'85%+ Accuracy', text:"AI grading matches human teacher assessments with over 85% accuracy, validated against actual MSCE rubrics." },
-              { icon:'📋', title:'Custom Rubrics', text:"Teachers set custom grading criteria per assignment, aligned with the Malawi curriculum and MSCE standards." },
-              { icon:'🔍', title:'Plagiarism Detection', text:"Automatically flags copied or suspicious content, ensuring academic integrity across all submissions." },
-              { icon:'📈', title:'Progress Tracking', text:"Visual dashboards show student improvement over time, helping teachers identify who needs extra support." },
-              { icon:'📱', title:'Mobile Friendly', text:"Fully responsive on smartphones and tablets — accessible even on low-bandwidth connections in rural areas." },
-            ].map(f => (
-              <div key={f.title} className="feature-card">
-                <div className="feature-icon-wrap">{f.icon}</div>
-                <div className="feature-body">
-                  <h3>{f.title}</h3>
-                  <p>{f.text}</p>
+              { icon: '⚡', title: 'Instant Grading', text: 'Results in under 2 minutes, no more waiting weeks.' },
+              { icon: '🎯', title: '85%+ Accuracy', text: 'Matches human teacher assessments, validated on MSCE rubrics.' },
+              { icon: '📋', title: 'Custom Rubrics', text: 'Teachers set grading criteria per assignment.' },
+              { icon: '🔍', title: 'Plagiarism Detection', text: 'Flags copied or suspicious content automatically.' },
+              { icon: '📈', title: 'Progress Tracking', text: 'Visual dashboards show student improvement over time.' },
+              { icon: '📱', title: 'Mobile Friendly', text: 'Works on smartphones, even on low-bandwidth connections.' },
+            ].map(f => {
+              return (
+                <div key={f.title} style={{ display: 'flex', gap: 14, padding: '18px', border: '1px solid rgba(26,46,90,0.08)', borderRadius: 10, alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: '1.2rem', flexShrink: 0, marginTop: 2 }}>{f.icon}</div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1a2e5a', marginBottom: 4 }}>{f.title}</div>
+                    <p style={{ fontSize: '0.83rem', color: '#6b7a99', lineHeight: 1.6, margin: 0 }}>{f.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* WHO IT'S FOR */}
-      <section className="who-section" id="who">
-        <div className="section-inner">
-          <div className="section-label" style={{ color:'var(--gold-light)' }}>Beneficiaries</div>
-          <h2 className="section-title" style={{ color:'white' }}>Who Is It For?</h2>
-          <p className="section-desc" style={{ color:'rgba(255,255,255,0.6)' }}>Designed to serve every stakeholder in the Education ecosystem.</p>
-          <div className="who-cards">
+      {/* FOR WHO */}
+      <section style={{ padding: '64px 20px', background: '#1a2e5a' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <p style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#e8c547', marginBottom: 8 }}>Beneficiaries</p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: '#fff', marginBottom: 8 }}>Who Is It For?</h2>
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: 40 }}>Designed for every stakeholder in the classroom.</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
             {[
-              { icon:'🧑‍🎓', title:'Students (form 1-4)', text:"Submit essays, receive instant detailed feedback, track your writing improvement and resubmit to improve your score." },
-              { icon:'👩‍🏫', title:'Computer Teachers', text:"Review AI grades, set rubrics, assign writing tasks, and spend more time on actual classroom teaching." },
-              { icon:'🏫', title:'School Administrators', text:"Monitor school-wide writing performance with analytics, track progress and generate reports effortlessly." },
+              { icon: '🧑‍🎓', title: 'Students', text: 'Submit essays, get instant feedback, and track your writing improvement.' },
+              { icon: '👩‍🏫', title: 'Teachers', text: 'Review AI grades, set rubrics, and focus on actual teaching.' },
+              { icon: '🏫', title: 'Administrators', text: 'Monitor school-wide performance with easy-to-read analytics.' },
             ].map(w => (
-              <div key={w.title} className="who-card">
-                <div className="who-icon">{w.icon}</div>
-                <div className="who-title">{w.title}</div>
-                <p className="who-text">{w.text}</p>
+              <div key={w.title} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px 20px' }}>
+                <div style={{ fontSize: '1.6rem', marginBottom: 10 }}>{w.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#fff', marginBottom: 6 }}>{w.title}</div>
+                <p style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, margin: 0 }}>{w.text}</p>
               </div>
             ))}
           </div>
@@ -412,48 +411,21 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="cta-section">
-        <div className="section-inner">
-          <h2>Ready to Transform Essay Grading?</h2>
-          <p>Join the pilot programme and help shape the future of AI-powered education in Malawi.</p>
-          <div className="cta-buttons">
-            <Link to="/login" className="btn-primary-hero">Sign In to Portal →</Link>
-            <Link to="/register" className="btn-outline-hero">Register Your School</Link>
-          </div>
+      <section style={{ padding: '64px 20px', background: '#0f1d3a', textAlign: 'center' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)', color: '#fff', marginBottom: 12 }}>Ready to Get Started?</h2>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: 32 }}>Sign in with your school account and start grading smarter today.</p>
+          <Link to="/login" style={{ display: 'inline-block', background: '#c9a227', color: '#0f1d3a', fontWeight: 700, fontSize: '0.95rem', padding: '14px 36px', borderRadius: 10, textDecoration: 'none' }}>
+            Sign In to Portal →
+          </Link>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer>
-        <div className="footer-inner">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
-                <div style={{ width:40, height:40, background:'#c9a227', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Playfair Display',serif", fontWeight:700, color:'#0f1d3a' }}>U</div>
-                <span style={{ fontFamily:"'Playfair Display',serif", fontSize:'0.95rem', color:'white', fontWeight:600 }}>AI Essay Grading System</span>
-              </div>
-              <p>An AI-powered essay grading platform developed for Malawian schools by students of the University of Malawi.</p>
-            </div>
-            {[
-              { title:'Platform', links:['Student Portal','Teacher Dashboard','Admin Panel','Login'] },
-              { title:'Project', links:['About','Methodology','Documentation','GitHub'] },
-              { title:'UNIMA', links:['unima.ac.mw','School of Education','Student Resources','Contact'] },
-            ].map(col => (
-              <div key={col.title} className="footer-col">
-                <h4>{col.title}</h4>
-                <ul>{col.links.map(l => <li key={l}><a href="#">{l}</a></li>)}</ul>
-              </div>
-            ))}
-          </div>
-          <div className="footer-bottom">
-            <p>© 2026 Essay Grading System Leveraging AI — University of Malawi Fourth Year Project</p>
-            <div className="footer-badge">
-              {/* <span className="badge-item">React + Supabase</span>
-              <span className="badge-item">Gemini AI & Hugging Face AI</span> */}
-              <span className="badge-item">BED/COM 2021–2022</span>
-            </div>
-          </div>
-        </div>
+      <footer style={{ background: '#0a1425', padding: '24px 20px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+        <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
+          © 2026 AI Essay Grading System · University of Malawi ·  Group 30
+        </p>
       </footer>
     </>
   )

@@ -1,5 +1,6 @@
 
 
+<<<<<<< HEAD
 // // src/components/student/WriteEssaySheet.jsx
 // import { useRef, useState } from 'react';
 // import { C, Sheet } from './shared.jsx';
@@ -192,6 +193,8 @@
 
 
 
+=======
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 // src/components/student/WriteEssaySheet.jsx
 import { useRef, useState } from 'react';
 import { C, Sheet } from './shared.jsx';
@@ -450,4 +453,12 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
       )}
     </Sheet>
   );
+<<<<<<< HEAD
 }
+=======
+}
+
+
+
+
+>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63

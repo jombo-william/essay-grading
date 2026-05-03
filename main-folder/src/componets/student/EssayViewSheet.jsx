@@ -1,7 +1,8 @@
 // src/components/student/EssayViewSheet.jsx
 import { C, Sheet } from './shared.jsx';
+import ChatPanel from '../ChatPanel.jsx';
 
-export default function EssayViewSheet({ sub, canUnsubmit, onClose, onUnsubmit }) {
+export default function EssayViewSheet({ sub, user, canUnsubmit, onClose, onUnsubmit }) {
   if (!sub) return null;
 
   return (
@@ -23,7 +24,6 @@ export default function EssayViewSheet({ sub, canUnsubmit, onClose, onUnsubmit }
         </div>
       }
     >
-      {/* Meta row */}
       <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '12px', padding: '12px 16px', marginBottom: '14px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <p style={{ fontSize: '11px', fontWeight: '700', color: '#7e22ce', margin: '0 0 2px' }}>SUBMITTED</p>
@@ -35,7 +35,6 @@ export default function EssayViewSheet({ sub, canUnsubmit, onClose, onUnsubmit }
         </div>
       </div>
 
-      {/* Unsubmit hint */}
       {canUnsubmit && (
         <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', display: 'flex', gap: '8px' }}>
           <span>💡</span>
@@ -45,13 +44,14 @@ export default function EssayViewSheet({ sub, canUnsubmit, onClose, onUnsubmit }
         </div>
       )}
 
-      {/* Essay text */}
       <p style={{ ...C.sL, marginBottom: '8px' }}>
         Essay Content · {sub.essay_text?.trim().split(/\s+/).filter(Boolean).length} words
       </p>
       <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', fontSize: '14px', color: '#374151', lineHeight: '1.85', whiteSpace: 'pre-wrap' }}>
         {sub.essay_text}
       </div>
+
+      <ChatPanel submissionId={sub.id ?? sub.submission_id} user={user} />
     </Sheet>
   );
 }
