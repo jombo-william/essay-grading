@@ -107,10 +107,10 @@
 //       })}
 //     </div>
 //   );
-<<<<<<< HEAD
-// }
-=======
-// }
+// <<<<<<< HEAD
+// // }
+// =======
+// // }
 
 // src/components/student/ResultsTab.jsx
 import { useState, useEffect } from 'react';
@@ -569,12 +569,3 @@ export default function ResultsTab({ results, loading, onOpenResult, studentName
     </div>
   );
 }
-<<<<<<<< HEAD:src/componets/student/ResultsTab.jsx
-========
-
-
-
-
-
->>>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63:main-folder/src/componets/student/ResultsTab.jsx
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63

@@ -1,5 +1,5 @@
 // C:\PROJECTS\Essay-Grader\src\Student\landingPage.jsx
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 export default function LandingPage() {
@@ -12,11 +12,11 @@ export default function LandingPage() {
   const DURATION = 5000
   const total = 3
 
-  const goToSlide = useCallback((n) => {
+  const goToSlide = (n) => {
     setCurrent(n)
-  }, [])
-  const nextSlide = useCallback(() => setCurrent(c => (c + 1) % total), [total])
-  const prevSlide = useCallback(() => setCurrent(c => (c - 1 + total) % total), [total])
+  }
+  const nextSlide = () => setCurrent(c => (c + 1) % total)
+  const prevSlide = () => setCurrent(c => (c - 1 + total) % total)
 
   useEffect(() => {
     clearInterval(progressRef.current)
@@ -43,7 +43,7 @@ export default function LandingPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [nextSlide, prevSlide])
+  }, [])
 
   const touchXRef = useRef(0)
 
@@ -201,7 +201,7 @@ export default function LandingPage() {
             <li><a href="#who">Who It's For</a></li>
             <li><Link to="/login" className="btn-nav">Sign In →</Link></li>
           </ul>
-          <button type="button" className="hamburger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
+          <button className="hamburger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
             <span /><span /><span />
           </button>
         </div>
@@ -311,13 +311,13 @@ export default function LandingPage() {
         {/* Dots */}
         <div className="slide-dots">
           {[0,1,2].map(i => (
-            <button type="button" key={i} className={`dot${current === i ? ' active' : ''}`} onClick={() => goToSlide(i)} />
+            <button key={i} className={`dot${current === i ? ' active' : ''}`} onClick={() => goToSlide(i)} />
           ))}
         </div>
 
         {/* Arrows */}
-        <button type="button" className="slide-arrow arrow-prev" onClick={prevSlide} aria-label="Previous">←</button>
-        <button type="button" className="slide-arrow arrow-next" onClick={nextSlide} aria-label="Next">→</button>
+        <button className="slide-arrow arrow-prev" onClick={prevSlide} aria-label="Previous">&#8592;</button>
+        <button className="slide-arrow arrow-next" onClick={nextSlide} aria-label="Next">&#8594;</button>
 
         {/* Progress bar */}
         <div style={{ position:'absolute', bottom:0, left:0, height:3, background:'#c9a227', width:`${progress}%`, zIndex:50, transition:'width 0.1s linear' }} />
@@ -424,7 +424,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer style={{ background: '#0a1425', padding: '24px 20px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
         <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
-          © 2026 AI Essay Grading System · University of Malawi ·  Group 30
+          © 2026 AI Essay Grading System · University of Malawi · Group 30
         </p>
       </footer>
     </>
