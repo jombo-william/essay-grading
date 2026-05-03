@@ -33,9 +33,7 @@ export default function LandingPage() {
       {/* HERO */}
       <section style={{ background: 'linear-gradient(160deg, #0f1d3a 0%, #1a2e5a 60%, #0e2244 100%)', padding: '72px 20px 80px', textAlign: 'center' }}>
         <div style={{ maxWidth: 620, margin: '0 auto' }} className="fade-up">
-          <div style={{ display: 'inline-block', background: 'rgba(201,162,39,0.15)', border: '1px solid rgba(201,162,39,0.35)', color: '#e8c547', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 14px', borderRadius: 20, marginBottom: 20 }}>
-            University of Malawi · Group 30
-          </div>
+
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.8rem, 5vw, 2.8rem)', color: '#fff', lineHeight: 1.2, marginBottom: 16 }}>
             Essay Grading Powered by <span style={{ color: '#e8c547' }}>Artificial Intelligence</span>
           </h1>
@@ -153,7 +151,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer style={{ background: '#0a1425', padding: '24px 20px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
         <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
-          © 2026 AI Essay Grading System · University of Malawi · Fourth Year Project — Group 30
+          © 2026 AI Essay Grading System
         </p>
       </footer>
     </div>
