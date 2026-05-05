@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiFetch } from "./api.js";
 
 export default function StudentClassroomTab({ assignments, showToast, onSubmitted }) {
-  const [connected,    setConnected]    = useState(false);
-  const [courses,      setCourses]      = useState([]);
-  const [gcAssignments,setGcAssignments]= useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [loading,      setLoading]      = useState(false);
-  const [submitting,   setSubmitting]   = useState(null); // gc assignment id being submitted
 
+  // ── Google Classroom state ─────────────────────────────────────────────────
+  const [connected,      setConnected]      = useState(false);
+  const [courses,        setCourses]        = useState([]);
+  const [gcAssignments,  setGcAssignments]  = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [loading,        setLoading]        = useState(false);
+  const [submitting,     setSubmitting]     = useState(null);
+
+  // ── Moodle state ───────────────────────────────────────────────────────────
+  const [moodleToken,      setMoodleToken]      = useState("");
+  const [moodleSiteUrl,    setMoodleSiteUrl]    = useState("");
+  const [moodleConnected,  setMoodleConnected]  = useState(false);
+  const [moodleLoading,    setMoodleLoading]    = useState(false);
+  const [moodleSiteDisplay,setMoodleSiteDisplay]= useState("");
+
+  // ── Styles ─────────────────────────────────────────────────────────────────
   const card = {
     background: "#fff", borderRadius: "18px", padding: "24px",
     border: "1px solid #e2e8f0", marginBottom: "20px",
@@ -25,7 +35,24 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     fontFamily: "inherit", marginBottom: "12px",
     boxSizing: "border-box", background: "#f8fafc",
   };
+  const input = {
+    width: "100%", padding: "10px 14px", borderRadius: "10px",
+    border: "1.5px solid #e2e8f0", fontSize: "13px",
+    fontFamily: "inherit", marginBottom: "12px",
+    boxSizing: "border-box",
+  };
 
+  // ── Check Moodle connection status on load ─────────────────────────────────
+  useEffect(() => {
+    apiFetch("/moodle/status")
+      .then(res => {
+        setMoodleConnected(res.connected);
+        if (res.site_url) setMoodleSiteDisplay(res.site_url);
+      })
+      .catch(() => {});
+  }, []);
+
+  // ── Google Classroom handlers ──────────────────────────────────────────────
   const connectGoogle = async () => {
     try {
       const res = await apiFetch("/auth/google/classroom");
@@ -88,13 +115,69 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     }
   };
 
+  // ── Moodle handlers ────────────────────────────────────────────────────────
+  const connectMoodle = async () => {
+    if (!moodleToken || !moodleSiteUrl) {
+      showToast("Please enter both Moodle site URL and token", "error");
+      return;
+    }
+    setMoodleLoading(true);
+    try {
+      await apiFetch("/moodle/connect", {
+        method: "POST",
+        body: JSON.stringify({
+          token:    moodleToken,
+          site_url: moodleSiteUrl.trim().replace(/\/$/, ""),
+        }),
+      });
+      setMoodleConnected(true);
+      setMoodleSiteDisplay(moodleSiteUrl);
+      showToast("✅ Connected to Moodle successfully!", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to connect to Moodle", "error");
+    } finally {
+      setMoodleLoading(false);
+    }
+  };
+
+  const disconnectMoodle = async () => {
+    try {
+      await apiFetch("/moodle/disconnect", { method: "DELETE" });
+      setMoodleConnected(false);
+      setMoodleToken("");
+      setMoodleSiteUrl("");
+      setMoodleSiteDisplay("");
+      showToast("Disconnected from Moodle", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to disconnect", "error");
+    }
+  };
+
   return (
     <div>
       <h2 style={{ fontSize: "18px", fontWeight: "800", color: "#1e293b", marginBottom: "20px" }}>
-        🎓 Google Classroom
+        🔗 Connected Platforms
       </h2>
 
+      {/* ── Google Classroom ───────────────────────────────────────────────── */}
       <div style={card}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "linear-gradient(135deg,#4285f4,#34a853)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "20px",
+          }}>🎓</div>
+          <div>
+            <p style={{ margin: 0, fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>
+              Google Classroom
+            </p>
+            <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
+              Submit assignments and sync results with Google Classroom
+            </p>
+          </div>
+        </div>
+
         {/* Step 1 */}
         <div style={{ marginBottom: "20px" }}>
           <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
@@ -134,7 +217,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
         {gcAssignments.length > 0 && (
           <div>
             <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "10px" }}>
-              Step 4 — Import & submit an assignment
+              Step 4 — Import and submit an assignment
             </p>
             {gcAssignments.map(a => (
               <div key={a.id} style={{
@@ -163,11 +246,106 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {submitting === a.id ? "⏳ Submitting..." : "📤 Import & Submit"}
+                    {submitting === a.id ? "⏳ Submitting..." : "📤 Import and Submit"}
                   </button>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Moodle ────────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "linear-gradient(135deg,#f98012,#e85d04)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "20px",
+          }}>📚</div>
+          <div>
+            <p style={{ margin: 0, fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>
+              Moodle
+            </p>
+            <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
+              {moodleConnected
+                ? `✅ Connected to ${moodleSiteDisplay}`
+                : "Connect to sync your submissions with Moodle"}
+            </p>
+          </div>
+        </div>
+
+        {!moodleConnected ? (
+          <>
+            <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
+              Step 1 — Enter your Moodle site URL
+            </p>
+            <input
+              style={input}
+              placeholder="e.g. https://yourschool.moodlecloud.com"
+              value={moodleSiteUrl}
+              onChange={e => setMoodleSiteUrl(e.target.value)}
+            />
+
+            <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
+              Step 2 — Enter your Moodle web service token
+            </p>
+            <input
+              style={input}
+              type="password"
+              placeholder="Paste your Moodle token here..."
+              value={moodleToken}
+              onChange={e => setMoodleToken(e.target.value)}
+            />
+
+            <button
+              onClick={connectMoodle}
+              disabled={moodleLoading}
+              style={{
+                ...btn("linear-gradient(135deg,#f98012,#e85d04)"),
+                width: "100%",
+                padding: "12px",
+              }}
+            >
+              {moodleLoading ? "⏳ Connecting..." : "🔌 Connect to Moodle"}
+            </button>
+
+            <div style={{
+              marginTop: "12px", background: "#fff7ed",
+              border: "1px solid #fed7aa", borderRadius: "10px",
+              padding: "10px 14px",
+            }}>
+              {/* <p style={{ margin: 0, fontSize: "12px", color: "#92400e" }}>
+                💡 Ask your teacher for your Moodle token. Once connected, any assignment
+                you submit here will automatically appear in Moodle too.
+              </p> */}
+            </div>
+          </>
+        ) : (
+          <div>
+            <div style={{
+              background: "#fff7ed", border: "1px solid #fed7aa",
+              borderRadius: "12px", padding: "14px 16px", marginBottom: "12px",
+            }}>
+              <p style={{ margin: "0 0 4px", fontWeight: "700", fontSize: "13px", color: "#ea580c" }}>
+                ✅ Moodle Connected
+              </p>
+              <p style={{ margin: 0, fontSize: "12px", color: "#92400e" }}>
+                Your submissions in EssayGrade AI will automatically sync to Moodle
+                when the assignment is linked to Moodle by your teacher.
+              </p>
+            </div>
+            <button
+              onClick={disconnectMoodle}
+              style={{
+                ...btn("#ef4444"),
+                fontSize: "12px",
+                padding: "8px 16px",
+              }}
+            >
+              🔌 Disconnect Moodle
+            </button>
           </div>
         )}
       </div>
