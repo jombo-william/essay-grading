@@ -1,16 +1,14 @@
-
-
-const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
+const BASE_URL = 'http://localhost:8000/api/teacher';
 
 export async function apiFetch(path, options = {}) {
-  const csrfToken    = getToken('csrf_token', 'token');
-  const sessionToken = getToken('session_token', 'session_token');
-
-   console.log('csrfToken:', csrfToken);        // ← ADD THIS
-  console.log('sessionToken:', sessionToken);  // ← ADD THIS
-
+  // Get token from localStorage - check all possible token names
+  const token = localStorage.getItem('token') || 
+                localStorage.getItem('session_token') || 
+                localStorage.getItem('access_token');
+  
+  console.log('Token found:', token ? 'Yes' : 'No');
+  
   const routeMap = {
-    // ── Legacy PHP → FastAPI mappings (kept for backward compat) ──────────
     '/get_assignments.php':     '/assignments',
     '/get_submissions.php':     '/submissions',
     '/get_pending_grading.php': '/submissions/pending',
@@ -19,40 +17,46 @@ export async function apiFetch(path, options = {}) {
     '/override_grade.php':      '/submissions/grade',
   };
 
-  const cleanPath  = path.startsWith('/') ? path : '/' + path;
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
   const mappedPath = routeMap[cleanPath] || cleanPath;
-  const url        = `${BASE_URL}${mappedPath}`;
+  const url = `${BASE_URL}${mappedPath}`;
 
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type':  'application/json',
-      ...(csrfToken    ? { 'X-CSRF-Token':  csrfToken    } : {}),
-      ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
-      ...(options.headers || {}),
-    },
+  // Handle query parameters
+  let finalUrl = url;
+  if (options.params) {
+    const params = new URLSearchParams(options.params);
+    finalUrl = `${url}?${params.toString()}`;
+    delete options.params;
+  }
+
+  // Handle body
+  let body = options.body;
+  if (body && typeof body === 'object') {
+    body = JSON.stringify(body);
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+  
+  // Add Authorization header if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(finalUrl, {
+    method: options.method || 'GET',
+    headers: headers,
     credentials: 'include',
-    ...options,
+    body: body,
   });
 
-  const data = await res.json();
+  const data = await response.json();
 
-  if (!res.ok || data.success === false) {
-    throw new Error(data.message || `Request failed (${res.status})`);
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || data.detail || `Request failed (${response.status})`);
   }
 
   return data;
-}
-
-
-
-
-function getToken(cookieName, localKey) {
-  const cookieMatch = document.cookie.match(
-    new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]+)')
-  );
-  if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-  return sessionStorage.getItem(cookieName) 
-      || sessionStorage.getItem(localKey)
-      || localStorage.getItem(localKey) 
-      || '';
 }

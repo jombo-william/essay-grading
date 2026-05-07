@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Export</title>
+</head>
+<body>
+    <h1>Test Moodle Export</h1>
+    <div>
+        <p>Click the button below to test export:</p>
+        <button onclick="testExport()">Export Quiz ID 1</button>
+    </div>
+    <div id="result"></div>
+    
+    <script>
+        async function testExport() {
+            const token = localStorage.getItem('session_token') || sessionStorage.getItem('session_token');
+            document.getElementById('result').innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/teacher/moodle/export-quiz/1', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'test_quiz.xml';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    document.getElementById('result').innerHTML = '✅ Export successful! File downloaded.';
+                } else {
+                    const text = await response.text();
+                    document.getElementById('result').innerHTML = `❌ Failed: ${response.status} - ${text}`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

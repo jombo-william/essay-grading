@@ -1,3 +1,6 @@
+
+
+
 // src/components/teacher/TeacherDashboard.jsx
 import { useState, useEffect, useCallback } from "react";
 import { Toast } from "./shared.jsx";
@@ -7,16 +10,16 @@ import AssignmentsTab    from "./AssignmentsTab.jsx";
 import StudentsTab       from "./StudentsTab.jsx";
 import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
+// import ExamsTab from "./ExamsTab.jsx";
 import IntegrationsTab from "./IntegrationsTab.jsx";
-import QuizzesTab from "./QuizzesTab.jsx";
 import { GoGraph } from "react-icons/go";
 
 const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
-  { id: "quizzes",     icon: "📝", label: "Quizzes"      },
-  { id: "archived",    icon: "📦", label: "Archived"      },
+  // { id: "exams", icon: "📝", label: "Exams" },
+  { id: "archived",     icon: "📦", label: "Archived"      },
   { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 
@@ -34,46 +37,8 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
   const [assignments, setAssignments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [loading,     setLoading]     = useState(true);
-  const [fetchError,  setFetchError]  = useState(null);
+  const [fetchError,  setFetchError]  = useState(null);   // ← FIX #4: persistent error state
   const [toast,       setToast]       = useState(null);
-
-  // Moodle state - lifted up to share between tabs
-  const [moodleToken, setMoodleToken] = useState("");
-  const [moodleSiteUrl, setMoodleSiteUrl] = useState("https://essaygrade.moodlecloud.com");
-  const [moodleCourses, setMoodleCourses] = useState([]);
-  const [moodleConnected, setMoodleConnected] = useState(false);
-  const [moodleLoading, setMoodleLoading] = useState(false);
-
-  // Function to connect to Moodle
-  const connectMoodle = async (token, siteUrl) => {
-    if (!token) { 
-      showToast("Please enter your Moodle token", "error"); 
-      return false;
-    }
-    if (!siteUrl) { 
-      showToast("Please enter your Moodle site URL", "error"); 
-      return false;
-    }
-    
-    setMoodleLoading(true);
-    try {
-      const res = await apiFetch(
-        `/moodle/courses?moodle_token=${token}&site_url=${encodeURIComponent(siteUrl)}`
-      );
-      setMoodleCourses(res.courses || []);
-      setMoodleConnected(true);
-      setMoodleToken(token);
-      setMoodleSiteUrl(siteUrl);
-      showToast(`✅ Connected! Found ${res.courses.length} courses`, "success");
-      return true;
-    } catch (err) {
-      showToast(err.message || "Failed to connect to Moodle", "error");
-      setMoodleConnected(false);
-      return false;
-    } finally {
-      setMoodleLoading(false);
-    }
-  };
 
   // Modals
   const [gradeSub,     setGradeSub]     = useState(null);
@@ -91,6 +56,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     setTimeout(() => setToast(null), 3500);
   };
 
+  // ── FIX #4: fetchAll now sets a visible, persistent error state ─────────
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
@@ -103,6 +69,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
       setAssignments(aData.assignments || []);
       setSubmissions(sData.submissions || []);
     } catch (err) {
+      // Show in UI persistently — not just a toast that vanishes
       const msg = err.message || "Failed to load data. Check your connection.";
       setFetchError(msg);
       showToast(msg, "error");
@@ -116,6 +83,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     fetchAll();
   }, [fetchAll]);
 
+  // ── FIX #3: only count submissions that are actually ready for teacher review
   const pending = submissions.filter(
     s => (s.status === "submitted" || s.status === "ai_graded") && s.final_score === null
   );
@@ -137,6 +105,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     ? Math.round(gradedSubs.reduce((acc, s) => acc + (s.final_score / s.max_score) * 100, 0) / gradedSubs.length)
     : null;
 
+  // ── Grade handlers ───────────────────────────────────────────────────────
   const openGrade = sub => {
     setGradeSub(sub);
     setGradeScore(sub.ai_score ?? "");
@@ -148,10 +117,11 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     setEditFB(sub.teacher_feedback || "");
   };
 
+  // ── FIX #1: use short paths — apiFetch already prepends BASE_URL ────────
   const saveGrade = async () => {
     if (!gradeScore) { showToast("Please enter a score.", "error"); return; }
     try {
-      await apiFetch("/submissions/grade", {
+      await apiFetch("/submissions/grade", {          // ← was "/api/teacher/submissions/grade"
         method: "POST",
         body: JSON.stringify({
           submission_id: gradeSub.id,
@@ -168,7 +138,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
   const saveEditGrade = async () => {
     if (!editScore) { showToast("Please enter a score.", "error"); return; }
     try {
-      await apiFetch("/submissions/grade", {
+      await apiFetch("/submissions/grade", {          // ← was "/api/teacher/submissions/grade"
         method: "POST",
         body: JSON.stringify({
           submission_id: editGradeSub.id,
@@ -193,6 +163,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     <div style={{ minHeight: "100vh", background: "#f1f5f9", fontFamily: "'Inter', system-ui, sans-serif" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
+      {/* ── Top nav ──────────────────────────────────────────────────────── */}
       <nav style={{
         background: "#fff", borderBottom: "1px solid #e2e8f0",
         padding: "0 24px", height: "60px",
@@ -250,6 +221,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
         </div>
       </nav>
 
+      {/* ── Class banner ─────────────────────────────────────────────────── */}
       <div style={{
         background: palette.bg,
         padding: "20px 24px",
@@ -288,6 +260,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
 
       <div style={{ maxWidth: "880px", margin: "0 auto", padding: "28px 20px" }}>
 
+        {/* ── FIX #4: Persistent fetch error banner ────────────────────── */}
         {fetchError && (
           <div style={{
             background: "#fef2f2", border: "1px solid #fecaca",
@@ -309,6 +282,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
           </div>
         )}
 
+        {/* Stats row */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "14px", marginBottom: "24px" }}>
           {stats.map(s => (
             <div key={s.label} style={{
@@ -324,6 +298,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
           ))}
         </div>
 
+        {/* Tabs */}
         <div style={{
           display: "flex", gap: "6px",
           background: "#fff", borderRadius: "16px", padding: "6px",
@@ -357,17 +332,21 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
           })}
         </div>
 
+        {/* Tab content */}
         {tab === "pending" && (
+         
           <PendingTab
             pending={pending}
             loading={loading}
             onViewEssay={setViewSub}
             onGrade={() => fetchAll()}
-            classId={selectedClass.id}
+             classId={selectedClass.id}
           />
-        )}
 
-        {tab === "assignments" && (
+        )}
+       
+
+      {tab === "assignments" && (
           <AssignmentsTab
             assignments={assignments.filter(a => a.is_active !== false && a.is_active !== 0)}
             submissions={submissions}
@@ -378,6 +357,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             showToast={showToast}
           />
         )}
+
 
         {tab === "students" && (
           <StudentsTab
@@ -391,45 +371,33 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
           />
         )}
 
-        {tab === "quizzes" && (
-          <QuizzesTab
-            selectedClass={selectedClass}
-            showToast={showToast}
-            moodleToken={moodleToken}
-            moodleSiteUrl={moodleSiteUrl}
-            moodleCourses={moodleCourses}
-            moodleConnected={moodleConnected}
-          />
-        )}
-
         {tab === "archived" && (
-          <AssignmentsTab
-            assignments={assignments.filter(a => a.is_active === false || a.is_active === 0)}
-            submissions={submissions}
-            loading={loading}
-            selectedClass={selectedClass}
-            onCreated={fetchAll}
-            onUpdated={fetchAll}
-            showToast={showToast}
-            archivedOnly={true}
-          />
-        )}
+            <AssignmentsTab
+              //assignments={assignments.filter(a => a.is_active === false)}
+              assignments={assignments.filter(a => a.is_active === false || a.is_active === 0)}
+              submissions={submissions}
+              loading={loading}
+              selectedClass={selectedClass}
+              onCreated={fetchAll}
+              onUpdated={fetchAll}
+              showToast={showToast}
+              archivedOnly={true}
+            />
+          )}
 
-        {tab === "integrations" && (
-          <IntegrationsTab
-            selectedClass={selectedClass}
-            showToast={showToast}
-            assignments={assignments}
-            moodleToken={moodleToken}
-            moodleSiteUrl={moodleSiteUrl}
-            moodleCourses={moodleCourses}
-            moodleConnected={moodleConnected}
-            moodleLoading={moodleLoading}
-            onConnectMoodle={connectMoodle}
-          />
-        )}
+        {/* {tab === "exams" && (
+        <ExamsTab selectedClass={selectedClass} showToast={showToast} />
+          )} */}
+              {tab === "integrations" && (
+                  <IntegrationsTab
+                    selectedClass={selectedClass}
+                    showToast={showToast}
+                    assignments={assignments}
+                  />
+                )}
       </div>
 
+      {/* Modals */}
       {viewSub && (
         <SubmissionDetail
           sub={viewSub}
