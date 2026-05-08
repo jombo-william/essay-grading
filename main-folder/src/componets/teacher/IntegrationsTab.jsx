@@ -464,6 +464,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
         />
 
         <p style={label}>Step 2 — Enter your Moodle API token</p>
+        <p style={label}>tessting token : b31af5ab7968d76559983a1df6dbfcf1 </p>
         <input
           style={input}
           type="password"
