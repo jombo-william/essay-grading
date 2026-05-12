@@ -1044,78 +1044,6 @@ function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExp
   );
 }
 
-// ── Shared modal wrapper ──────────────────────────────────────────────────────
-// IMPORTANT: defined at module scope (outside AssignmentsTab) so React never
-// re-creates this component type on re-render, which would unmount the form
-// and drop focus after every keystroke.
-function ModalShell({ title, subtitle, iconName, iconBg, iconColor, onClose, onSave, saveLabel, saving, children }) {
-  return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 500,
-      background: "rgba(15,13,40,0.55)", backdropFilter: "blur(4px)",
-      display: "flex", alignItems: "stretch", justifyContent: "center", padding: 20,
-    }}>
-      <div style={{
-        background: "#fff", borderRadius: 18,
-        width: "100%", maxWidth: 1100,
-        display: "flex", flexDirection: "column",
-        overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
-        fontFamily: "'DM Sans','Segoe UI',sans-serif",
-      }}>
-        {/* Header */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "14px 22px", borderBottom: "1px solid #ECECF2",
-          background: "#F8F7FF", flexShrink: 0,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name={iconName} size={18} style={{ color: iconColor }} />
-            </div>
-            <div>
-              <p style={{ fontWeight: 700, fontSize: 14, color: "#1A1830", margin: 0 }}>{title}</p>
-              {subtitle && <p style={{ fontSize: 12, color: "#8884A8", margin: 0 }}>{subtitle}</p>}
-            </div>
-          </div>
-          <button onClick={onClose} style={{
-            width: 30, height: 30, borderRadius: 8, border: "1px solid #ECECF2",
-            background: "#fff", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <Icon name="x" size={15} style={{ color: "#5F5E5A" }} />
-          </button>
-        </div>
-        {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "26px 30px" }}>{children}</div>
-        {/* Footer */}
-        <div style={{
-          display: "flex", justifyContent: "flex-end", gap: 8,
-          padding: "12px 22px", borderTop: "1px solid #ECECF2",
-          background: "#F8F7FF", flexShrink: 0,
-        }}>
-          <button onClick={onClose} style={{
-            padding: "9px 20px", borderRadius: 9, border: "1px solid #D3D1C7",
-            background: "#F1EFE8", color: "#5F5E5A", fontSize: 13, fontWeight: 500,
-            cursor: "pointer", fontFamily: "inherit",
-          }}>Cancel</button>
-          <button onClick={onSave} disabled={saving} style={{
-            padding: "9px 22px", borderRadius: 9, border: "none",
-            background: saving ? "#8884A8" : "#1A1830",
-            color: "#fff", fontSize: 13, fontWeight: 500,
-            cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit",
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            {saving
-              ? <><Icon name="loader" size={13} style={{ color: "#fff" }} /> Saving…</>
-              : <><Icon name="device-floppy" size={13} style={{ color: "#fff" }} /> {saveLabel}</>
-            }
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AssignmentsTab({ assignments, submissions, loading, onCreated, onUpdated, showToast, selectedClassId, selectedClass, archivedOnly = false }) {
   const classId = selectedClassId ?? selectedClass?.id;
@@ -1240,6 +1168,73 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
 
   const activeAssignments = assignments.filter(a => a.is_active !== false);
   const archivedAssignments = assignments.filter(a => a.is_active === false);
+
+  // ── Shared modal wrapper ──────────────────────────────────────────────────
+  const ModalShell = ({ title, subtitle, iconName, iconBg, iconColor, onClose, onSave, saveLabel, children }) => (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 500,
+      background: "rgba(15,13,40,0.55)", backdropFilter: "blur(4px)",
+      display: "flex", alignItems: "stretch", justifyContent: "center", padding: 20,
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: 18,
+        width: "100%", maxWidth: 1100,
+        display: "flex", flexDirection: "column",
+        overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+        fontFamily: "'DM Sans','Segoe UI',sans-serif",
+      }}>
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 22px", borderBottom: "1px solid #ECECF2",
+          background: "#F8F7FF", flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name={iconName} size={18} style={{ color: iconColor }} />
+            </div>
+            <div>
+              <p style={{ fontWeight: 700, fontSize: 14, color: "#1A1830", margin: 0 }}>{title}</p>
+              {subtitle && <p style={{ fontSize: 12, color: "#8884A8", margin: 0 }}>{subtitle}</p>}
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            width: 30, height: 30, borderRadius: 8, border: "1px solid #ECECF2",
+            background: "#fff", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Icon name="x" size={15} style={{ color: "#5F5E5A" }} />
+          </button>
+        </div>
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "26px 30px" }}>{children}</div>
+        {/* Footer */}
+        <div style={{
+          display: "flex", justifyContent: "flex-end", gap: 8,
+          padding: "12px 22px", borderTop: "1px solid #ECECF2",
+          background: "#F8F7FF", flexShrink: 0,
+        }}>
+          <button onClick={onClose} style={{
+            padding: "9px 20px", borderRadius: 9, border: "1px solid #D3D1C7",
+            background: "#F1EFE8", color: "#5F5E5A", fontSize: 13, fontWeight: 500,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>Cancel</button>
+          <button onClick={onSave} disabled={saving} style={{
+            padding: "9px 22px", borderRadius: 9, border: "none",
+            background: saving ? "#8884A8" : "#1A1830",
+            color: "#fff", fontSize: 13, fontWeight: 500,
+            cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            {saving
+              ? <><Icon name="loader" size={13} style={{ color: "#fff" }} /> Saving…</>
+              : <><Icon name="device-floppy" size={13} style={{ color: "#fff" }} /> {saveLabel}</>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderAssignment = (a) => {
     const subCount = submissions.filter(s => s.assignment_id === a.id).length;
@@ -1467,6 +1462,7 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
           iconBg="#E6F1FB"
           iconColor="#185FA5"
           onClose={() => setCreateOpen(false)}
+          saving={saving}
           onSave={handleCreate}
           saveLabel="Publish assignment"
           saving={saving}
@@ -1488,6 +1484,7 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
           iconBg="#FAEEDA"
           iconColor="#854F0B"
           onClose={() => setEditTarget(null)}
+          saving={saving}
           onSave={handleEditSave}
           saveLabel="Save changes"
           saving={saving}
