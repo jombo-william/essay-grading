@@ -1,8 +1,3 @@
-
-
-
-
-
 // import { useState } from "react";
 // import { apiFetch } from "./api.js";
 
@@ -654,15 +649,6 @@
 // }
 
 
-
-
-
-
-
-
-
-
-
 // src/components/teacher/IntegrationsTab.jsx
 // No external CSS — all styles inline. Uses Tabler Icons via Icon component.
 
@@ -676,7 +662,8 @@ const C = {
   green:  { bg: "#EAF3DE", border: "#C0DD97", text: "#3B6D11", dark: "#27500A" },
   amber:  { bg: "#FAEEDA", border: "#FAC775", text: "#854F0B", dark: "#633806" },
   red:    { bg: "#FCEBEB", border: "#F7C1C1", text: "#A32D2D", dark: "#791F1F" },
-  purple: { bg: "#EEEDFE", border: "#CECBF6", text: "#3C3489", dark: "#26215C" },
+  // purple token kept for reference but quiz/exam section is removed
+  // purple: { bg: "#EEEDFE", border: "#CECBF6", text: "#3C3489", dark: "#26215C" },
   gray:   { bg: "#F1EFE8", border: "#D3D1C7", text: "#5F5E5A", dark: "#2C2C2A" },
 };
 
@@ -713,7 +700,7 @@ function Btn({ onClick, disabled, loading, icon, children, color = "dark", small
     blue:   { bg: "#185FA5", hover: "#0C447C" },
     green:  { bg: "#3B6D11", hover: "#27500A" },
     amber:  { bg: "#854F0B", hover: "#633806" },
-    purple: { bg: "#3C3489", hover: "#26215C" },
+    // purple removed — quiz/exam feature not implemented
     red:    { bg: "#A32D2D", hover: "#791F1F" },
     ghost:  { bg: "#F1EFE8", hover: "#D3D1C7" },
   };
@@ -838,11 +825,13 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
   const [moodleLoading,        setMoodleLoading]        = useState(false);
   const [moodleResults,        setMoodleResults]        = useState(null);
   const [moodleConnected,      setMoodleConnected]      = useState(false);
-  const [moodleQuizzes,        setMoodleQuizzes]        = useState([]);
-  const [selectedMoodleQuiz,   setSelectedMoodleQuiz]   = useState("");
-  const [quizLocalId,          setQuizLocalId]          = useState("");
-  const [quizLoading,          setQuizLoading]          = useState(false);
-  const [quizResults,          setQuizResults]          = useState(null);
+
+  // ── Quiz / Exam state (not implemented) ───────────────────────────────
+  // const [moodleQuizzes,        setMoodleQuizzes]        = useState([]);
+  // const [selectedMoodleQuiz,   setSelectedMoodleQuiz]   = useState("");
+  // const [quizLocalId,          setQuizLocalId]          = useState("");
+  // const [quizLoading,          setQuizLoading]          = useState(false);
+  // const [quizResults,          setQuizResults]          = useState(null);
 
   // ── Moodle handlers ────────────────────────────────────────────────────
   const connectMoodle = async () => {
@@ -897,39 +886,40 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
-  const loadMoodleQuizzes = async (courseId) => {
-    setMoodleLoading(true);
-    try {
-      const res = await apiFetch(`/moodle/quizzes?moodle_token=${moodleToken}&course_id=${courseId}&site_url=${encodeURIComponent(moodleSiteUrl)}`);
-      setMoodleQuizzes(res.quizzes || []);
-      showToast(`Found ${res.quizzes.length} quizzes`, "success");
-    } catch (err) {
-      showToast(err.message || "Failed to load quizzes", "error");
-    } finally {
-      setMoodleLoading(false);
-    }
-  };
+  // ── Quiz / Exam handlers (not implemented) ────────────────────────────
+  // const loadMoodleQuizzes = async (courseId) => {
+  //   setMoodleLoading(true);
+  //   try {
+  //     const res = await apiFetch(`/moodle/quizzes?moodle_token=${moodleToken}&course_id=${courseId}&site_url=${encodeURIComponent(moodleSiteUrl)}`);
+  //     setMoodleQuizzes(res.quizzes || []);
+  //     showToast(`Found ${res.quizzes.length} quizzes`, "success");
+  //   } catch (err) {
+  //     showToast(err.message || "Failed to load quizzes", "error");
+  //   } finally {
+  //     setMoodleLoading(false);
+  //   }
+  // };
 
-  const gradeQuizFromMoodle = async () => {
-    if (!moodleToken || !selectedMoodleQuiz || !quizLocalId) {
-      showToast("Please select a quiz and local assignment", "error");
-      return;
-    }
-    setQuizLoading(true);
-    setQuizResults(null);
-    try {
-      const res = await apiFetch("/moodle/autograde-quiz", {
-        method: "POST",
-        body: JSON.stringify({ moodle_token: moodleToken, quiz_id: parseInt(selectedMoodleQuiz), local_assignment_id: parseInt(quizLocalId), site_url: moodleSiteUrl }),
-      });
-      setQuizResults(res);
-      showToast(`Graded ${res.total_graded} quiz essays from Moodle`, "success");
-    } catch (err) {
-      showToast(err.message || "Quiz grading failed", "error");
-    } finally {
-      setQuizLoading(false);
-    }
-  };
+  // const gradeQuizFromMoodle = async () => {
+  //   if (!moodleToken || !selectedMoodleQuiz || !quizLocalId) {
+  //     showToast("Please select a quiz and local assignment", "error");
+  //     return;
+  //   }
+  //   setQuizLoading(true);
+  //   setQuizResults(null);
+  //   try {
+  //     const res = await apiFetch("/moodle/autograde-quiz", {
+  //       method: "POST",
+  //       body: JSON.stringify({ moodle_token: moodleToken, quiz_id: parseInt(selectedMoodleQuiz), local_assignment_id: parseInt(quizLocalId), site_url: moodleSiteUrl }),
+  //     });
+  //     setQuizResults(res);
+  //     showToast(`Graded ${res.total_graded} quiz essays from Moodle`, "success");
+  //   } catch (err) {
+  //     showToast(err.message || "Quiz grading failed", "error");
+  //   } finally {
+  //     setQuizLoading(false);
+  //   }
+  // };
 
   // ── Google Classroom handlers ──────────────────────────────────────────
   const connectGoogle = async () => {
@@ -1139,8 +1129,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
             {moodleLoading ? "Connecting…" : "Connect to Moodle"}
           </Btn>
           <a href={moodleSiteUrl || "https://essaygrade.moodlecloud.com"} target="_blank" rel="noopener noreferrer"
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: C.purple.bg, color: C.purple.text, border: `1px solid ${C.purple.border}`, fontWeight: 500, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-            <Icon name="external-link" size={13} style={{ color: C.purple.text }} />
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: C.gray.bg, color: C.gray.dark, border: `1px solid ${C.gray.border}`, fontWeight: 500, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
+            <Icon name="external-link" size={13} style={{ color: C.gray.dark }} />
             Open Moodle
           </a>
         </div>
@@ -1207,8 +1197,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
 
         {moodleResults && <ResultsBox results={moodleResults.results} total={moodleResults.total_graded} color="amber" />}
 
-        {/* ── Quiz / Exam section ── */}
-        {moodleConnected && moodleCourses.length > 0 && (
+        {/* ── Quiz / Exam section (not implemented) ────────────────────── */}
+        {/* {moodleConnected && moodleCourses.length > 0 && (
           <>
             <div style={{ height: 1, background: "#D3D1C7", margin: "24px 0" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
@@ -1255,7 +1245,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
 
             {quizResults && <ResultsBox results={quizResults.results} total={quizResults.total_graded} color="purple" />}
           </>
-        )}
+        )} */}
+
       </PlatformCard>
     </div>
   );

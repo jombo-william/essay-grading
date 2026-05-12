@@ -454,6 +454,7 @@ import StudentsTab       from "./StudentsTab.jsx";
 import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 import IntegrationsTab   from "./IntegrationsTab.jsx";
+// import TeacherQuizTab from "./TeacherQuizTab";
 
 const TABS = [
   { id: "pending",      icon: "clock-hour-4",     label: "Pending"      },
@@ -461,6 +462,7 @@ const TABS = [
   { id: "students",     icon: "users",            label: "Students"     },
   { id: "archived",     icon: "archive",          label: "Archived"     },
   { id: "integrations", icon: "plug-connected",   label: "Integrations" },
+  // { id: "quizzes",      icon: "clipboard-list",   label: "Quizzes"      },
 ];
 
 const CLASS_PALETTES = [
@@ -835,6 +837,14 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             assignments={assignments}
           />
         )}
+
+        {/* {tab === "quizzes" && (
+          <TeacherQuizTab
+             apiFetch={apiFetch}
+            showToast={showToast}
+            classes={[selectedClass]}
+          />
+        )} */}
       </div>
 
       {/* Modals */}
