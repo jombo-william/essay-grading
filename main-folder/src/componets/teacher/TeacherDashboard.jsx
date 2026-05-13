@@ -1,4 +1,3 @@
-// src/components/teacher/TeacherDashboard.jsx
 import { useState, useEffect, useCallback } from "react";
 import { Toast } from "./shared.jsx";
 import { apiFetch } from "./api.js";
@@ -8,15 +7,13 @@ import StudentsTab       from "./StudentsTab.jsx";
 import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 import IntegrationsTab from "./IntegrationsTab.jsx";
-import QuizzesTab from "./QuizzesTab.jsx";
 import { GoGraph } from "react-icons/go";
 
 const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
   { id: "assignments", icon: "📋", label: "Assignments"  },
   { id: "students",    icon: "👥", label: "Students"     },
-  { id: "quizzes",     icon: "📝", label: "Quizzes"      },
-  { id: "archived",    icon: "📦", label: "Archived"      },
+  { id: "archived",     icon: "📦", label: "Archived"      },
   { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 
@@ -37,45 +34,6 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
   const [fetchError,  setFetchError]  = useState(null);
   const [toast,       setToast]       = useState(null);
 
-  // Moodle state - lifted up to share between tabs
-  const [moodleToken, setMoodleToken] = useState("");
-  const [moodleSiteUrl, setMoodleSiteUrl] = useState("https://essaygrade.moodlecloud.com");
-  const [moodleCourses, setMoodleCourses] = useState([]);
-  const [moodleConnected, setMoodleConnected] = useState(false);
-  const [moodleLoading, setMoodleLoading] = useState(false);
-
-  // Function to connect to Moodle
-  const connectMoodle = async (token, siteUrl) => {
-    if (!token) { 
-      showToast("Please enter your Moodle token", "error"); 
-      return false;
-    }
-    if (!siteUrl) { 
-      showToast("Please enter your Moodle site URL", "error"); 
-      return false;
-    }
-    
-    setMoodleLoading(true);
-    try {
-      const res = await apiFetch(
-        `/moodle/courses?moodle_token=${token}&site_url=${encodeURIComponent(siteUrl)}`
-      );
-      setMoodleCourses(res.courses || []);
-      setMoodleConnected(true);
-      setMoodleToken(token);
-      setMoodleSiteUrl(siteUrl);
-      showToast(`✅ Connected! Found ${res.courses.length} courses`, "success");
-      return true;
-    } catch (err) {
-      showToast(err.message || "Failed to connect to Moodle", "error");
-      setMoodleConnected(false);
-      return false;
-    } finally {
-      setMoodleLoading(false);
-    }
-  };
-
-  // Modals
   const [gradeSub,     setGradeSub]     = useState(null);
   const [editGradeSub, setEditGradeSub] = useState(null);
   const [viewSub,      setViewSub]      = useState(null);
@@ -103,7 +61,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
       setAssignments(aData.assignments || []);
       setSubmissions(sData.submissions || []);
     } catch (err) {
-      const msg = err.message || "Failed to load data. Check your connection.";
+      const msg = err.message || "Failed to load data.";
       setFetchError(msg);
       showToast(msg, "error");
     } finally {
@@ -391,17 +349,6 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
           />
         )}
 
-        {tab === "quizzes" && (
-          <QuizzesTab
-            selectedClass={selectedClass}
-            showToast={showToast}
-            moodleToken={moodleToken}
-            moodleSiteUrl={moodleSiteUrl}
-            moodleCourses={moodleCourses}
-            moodleConnected={moodleConnected}
-          />
-        )}
-
         {tab === "archived" && (
           <AssignmentsTab
             assignments={assignments.filter(a => a.is_active === false || a.is_active === 0)}
@@ -420,12 +367,6 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             selectedClass={selectedClass}
             showToast={showToast}
             assignments={assignments}
-            moodleToken={moodleToken}
-            moodleSiteUrl={moodleSiteUrl}
-            moodleCourses={moodleCourses}
-            moodleConnected={moodleConnected}
-            moodleLoading={moodleLoading}
-            onConnectMoodle={connectMoodle}
           />
         )}
       </div>
