@@ -239,6 +239,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
+<<<<<<< HEAD
   // ── Quiz / Exam handlers (not implemented) ────────────────────────────
   // const loadMoodleQuizzes = async (courseId) => {
   //   setMoodleLoading(true);
@@ -273,6 +274,97 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
   //     setQuizLoading(false);
   //   }
   // };
+=======
+  const loadMoodleQuizzes = async (courseId) => {
+    setSelectedMoodleCourse(courseId);
+    setMoodleLoading(true);
+    try {
+      const res = await apiFetch(`/moodle/quizzes?moodle_token=${moodleToken}&course_id=${courseId}&site_url=${encodeURIComponent(moodleSiteUrl)}`);
+      setMoodleQuizzes(res.quizzes || []);
+      showToast(`Found ${res.quizzes.length} quizzes`, "success");
+    } catch (err) {
+      showToast(err.message || "Failed to load quizzes", "error");
+    } finally {
+      setMoodleLoading(false);
+    }
+  };
+
+
+const gradeQuizFromMoodle = async () => {
+    if (!moodleToken || !selectedMoodleQuiz || !quizLocalId) {
+      showToast("Please select a quiz and local assignment", "error");
+      return;
+    }
+
+    // DEBUG — check browser console before clicking grade
+    console.log("=== QUIZ GRADE DEBUG ===");
+    console.log("moodleToken:", moodleToken ? "present" : "MISSING");
+    console.log("selectedMoodleQuiz:", selectedMoodleQuiz, "→ parsed:", parseInt(selectedMoodleQuiz));
+    console.log("selectedMoodleCourse:", selectedMoodleCourse, "→ parsed:", parseInt(selectedMoodleCourse));
+    console.log("quizLocalId:", quizLocalId, "→ parsed:", parseInt(quizLocalId));
+    console.log("moodleSiteUrl:", moodleSiteUrl);
+
+    const payload = {
+      moodle_token:        moodleToken,
+      quiz_id:             parseInt(selectedMoodleQuiz),
+      course_id:           parseInt(selectedMoodleCourse),
+      local_assignment_id: parseInt(quizLocalId),
+      site_url:            moodleSiteUrl
+    };
+    console.log("Payload being sent:", JSON.stringify(payload));
+
+    setQuizLoading(true);
+    setQuizResults(null);
+    try {
+      const res = await apiFetch("/moodle/autograde-quiz", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      setQuizResults(res);
+      showToast(`Graded ${res.total_graded} quiz essays from Moodle`, "success");
+    } catch (err) {
+      showToast(err.message || "Quiz grading failed", "error");
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+>>>>>>> 09e8f77d69672bbe37dc0697a7eda8a136220551
+
+
+
+//   const gradeQuizFromMoodle = async () => {
+//     if (!moodleToken || !selectedMoodleQuiz || !quizLocalId) {
+//       showToast("Please select a quiz and local assignment", "error");
+//       return;
+//     }
+//     setQuizLoading(true);
+//     setQuizResults(null);
+//     try {
+//       // const res = await apiFetch("/moodle/autograde-quiz", {
+//       //   method: "POST",
+//       //   body: JSON.stringify({ moodle_token: moodleToken, quiz_id: parseInt(selectedMoodleQuiz), local_assignment_id: parseInt(quizLocalId), site_url: moodleSiteUrl }),
+//       // });
+
+
+//       const res = await apiFetch("/moodle/autograde-quiz", {
+//   method: "POST",
+//   body: JSON.stringify({
+//     moodle_token:        moodleToken,
+//     quiz_id:             parseInt(selectedMoodleQuiz),
+//     course_id:           parseInt(selectedMoodleCourse),  // ADD THIS
+//     local_assignment_id: parseInt(quizLocalId),
+//     site_url:            moodleSiteUrl
+//   }),
+// });
+
+//       setQuizResults(res);
+//       showToast(`Graded ${res.total_graded} quiz essays from Moodle`, "success");
+//     } catch (err) {
+//       showToast(err.message || "Quiz grading failed", "error");
+//     } finally {
+//       setQuizLoading(false);
+//     }
+//   };
 
   // ── Google Classroom handlers ──────────────────────────────────────────
   const connectGoogle = async () => {
