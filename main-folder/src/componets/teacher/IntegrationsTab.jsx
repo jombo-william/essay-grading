@@ -1,7 +1,4 @@
 
-
-
-
 // src/components/teacher/IntegrationsTab.jsx
 // No external CSS — all styles inline. Uses Tabler Icons via Icon component.
 
@@ -11,12 +8,12 @@ import { Icon } from "./shared.jsx";
 
 // ── Color tokens ──────────────────────────────────────────────────────────────
 const C = {
-  blue:   { bg: "#E6F1FB", border: "#B5D4F4", text: "#185FA5", dark: "#0C447C" },
-  green:  { bg: "#EAF3DE", border: "#C0DD97", text: "#3B6D11", dark: "#27500A" },
-  amber:  { bg: "#FAEEDA", border: "#FAC775", text: "#854F0B", dark: "#633806" },
-  red:    { bg: "#FCEBEB", border: "#F7C1C1", text: "#A32D2D", dark: "#791F1F" },
+  blue: { bg: "#E6F1FB", border: "#B5D4F4", text: "#185FA5", dark: "#0C447C" },
+  green: { bg: "#EAF3DE", border: "#C0DD97", text: "#3B6D11", dark: "#27500A" },
+  amber: { bg: "#FAEEDA", border: "#FAC775", text: "#854F0B", dark: "#633806" },
+  red: { bg: "#FCEBEB", border: "#F7C1C1", text: "#A32D2D", dark: "#791F1F" },
   purple: { bg: "#EEEDFE", border: "#CECBF6", text: "#3C3489", dark: "#26215C" },
-  gray:   { bg: "#F1EFE8", border: "#D3D1C7", text: "#5F5E5A", dark: "#2C2C2A" },
+  gray: { bg: "#F1EFE8", border: "#D3D1C7", text: "#5F5E5A", dark: "#2C2C2A" },
 };
 
 // ── Shared sub-components ─────────────────────────────────────────────────────
@@ -48,13 +45,13 @@ function StepBlock({ step, label, children }) {
 
 function Btn({ onClick, disabled, loading, icon, children, color = "dark", small = false, fullWidth = false }) {
   const palettes = {
-    dark:   { bg: "#1A1830", hover: "#26215C" },
-    blue:   { bg: "#185FA5", hover: "#0C447C" },
-    green:  { bg: "#3B6D11", hover: "#27500A" },
-    amber:  { bg: "#854F0B", hover: "#633806" },
+    dark: { bg: "#1A1830", hover: "#26215C" },
+    blue: { bg: "#185FA5", hover: "#0C447C" },
+    green: { bg: "#3B6D11", hover: "#27500A" },
+    amber: { bg: "#854F0B", hover: "#633806" },
     purple: { bg: "#3C3489", hover: "#26215C" },
-    red:    { bg: "#A32D2D", hover: "#791F1F" },
-    ghost:  { bg: "#F1EFE8", hover: "#D3D1C7" },
+    red: { bg: "#A32D2D", hover: "#791F1F" },
+    ghost: { bg: "#F1EFE8", hover: "#D3D1C7" },
   };
   const p = palettes[color] || palettes.dark;
   const isGhost = color === "ghost";
@@ -155,33 +152,33 @@ function PlatformCard({ icon, iconColor, title, subtitle, children }) {
 export default function IntegrationsTab({ selectedClass, showToast, assignments }) {
 
   // ── Google Classroom state ─────────────────────────────────────────────
-  const [gcCourses,       setGcCourses]       = useState([]);
-  const [gcAssignments,   setGcAssignments]   = useState([]);
-  const [selectedCourse,  setSelectedCourse]  = useState(null);
-  const [selectedGcWork,  setSelectedGcWork]  = useState("");
+  const [gcCourses, setGcCourses] = useState([]);
+  const [gcAssignments, setGcAssignments] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedGcWork, setSelectedGcWork] = useState("");
   const [selectedLocalId, setSelectedLocalId] = useState("");
-  const [gcLoading,       setGcLoading]       = useState(false);
-  const [gcResults,       setGcResults]       = useState(null);
-  const [linkClassId,     setLinkClassId]     = useState("");
-  const [linking,         setLinking]         = useState(false);
-  const [classes,         setClasses]         = useState([]);
+  const [gcLoading, setGcLoading] = useState(false);
+  const [gcResults, setGcResults] = useState(null);
+  const [linkClassId, setLinkClassId] = useState("");
+  const [linking, setLinking] = useState(false);
+  const [classes, setClasses] = useState([]);
 
   // ── Moodle state ───────────────────────────────────────────────────────
-  const [moodleToken,          setMoodleToken]          = useState("");
-  const [moodleSiteUrl,        setMoodleSiteUrl]        = useState("https://essaygrade.moodlecloud.com");
-  const [moodleCourses,        setMoodleCourses]        = useState([]);
-  const [moodleAssignments,    setMoodleAssignments]    = useState([]);
+  const [moodleToken, setMoodleToken] = useState("");
+  const [moodleSiteUrl, setMoodleSiteUrl] = useState("https://essaygrade.moodlecloud.com");
+  const [moodleCourses, setMoodleCourses] = useState([]);
+  const [moodleAssignments, setMoodleAssignments] = useState([]);
   const [selectedMoodleCourse, setSelectedMoodleCourse] = useState(null);
   const [selectedMoodleAssign, setSelectedMoodleAssign] = useState("");
-  const [moodleLocalId,        setMoodleLocalId]        = useState("");
-  const [moodleLoading,        setMoodleLoading]        = useState(false);
-  const [moodleResults,        setMoodleResults]        = useState(null);
-  const [moodleConnected,      setMoodleConnected]      = useState(false);
-  const [moodleQuizzes,        setMoodleQuizzes]        = useState([]);
-  const [selectedMoodleQuiz,   setSelectedMoodleQuiz]   = useState("");
-  const [quizLocalId,          setQuizLocalId]          = useState("");
-  const [quizLoading,          setQuizLoading]          = useState(false);
-  const [quizResults,          setQuizResults]          = useState(null);
+  const [moodleLocalId, setMoodleLocalId] = useState("");
+  const [moodleLoading, setMoodleLoading] = useState(false);
+  const [moodleResults, setMoodleResults] = useState(null);
+  const [moodleConnected, setMoodleConnected] = useState(false);
+  const [moodleQuizzes, setMoodleQuizzes] = useState([]);
+  const [selectedMoodleQuiz, setSelectedMoodleQuiz] = useState("");
+  const [quizLocalId, setQuizLocalId] = useState("");
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizResults, setQuizResults] = useState(null);
 
   // ── Moodle handlers ────────────────────────────────────────────────────
   const connectMoodle = async () => {
@@ -250,30 +247,18 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
-
-const gradeQuizFromMoodle = async () => {
+  const gradeQuizFromMoodle = async () => {
     if (!moodleToken || !selectedMoodleQuiz || !quizLocalId) {
       showToast("Please select a quiz and local assignment", "error");
       return;
     }
-
-    // DEBUG — check browser console before clicking grade
-    console.log("=== QUIZ GRADE DEBUG ===");
-    console.log("moodleToken:", moodleToken ? "present" : "MISSING");
-    console.log("selectedMoodleQuiz:", selectedMoodleQuiz, "→ parsed:", parseInt(selectedMoodleQuiz));
-    console.log("selectedMoodleCourse:", selectedMoodleCourse, "→ parsed:", parseInt(selectedMoodleCourse));
-    console.log("quizLocalId:", quizLocalId, "→ parsed:", parseInt(quizLocalId));
-    console.log("moodleSiteUrl:", moodleSiteUrl);
-
     const payload = {
-      moodle_token:        moodleToken,
-      quiz_id:             parseInt(selectedMoodleQuiz),
-      course_id:           parseInt(selectedMoodleCourse),
+      moodle_token: moodleToken,
+      quiz_id: parseInt(selectedMoodleQuiz),
+      course_id: parseInt(selectedMoodleCourse),
       local_assignment_id: parseInt(quizLocalId),
-      site_url:            moodleSiteUrl
+      site_url: moodleSiteUrl,
     };
-    console.log("Payload being sent:", JSON.stringify(payload));
-
     setQuizLoading(true);
     setQuizResults(null);
     try {
@@ -290,49 +275,26 @@ const gradeQuizFromMoodle = async () => {
     }
   };
 
-
-
-//   const gradeQuizFromMoodle = async () => {
-//     if (!moodleToken || !selectedMoodleQuiz || !quizLocalId) {
-//       showToast("Please select a quiz and local assignment", "error");
-//       return;
-//     }
-//     setQuizLoading(true);
-//     setQuizResults(null);
-//     try {
-//       // const res = await apiFetch("/moodle/autograde-quiz", {
-//       //   method: "POST",
-//       //   body: JSON.stringify({ moodle_token: moodleToken, quiz_id: parseInt(selectedMoodleQuiz), local_assignment_id: parseInt(quizLocalId), site_url: moodleSiteUrl }),
-//       // });
-
-
-//       const res = await apiFetch("/moodle/autograde-quiz", {
-//   method: "POST",
-//   body: JSON.stringify({
-//     moodle_token:        moodleToken,
-//     quiz_id:             parseInt(selectedMoodleQuiz),
-//     course_id:           parseInt(selectedMoodleCourse),  // ADD THIS
-//     local_assignment_id: parseInt(quizLocalId),
-//     site_url:            moodleSiteUrl
-//   }),
-// });
-
-//       setQuizResults(res);
-//       showToast(`Graded ${res.total_graded} quiz essays from Moodle`, "success");
-//     } catch (err) {
-//       showToast(err.message || "Quiz grading failed", "error");
-//     } finally {
-//       setQuizLoading(false);
-//     }
-//   };
-
   // ── Google Classroom handlers ──────────────────────────────────────────
   const connectGoogle = async () => {
+    // Must open the popup SYNCHRONOUSLY before any await — browsers block
+    // window.open() if it isn't called as a direct result of a user gesture.
+    const popup = window.open("", "_blank", "width=600,height=700");
+    if (!popup) {
+      showToast("Popup was blocked — please allow popups for this site and try again", "error");
+      return;
+    }
+    popup.document.write(`
+      <html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#F8F7FF">
+        <p style="color:#1A1830;font-size:15px">Connecting to Google…</p>
+      </body></html>
+    `);
     try {
       const res = await apiFetch("/auth/google/classroom");
-      window.open(res.auth_url, "_blank", "width=600,height=700");
+      popup.location.href = res.auth_url;
       showToast("Complete login in the popup window", "success");
     } catch (err) {
+      popup.close();
       showToast(err.message || "Could not connect to Google", "error");
     }
   };
