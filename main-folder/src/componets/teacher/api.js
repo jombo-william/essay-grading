@@ -1,7 +1,7 @@
 // src/components/teacher/api.js
 
-const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
-
+// const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
+const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
 export async function apiFetch(path, options = {}) {
   const csrfToken = getCsrfToken();
 
