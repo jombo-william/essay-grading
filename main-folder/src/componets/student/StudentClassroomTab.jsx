@@ -1,29 +1,7 @@
-<<<<<<< HEAD
-
-// src/components/student/StudentClassroomTab.jsx
-=======
->>>>>>> HomePage
 import { useState, useEffect } from "react";
 import { apiFetch } from "./api.js";
 
 export default function StudentClassroomTab({ assignments, showToast, onSubmitted }) {
-<<<<<<< HEAD
-
-  // ── Google Classroom state ─────────────────────────────────────────────────
-  const [connected,      setConnected]      = useState(false);
-  const [courses,        setCourses]        = useState([]);
-  const [gcAssignments,  setGcAssignments]  = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [loading,        setLoading]        = useState(false);
-  const [submitting,     setSubmitting]     = useState(null);
-
-  // ── Moodle state ───────────────────────────────────────────────────────────
-  const [moodleToken,       setMoodleToken]       = useState("");
-  const [moodleSiteUrl,     setMoodleSiteUrl]     = useState("");
-  const [moodleConnected,   setMoodleConnected]   = useState(false);
-  const [moodleLoading,     setMoodleLoading]     = useState(false);
-  const [moodleSiteDisplay, setMoodleSiteDisplay] = useState("");
-=======
 
   // ── Google Classroom state ─────────────────────────────────────────────────
   const [connected,      setConnected]      = useState(false);
@@ -39,7 +17,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
   const [moodleConnected,  setMoodleConnected]  = useState(false);
   const [moodleLoading,    setMoodleLoading]    = useState(false);
   const [moodleSiteDisplay,setMoodleSiteDisplay]= useState("");
->>>>>>> HomePage
 
   // ── Styles ─────────────────────────────────────────────────────────────────
   const card = {
@@ -56,49 +33,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     boxSizing: "border-box",
   };
 
-<<<<<<< HEAD
-  const platformBadge = (bg) => ({
-    width: "40px", height: "40px", borderRadius: "10px",
-    background: bg, display: "flex", alignItems: "center",
-    justifyContent: "center", flexShrink: 0, color: "#fff", fontSize: "18px",
-  });
-
-  const btn = (bg = "#3b82f6", extra = {}) => ({
-    display: "inline-flex", alignItems: "center", gap: "6px",
-    padding: "9px 16px", background: bg, color: "#fff",
-    border: "none", borderRadius: "8px", fontWeight: "600",
-    fontSize: "13px", cursor: "pointer", fontFamily: "inherit", lineHeight: 1,
-    ...extra,
-  });
-
-  const selectStyle = {
-    width: "100%", padding: "9px 36px 9px 12px",
-    borderRadius: "8px", border: "1px solid #ECECF2",
-    fontSize: "13px", fontFamily: "inherit",
-    background: "#F8F7FF", appearance: "none", cursor: "pointer",
-    color: "#1A1830",
-  };
-
-  const inputStyle = {
-    width: "100%", padding: "9px 12px",
-    borderRadius: "8px", border: "1px solid #ECECF2",
-    fontSize: "13px", fontFamily: "inherit",
-    background: "#F8F7FF", color: "#1A1830", outline: "none",
-    boxSizing: "border-box",
-  };
-
-  const stepLabel = {
-    fontWeight: "600", fontSize: "11px", color: "#8884A8",
-    marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em",
-    display: "block",
-  };
-
-  const divider = { height: "1px", background: "#F1EFE8", margin: "16px 0" };
-
-  // ── Moodle status on load ──────────────────────────────────────────────────
-=======
   // ── Check Moodle connection status on load ─────────────────────────────────
->>>>>>> HomePage
   useEffect(() => {
     apiFetch("/moodle/status")
       .then(res => {
@@ -188,11 +123,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
       });
       setMoodleConnected(true);
       setMoodleSiteDisplay(moodleSiteUrl);
-<<<<<<< HEAD
-      showToast("Connected to Moodle successfully!", "success");
-=======
       showToast("✅ Connected to Moodle successfully!", "success");
->>>>>>> HomePage
     } catch (err) {
       showToast(err.message || "Failed to connect to Moodle", "error");
     } finally {
@@ -215,24 +146,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
 
   return (
     <div>
-<<<<<<< HEAD
-      <p style={{ fontSize: "16px", fontWeight: "600", color: "#1A1830", marginBottom: "16px" }}>
-        Connected Platforms
-      </p>
-
-      {/* ── Google Classroom ── */}
-      <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
-          <div style={platformBadge("#185FA5")}>
-            <i className="ti ti-school" aria-hidden="true" />
-          </div>
-          <div>
-            <p style={{ margin: 0, fontWeight: "600", fontSize: "14px", color: "#1A1830" }}>
-              Google Classroom
-            </p>
-            <p style={{ margin: 0, fontSize: "12px", color: "#8884A8" }}>
-              Submit assignments and sync results
-=======
       <h2 style={{ fontSize: "18px", fontWeight: "800", color: "#1e293b", marginBottom: "20px" }}>
         🔗 Connected Platforms
       </h2>
@@ -252,7 +165,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
             </p>
             <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
               Submit assignments and sync results with Google Classroom
->>>>>>> HomePage
             </p>
           </div>
         </div>
@@ -310,16 +222,10 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
 
         {/* Step 4 — Assignments */}
         {gcAssignments.length > 0 && (
-<<<<<<< HEAD
-          <>
-            <div style={divider} />
-            <span style={stepLabel}>Step 4 — Import and submit</span>
-=======
           <div>
             <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "10px" }}>
               Step 4 — Import and submit an assignment
             </p>
->>>>>>> HomePage
             {gcAssignments.map(a => (
               <div
                 key={a.id}
@@ -349,8 +255,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
                       {a.local_assignment_id ? "Linked — ready to submit" : "Not yet linked by teacher"}
                     </p>
                   </div>
-<<<<<<< HEAD
-=======
                   <button
                     onClick={() => submitFromClassroom(a)}
                     disabled={!a.local_assignment_id || submitting === a.id}
@@ -362,7 +266,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
                   >
                     {submitting === a.id ? "⏳ Submitting..." : "📤 Import and Submit"}
                   </button>
->>>>>>> HomePage
                 </div>
                 <button
                   onClick={() => submitFromClassroom(a)}
@@ -382,7 +285,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
                 </button>
               </div>
             ))}
-          </>
+          </div>
         )}
       </div>
 
@@ -467,9 +370,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
         )}
       </div>
 
-<<<<<<< HEAD
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-=======
       {/* ── Moodle ────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
@@ -564,7 +464,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
           </div>
         )}
       </div>
->>>>>>> HomePage
     </div>
   );
 }
