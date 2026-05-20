@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 
+=======
+// src/components/student/AssignmentDetail.jsx
+import { C, Sheet } from './shared.jsx';
+>>>>>>> HomePage
 
 
 
@@ -15,6 +20,7 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
   const pct         = sub?.final_score != null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
   const isAI        = (sub?.ai_detection_score ?? 0) >= 50;
 
+<<<<<<< HEAD
   const body = (
     <>
       {/* Status banner */}
@@ -35,12 +41,52 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
                 : isAI ? `AI content detected (${sub.ai_detection_score}%) — score: 0`
                 : sub?.status === 'pending' ? 'Grading in progress…'
                 : sub?.ai_score != null ? 'Awaiting teacher approval'
+=======
+  const footer = !a.submitted && !a.isPast ? (
+    <button onClick={() => { onClose(); onWrite(a); }} style={{ ...C.pBtn(false), width: '100%', display: 'block' }}>
+      ✍️ Start Writing Essay
+    </button>
+  ) : a.submitted ? (
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <button
+        onClick={() => { if (a.submission) { onClose(); onViewEssay(a.submission); } }}
+        style={{ ...C.gBtn, border: '1.5px solid #8b5cf6', background: 'transparent', color: '#8b5cf6' }}
+      >
+        View My Essay
+      </button>
+      {a.submission && a.submission.final_score !== null && (
+        <button onClick={() => { onClose(); onViewResult(a.submission); }} style={C.pBtn(false)}>
+          See Results →
+        </button>
+      )}
+    </div>
+  ) : (
+    <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', margin: 0 }}>⏰ Submission deadline has passed.</p>
+  );
+
+  return (
+    <Sheet onClose={onClose} title={a.title}
+      subtitle={`Due ${new Date(a.due_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${a.max_score} pts`}
+      footer={footer}
+    >
+      {a.submitted && (
+        <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>✅</span>
+          <div>
+            <p style={{ fontWeight: '700', color: '#7e22ce', fontSize: '13px', margin: 0 }}>You have submitted this assignment</p>
+            <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+              {a.submission && a.submission.final_score !== null
+                ? `Score: ${a.submission.final_score}/${a.max_score}`
+                : a.submission?.status === 'pending' ? 'AI grading in progress...'
+                : a.submission?.ai_score !== null ? 'Awaiting teacher approval'
+>>>>>>> HomePage
                 : 'Grading in progress'}
             </p>
           </div>
         </div>
       )}
 
+<<<<<<< HEAD
       {isPast && !isSubmitted && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: '12px',
@@ -72,6 +118,25 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
       </div>
 
       {/* Rubric */}
+=======
+      {a.isPast && !a.submitted && (
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>⏰</span>
+          <p style={{ fontWeight: '700', color: '#dc2626', fontSize: '13px', margin: 0 }}>Deadline passed — you did not submit this assignment.</p>
+        </div>
+      )}
+
+      <div style={{ marginBottom: '18px' }}>
+        <p style={C.sL}>About this Assignment</p>
+        <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.7, margin: 0 }}>{a.description}</p>
+      </div>
+
+      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+        <p style={{ ...C.sL, color: '#92400e' }}>Full Instructions</p>
+        <p style={{ fontSize: '14px', color: '#78350f', margin: 0, lineHeight: 1.7 }}>{a.instructions}</p>
+      </div>
+
+>>>>>>> HomePage
       {a.rubric && (
         <div style={{ marginBottom: '16px' }}>
           <span style={C.sL}>Grading rubric</span>
@@ -91,7 +156,10 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Info grid */}
+=======
+>>>>>>> HomePage
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         {[
           { label: 'Max score',  value: `${a.max_score} pts`, icon: 'trophy'    },

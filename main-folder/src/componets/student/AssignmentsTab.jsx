@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 
@@ -31,6 +32,24 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
       <span style={{ fontSize: '14px' }}>Loading assignments…</span>
     </div>
   );
+=======
+// src/components/student/AssignmentsTab.jsx
+import { C } from './shared.jsx';
+
+export default function AssignmentsTab({
+  assignments,
+  loading,
+  onOpenDetail,
+}) {
+  if (loading) {
+    return (
+      <div style={{ ...C.card, textAlign: 'center', padding: '48px 24px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e2e8f0', borderTopColor: '#8b5cf6', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+        <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Loading assignments…</p>
+      </div>
+    );
+  }
+>>>>>>> HomePage
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: selectedAssignment ? '340px 1fr' : '1fr', gap: '20px', alignItems: 'start' }}>
@@ -48,6 +67,7 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
           </div>
         )}
 
+<<<<<<< HEAD
         {assignments.map(a => {
           const st   = getStatus(a);
           const s    = STATUS[st];
@@ -86,6 +106,28 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
                       <Icon name="trophy" size={13} />
                       {a.max_score} pts
                     </span>
+=======
+          {a.submitted && a.submission && (() => {
+            const sub = a.submission;
+            const isAI = (sub.ai_detection_score ?? 0) >= 50;
+            return (
+              <div
+                style={{ marginTop: '10px', background: isAI ? '#fef2f2' : '#faf5ff', border: `1px solid ${isAI ? '#fecaca' : '#e9d5ff'}`, borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px' }}>
+                    {sub.final_score !== null ? '✅' : isAI ? '🚨' : sub.status === 'pending' ? '⏳' : sub.ai_score !== null ? '🔍' : '⏳'}
+                  </span>
+                  <div>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: isAI ? '#dc2626' : '#6d28d9', margin: 0 }}>
+                      {sub.final_score !== null
+                        ? `Graded: ${sub.final_score}/${sub.max_score} (${Math.round((sub.final_score / sub.max_score) * 100)}%)`
+                        : isAI     ? `AI Flagged (${sub.ai_detection_score}%) — Score: 0`
+                        : sub.status === 'pending' ? 'Grading in progress...'
+                        : 'AI graded — awaiting teacher'}
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Submitted {new Date(sub.submitted_at).toLocaleDateString()}</p>
+>>>>>>> HomePage
                   </div>
                 </div>
                 <Icon name={isActive ? 'chevron-right' : 'chevron-right'} size={16} style={{ color: '#C0BDEA', flexShrink: 0, marginTop: '2px', transform: isActive ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
