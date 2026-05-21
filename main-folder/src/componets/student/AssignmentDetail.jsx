@@ -1,11 +1,4 @@
-// src/components/student/AssignmentDetail.jsx
-import { C, Sheet } from './shared.jsx';
-
-
-
-// src/components/student/AssignmentDetail.jsx
 import { C, Icon, Badge, Sheet, scoreColor } from './shared.jsx';
-
 // `inline` prop = renders as a side panel card instead of a bottom sheet
 export default function AssignmentDetail({ assignment, inline, onClose, onWrite, onViewEssay, onViewResult }) {
   if (!assignment) return null;

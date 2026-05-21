@@ -227,7 +227,5 @@ export function Sheet({ onClose, title, subtitle, children, footer }) {
 
 export const scoreColor = p => p >= 70 ? '#16a34a' : p >= 50 ? '#d97706' : '#dc2626';
 export const scoreLabel = p => p >= 70 ? 'Pass'    : p >= 50 ? 'Borderline' : 'Fail';
-export const scoreColor = p => p >= 70 ? '#3B6D11' : p >= 50 ? '#854F0B' : '#A32D2D';
-export const scoreLabel = p => p >= 70 ? 'Pass'    : p >= 50 ? 'Borderline' : 'Fail';
 export const scoreBg    = p => p >= 70 ? '#EAF3DE' : p >= 50 ? '#FAEEDA'   : '#FCEBEB';
 

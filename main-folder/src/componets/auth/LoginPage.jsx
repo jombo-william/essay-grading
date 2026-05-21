@@ -4,6 +4,7 @@
 // src/components/auth/LoginPage.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { setAuthToken } from '../teacher/api.js'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -31,11 +32,17 @@ export default function LoginPage() {
         return
       }
 
-      localStorage.setItem('user',          JSON.stringify(data.user))
-      localStorage.setItem('token',         data.csrf_token)
-      localStorage.setItem('session_token', data.session_token)
-      sessionStorage.setItem('csrf_token',    data.csrf_token)
-      sessionStorage.setItem('session_token', data.session_token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+
+      if (data.csrf_token) {
+        localStorage.setItem('csrf_token', data.csrf_token)
+        sessionStorage.setItem('csrf_token', data.csrf_token)
+      }
+
+      if (data.session_token) {
+        localStorage.setItem('session_token', data.session_token)
+        setAuthToken(data.session_token)
+      }
 
       navigate(data.user.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
 
