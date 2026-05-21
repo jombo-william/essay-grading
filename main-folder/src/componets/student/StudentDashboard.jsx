@@ -1,68 +1,41 @@
-
-
-
-<<<<<<< HEAD
-
-// src/components/student/StudentDashboard.jsx
-=======
-// src/componets/student/StudentDashboard.jsx
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 import { useState, useEffect, useCallback } from 'react';
-import { apiFetch }         from './api.js';
-import { C, Toast }         from './shared.jsx';
-import AssignmentsTab       from './AssignmentsTab.jsx';
-<<<<<<< HEAD
-import Results               from './Results.jsx';
-import AssignmentDetail     from './AssignmentDetail.jsx';
-import WriteEssaySheet      from './WriteEssaySheet.jsx';
-import EssayViewSheet       from './EssayViewSheet.jsx';
-// import ResultDetailSheet    from './ResultDetailSheet.jsx';
-=======
-import ResultsTab           from './ResultsTab.jsx';
-// import ExamsTab             from './ExamsTab.jsx';
-import AssignmentDetail     from './AssignmentDetail.jsx';
-import WriteEssaySheet      from './WriteEssaySheet.jsx';
-import EssayViewSheet       from './EssayViewSheet.jsx';
-import ResultDetailSheet    from './ResultDetailSheet.jsx';
-// import ExamTakeSheet        from './ExamTakeSheet.jsx';
-import StudentClassroomTab from "./StudentClassroomTab.jsx";
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
+import { apiFetch } from './api.js';
+import { C, Icon, Toast } from './shared.jsx';
+import AssignmentsTab from './AssignmentsTab.jsx';
+import ResultsTab from './ResultsTab.jsx';
+import WriteEssaySheet from './WriteEssaySheet.jsx';
+import EssayViewSheet from './EssayViewSheet.jsx';
+import ResultDetailSheet from './ResultDetailSheet.jsx';
+import StudentClassroomTab from './StudentClassroomTab.jsx';
+import AssignmentDetail from './AssignmentDetail.jsx';
 
 const TABS = [
-  { id: 'assignments', label: '📋 Assignments' },
-  { id: 'results',     label: '📊 My Results'  },
-<<<<<<< HEAD
-=======
-  // { id: 'exams',       label: '📝 Exams'        },
-  { id: 'classroom',   label: '🎓 Classroom'    },
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
+  { id: 'assignments', label: 'Assignments', icon: 'clipboard-text' },
+  { id: 'results', label: 'My results', icon: 'chart-bar' },
+  { id: 'classroom', label: 'Classroom', icon: 'building-community' },
 ];
 
 export default function StudentDashboard({ user, onBack }) {
-  const [tab,         setTab]         = useState('assignments');
+  const [tab, setTab] = useState('assignments');
   const [assignments, setAssignments] = useState([]);
-  const [results,     setResults]     = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [toast,       setToast]       = useState(null);
-  const [submitting,  setSubmitting]  = useState(false);
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [gradingStatus, setGradingStatus] = useState('');
 
   // Modals
   const [detailAssignment, setDetailAssignment] = useState(null);
-  const [writeAssignment,  setWriteAssignment]  = useState(null);
-  const [essayViewSub,     setEssayViewSub]     = useState(null);
-  const [resultSub,        setResultSub]        = useState(null);
-<<<<<<< HEAD
-=======
-  const [activeExam,       setActiveExam]       = useState(null); // ← exam being taken
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
+  const [writeAssignment, setWriteAssignment] = useState(null);
+  const [essayViewSub, setEssayViewSub] = useState(null);
+  const [resultSub, setResultSub] = useState(null);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ── Fetch ───────────────────────────────────────────────────────────────
+  // ── Fetch ────────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -81,31 +54,32 @@ export default function StudentDashboard({ user, onBack }) {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // ── Poll while submissions are pending ──────────────────────────────────
+  // ── Poll pending ─────────────────────────────────────────────────────────
   useEffect(() => {
     const hasPending = results.some(r => r.status === 'pending');
     if (!hasPending) return;
-    const interval = setInterval(async () => {
+    const iv = setInterval(async () => {
       try {
-        const rData  = await apiFetch('/get_results.php');
+        const rData = await apiFetch('/get_results.php');
         const updated = rData.results || [];
         setResults(updated);
-        if (!updated.some(r => r.status === 'pending')) clearInterval(interval);
-      } catch { /* silently retry */ }
+        if (!updated.some(r => r.status === 'pending')) clearInterval(iv);
+      } catch { /* retry */ }
     }, 5000);
-    return () => clearInterval(interval);
+    return () => clearInterval(iv);
   }, [results]);
 
-  // ── Derived ─────────────────────────────────────────────────────────────
-  const enrichedAssignments = assignments.map(a => ({
+  // ── Derived ──────────────────────────────────────────────────────────────
+  const enriched = assignments.map(a => ({
     ...a,
-    isPast:     new Date() > new Date(a.due_date),
+    isPast: new Date() > new Date(a.due_date),
     submission: results.find(r => r.assignment_id === a.id) || null,
+    submitted: results.some(r => r.assignment_id === a.id),
   }));
 
   const graded = results.filter(r => r.final_score !== null);
   const avgPct = graded.length
-    ? Math.round(graded.reduce((sum, r) => sum + (r.final_score / r.max_score) * 100, 0) / graded.length)
+    ? Math.round(graded.reduce((s, r) => s + (r.final_score / r.max_score) * 100, 0) / graded.length)
     : null;
 
   const canUnsubmit = sub => {
@@ -113,45 +87,30 @@ export default function StudentDashboard({ user, onBack }) {
     return sub.final_score === null && a && new Date() < new Date(a.due_date);
   };
 
-  // ── Submit essay ────────────────────────────────────────────────────────
+  // ── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = async ({ assignment, submitMode, essayText, uploadFile, uploadText, activeText }) => {
     const wordCount = activeText.trim().split(/\s+/).filter(Boolean).length;
-    if (submitMode === 'write'  && wordCount < 50) { showToast('Please write at least 50 words.', 'error'); return; }
-    if (submitMode === 'upload' && !uploadFile)    { showToast('Please select a file to upload.', 'error'); return; }
+    if (submitMode === 'write' && wordCount < 50) {
+      showToast('Please write at least 50 words.', 'error');
+      return;
+    }
+    if (submitMode === 'upload' && !uploadFile) {
+      showToast('Please select a file to upload.', 'error');
+      return;
+    }
 
     setSubmitting(true);
-    setGradingStatus('📤 Submitting...');
-
+    setGradingStatus('🤖 AI is grading your essay...');
     try {
-      setGradingStatus('🤖 AI is grading your essay...');
-<<<<<<< HEAD
-
-      const csrfToken = sessionStorage.getItem('csrf_token') || '';
-
-      const data = await apiFetch('/submit_essay.php', {
-=======
       const csrfToken = sessionStorage.getItem('csrf_token') || '';
       await apiFetch('/submit_essay.php', {
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
         method: 'POST',
-        body: JSON.stringify({
-          assignment_id: assignment.id,
-          essay_text:    activeText,
-          csrf_token:    csrfToken,
-        }),
+        body: JSON.stringify({ assignment_id: assignment.id, essay_text: activeText, csrf_token: csrfToken }),
       });
-<<<<<<< HEAD
 
       setWriteAssignment(null);
       setTab('results');
-
       showToast('✅ Submitted and AI-graded! Awaiting teacher approval.');
-
-=======
-      setWriteAssignment(null);
-      setTab('results');
-      showToast('✅ Submitted and AI-graded! Awaiting teacher approval.');
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       await fetchAll();
     } catch (err) {
       showToast(err.message || 'Submission failed. Please try again.', 'error');
@@ -161,137 +120,179 @@ export default function StudentDashboard({ user, onBack }) {
     }
   };
 
-  // ── Unsubmit essay ──────────────────────────────────────────────────────
+  // ── Unsubmit ─────────────────────────────────────────────────────────────
   const handleUnsubmit = async sub => {
     try {
       const csrfToken = sessionStorage.getItem('csrf_token') || '';
       await apiFetch('/unsubmit_essay.php', {
         method: 'POST',
-<<<<<<< HEAD
-        body: JSON.stringify({
-          submission_id: sub.id,
-          csrf_token:    csrfToken,
-        }),
-=======
         body: JSON.stringify({ submission_id: sub.id, csrf_token: csrfToken }),
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       });
       setEssayViewSub(null);
       setResultSub(null);
-      showToast('↩ Essay unsubmitted. You can rewrite before the deadline.');
+      showToast('Essay unsubmitted. You can rewrite before the deadline.');
       await fetchAll();
     } catch (err) {
-      showToast(err.message || 'Could not unsubmit. Please try again.', 'error');
+      showToast(err.message || 'Could not unsubmit.', 'error');
     }
   };
 
   const stats = [
-    { label: 'To Submit', value: loading ? '…' : enrichedAssignments.filter(a => !a.submitted && !a.isPast).length, icon: '📋', bg: '#eff6ff', fg: '#3b82f6' },
-    { label: 'Submitted', value: loading ? '…' : results.length,                                                     icon: '📝', bg: '#fdf4ff', fg: '#9333ea' },
-    { label: 'Avg Score', value: loading ? '…' : avgPct !== null ? `${avgPct}%` : '—',                               icon: '⭐', bg: '#f0fdf4', fg: '#16a34a' },
+    {
+      label: 'To submit',
+      value: loading ? '…' : enriched.filter(a => !a.submitted && !a.isPast).length,
+      icon: 'clipboard-text', color: '#185FA5', bg: '#E6F1FB',
+    },
+    {
+      label: 'Submitted',
+      value: loading ? '…' : results.length,
+      icon: 'file-check', color: '#534AB7', bg: '#EEEDFE',
+    },
+    {
+      label: 'Average score',
+      value: loading ? '…' : avgPct !== null ? `${avgPct}%` : '—',
+      icon: 'chart-bar', color: '#3B6D11', bg: '#EAF3DE',
+    },
   ];
 
   return (
     <div style={C.page}>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } } input[type=file] { display: none; }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+      `}</style>
 
       <Toast toast={toast} />
 
-      {/* ── Nav ── */}
+      {/* ── Header ── */}
       <header style={C.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '38px', height: '38px', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '19px', boxShadow: '0 2px 8px rgba(99,102,241,0.3)' }}>✍️</div>
+          <div style={{
+            width: '36px', height: '36px',
+            background: '#3C3489', borderRadius: '10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Icon name="pencil" size={18} style={{ color: '#EEEDFE' }} />
+          </div>
           <div>
-            <p style={{ fontWeight: '800', fontSize: '15px', color: '#1e293b', margin: 0 }}>EssayGrade AI</p>
-            <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Student Portal</p>
+            <p style={{ fontWeight: '600', fontSize: '14px', color: '#1A1830', margin: 0 }}>EssayGrade</p>
+            <p style={{ fontSize: '11px', color: '#8884A8', margin: 0 }}>Student Portal</p>
           </div>
         </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '4px 12px 4px 4px' }}>
-            <div style={{ width: '26px', height: '26px', background: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }}>🎓</div>
-            <span style={{ fontSize: '13px', color: '#374151', fontWeight: '600' }}>{user?.name || 'Student'}</span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '7px',
+            background: '#F8F7FF', border: '1px solid #E8E6FF',
+            borderRadius: '20px', padding: '4px 12px 4px 4px',
+          }}>
+            <div style={{
+              width: '26px', height: '26px',
+              background: '#EEEDFE', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '11px', fontWeight: '600', color: '#3C3489',
+            }}>
+              {(user?.name || 'S').charAt(0).toUpperCase()}
+            </div>
+            <span style={{ fontSize: '13px', color: '#1A1830', fontWeight: '500' }}>
+              {user?.name || 'Student'}
+            </span>
           </div>
-          <button onClick={onBack} style={{ background: 'none', border: '1.5px solid #e2e8f0', borderRadius: '8px', color: '#64748b', fontWeight: '600', fontSize: '12px', padding: '6px 12px', cursor: 'pointer' }}>← Logout</button>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'none', border: '1px solid #ECECF2',
+              borderRadius: '8px', color: '#6B6890',
+              fontWeight: '500', fontSize: '12px',
+              padding: '6px 12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '5px',
+            }}
+          >
+            <Icon name="door-exit" size={13} />Logout
+          </button>
         </div>
       </header>
 
       <div style={C.main}>
 
         {/* ── Stats ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '22px' }}>
           {stats.map(s => (
-            <div key={s.label} style={{ background: '#fff', borderRadius: '16px', padding: '14px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: s.bg, color: s.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{s.icon}</div>
+            <div key={s.label} style={{
+              background: '#fff', borderRadius: '12px',
+              padding: '14px 16px', border: '1px solid #ECECF2',
+              display: 'flex', alignItems: 'center', gap: '12px',
+            }}>
+              <div style={{
+                width: '38px', height: '38px', borderRadius: '10px',
+                background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Icon name={s.icon} size={18} style={{ color: s.color }} />
+              </div>
               <div>
-                <p style={{ fontSize: '20px', fontWeight: '900', color: '#1e293b', margin: 0, lineHeight: 1 }}>{s.value}</p>
-                <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0', fontWeight: '500' }}>{s.label}</p>
+                <p style={{ fontSize: '20px', fontWeight: '600', color: '#1A1830', margin: 0, lineHeight: 1 }}>
+                  {s.value}
+                </p>
+                <p style={{ fontSize: '11px', color: '#8884A8', margin: '2px 0 0', fontWeight: '500' }}>
+                  {s.label}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
         {/* ── Tabs ── */}
-        <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '10px', padding: '4px', marginBottom: '20px', gap: '2px', width: 'fit-content' }}>
+        <div style={{
+          display: 'flex', background: '#F1EFE8',
+          borderRadius: '10px', padding: '3px',
+          marginBottom: '22px', gap: '2px', width: 'fit-content',
+        }}>
           {TABS.map(t => (
-            <button key={t.id} style={C.tab(tab === t.id)} onClick={() => setTab(t.id)}>{t.label}</button>
+            <button key={t.id} style={C.tab(tab === t.id)} onClick={() => setTab(t.id)}>
+              <Icon name={t.icon} size={14} />
+              {t.label}
+            </button>
           ))}
         </div>
 
-        {/* ── Tab content ── */}
+        {/* ── Tab panes ── */}
         {tab === 'assignments' && (
           <AssignmentsTab
-            assignments={enrichedAssignments}
+            assignments={enriched}
             loading={loading}
-            onOpenDetail={setDetailAssignment}
+            onWrite={setWriteAssignment}
+            onViewEssay={setEssayViewSub}
+            onViewResult={setResultSub}
           />
         )}
-<<<<<<< HEAD
-        {/* {tab === 'results' && (
-=======
+
         {tab === 'results' && (
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
           <ResultsTab
             results={results}
             loading={loading}
             onOpenResult={setResultSub}
           />
-<<<<<<< HEAD
-        )} */}
-
-        {tab === 'results' && <Results />}
-      </div>
-
-      {/* ── Modals ── */}
-=======
-        )}
-        {tab === 'exams' && (
-          <ExamsTab
-            onStartExam={exam => setActiveExam(exam)}
-          />
         )}
 
         {tab === 'classroom' && (
-  <StudentClassroomTab
-    assignments={assignments}
-    showToast={showToast}
-    onSubmitted={() => { fetchAll(); setTab('results'); }}
-  />
-)}
+          <StudentClassroomTab
+            assignments={assignments}
+            showToast={showToast}
+            onSubmitted={() => { fetchAll(); setTab('results'); }}
+          />
+        )}
       </div>
 
-      {/* ── Essay Modals ── */}
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
+      {/* ── Modals ── */}
       <AssignmentDetail
         assignment={detailAssignment}
         onClose={() => setDetailAssignment(null)}
-        onWrite={a  => { setDetailAssignment(null); setWriteAssignment(a); }}
+        onWrite={a => { setDetailAssignment(null); setWriteAssignment(a); }}
         onViewEssay={sub => { setDetailAssignment(null); setEssayViewSub(sub); }}
         onViewResult={sub => { setDetailAssignment(null); setResultSub(sub); }}
       />
-<<<<<<< HEAD
 
-=======
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       <WriteEssaySheet
         assignment={writeAssignment}
         onClose={() => setWriteAssignment(null)}
@@ -299,31 +300,15 @@ export default function StudentDashboard({ user, onBack }) {
         submitting={submitting}
         gradingStatus={gradingStatus}
       />
-<<<<<<< HEAD
 
       <EssayViewSheet
         sub={essayViewSub}
-=======
-      <EssayViewSheet
-        sub={essayViewSub}
         user={user}
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
         canUnsubmit={essayViewSub ? canUnsubmit(essayViewSub) : false}
         onClose={() => setEssayViewSub(null)}
         onUnsubmit={handleUnsubmit}
       />
-<<<<<<< HEAD
 
-      {/* <ResultDetailSheet
-        sub={resultSub}
-        canUnsubmit={resultSub ? canUnsubmit(resultSub) : false}
-        onClose={() => setResultSub(null)}
-        onUnsubmit={handleUnsubmit}
-      /> */}
-    </div>
-  );
-}
-=======
       <ResultDetailSheet
         sub={resultSub}
         user={user}
@@ -331,17 +316,6 @@ export default function StudentDashboard({ user, onBack }) {
         onClose={() => setResultSub(null)}
         onUnsubmit={handleUnsubmit}
       />
-
-      {/* ── Exam modal ── */}
-      {activeExam && (
-        <ExamTakeSheet
-          exam={activeExam}
-          onClose={() => setActiveExam(null)}
-          onSubmitted={() => { setActiveExam(null); setTab('exams'); }}
-          showToast={showToast}
-        />
-      )}
     </div>
   );
 }
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
