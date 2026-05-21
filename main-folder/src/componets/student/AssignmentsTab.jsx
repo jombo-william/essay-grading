@@ -1,36 +1,19 @@
-
-
-
 // src/components/student/AssignmentsTab.jsx
-import { useState } from 'react';
-import { C, Icon, Badge, scoreColor, scoreLabel, scoreBg } from './shared.jsx';
-import AssignmentDetail from './AssignmentDetail.jsx';
+import { C } from './shared.jsx';
 
-const STATUS = {
-  open:      { color: 'purple', icon: 'circle-dot',  label: 'Open'      },
-  submitted: { color: 'green',  icon: 'circle-check', label: 'Submitted' },
-  past:      { color: 'red',    icon: 'clock-off',    label: 'Past due'  },
-};
-
-function getStatus(a) {
-  if (a.submitted) return 'submitted';
-  if (a.isPast)    return 'past';
-  return 'open';
-}
-
-const BORDER = { open: '#3C3489', submitted: '#3B6D11', past: '#A32D2D' };
-
-export default function AssignmentsTab({ assignments, loading, onWrite, onViewEssay, onViewResult }) {
-  const [selected, setSelected] = useState(null);
-
-  const selectedAssignment = assignments.find(a => a.id === selected) || null;
-
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '10px', color: '#8884A8' }}>
-      <Icon name="loader-2" size={20} style={{ animation: 'spin 0.8s linear infinite' }} />
-      <span style={{ fontSize: '14px' }}>Loading assignments…</span>
-    </div>
-  );
+export default function AssignmentsTab({
+  assignments,
+  loading,
+  onOpenDetail,
+}) {
+  if (loading) {
+    return (
+      <div style={{ ...C.card, textAlign: 'center', padding: '48px 24px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e2e8f0', borderTopColor: '#8b5cf6', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+        <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Loading assignments…</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: selectedAssignment ? '340px 1fr' : '1fr', gap: '20px', alignItems: 'start' }}>
@@ -48,48 +31,38 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
           </div>
         )}
 
-        {assignments.map(a => {
-          const st   = getStatus(a);
-          const s    = STATUS[st];
-          const isActive = selected === a.id;
-
+        {assignments.map((a, idx) => {
+          const isActive = selectedAssignment?.id === a.id;
           return (
-            <div
-              key={a.id}
-              onClick={() => setSelected(isActive ? null : a.id)}
-              style={{
-                ...C.card,
-                borderLeft: `3px solid ${BORDER[st]}`,
-                cursor: 'pointer',
-                transition: 'box-shadow 0.15s, border-color 0.15s',
-                outline: isActive ? `2px solid ${BORDER[st]}` : 'none',
-                outlineOffset: '0px',
-              }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.boxShadow = '0 2px 12px rgba(60,52,137,0.09)'; }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px', color: '#1A1830' }}>{a.title}</span>
-                    <Badge color={s.color} icon={s.icon}>{s.label}</Badge>
+            <div key={a.id ?? idx}>
+
+              {/* Submission status row */}
+              {a.submitted && a.submission && (() => {
+                const sub = a.submission;
+                const isAI = (sub.ai_detection_score ?? 0) >= 50;
+                return (
+                  <div
+                    style={{ marginTop: '10px', background: isAI ? '#fef2f2' : '#faf5ff', border: `1px solid ${isAI ? '#fecaca' : '#e9d5ff'}`, borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '16px' }}>
+                        {sub.final_score !== null ? '✅' : isAI ? '🚨' : sub.status === 'pending' ? '⏳' : sub.ai_score !== null ? '🔍' : '⏳'}
+                      </span>
+                      <div>
+                        <p style={{ fontSize: '12px', fontWeight: '700', color: isAI ? '#dc2626' : '#6d28d9', margin: 0 }}>
+                          {sub.final_score !== null
+                            ? `Graded: ${sub.final_score}/${sub.max_score} (${Math.round((sub.final_score / sub.max_score) * 100)}%)`
+                            : isAI     ? `AI Flagged (${sub.ai_detection_score}%) — Score: 0`
+                            : sub.status === 'pending' ? 'Grading in progress...'
+                            : 'AI graded — awaiting teacher'}
+                        </p>
+                        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>Submitted {new Date(sub.submitted_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <Icon name={isActive ? 'chevron-right' : 'chevron-right'} size={16} style={{ color: '#C0BDEA', flexShrink: 0, marginTop: '2px', transform: isActive ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
                   </div>
-                  <p style={{ fontSize: '12px', color: '#8884A8', margin: '0 0 8px', lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {a.description}
-                  </p>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#8884A8' }}>
-                      <Icon name="calendar" size={13} />
-                      {new Date(a.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#8884A8' }}>
-                      <Icon name="trophy" size={13} />
-                      {a.max_score} pts
-                    </span>
-                  </div>
-                </div>
-                <Icon name={isActive ? 'chevron-right' : 'chevron-right'} size={16} style={{ color: '#C0BDEA', flexShrink: 0, marginTop: '2px', transform: isActive ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
-              </div>
+                );
+              })()}
 
               {/* Submission preview row */}
               {a.submitted && a.submission && (() => {
@@ -124,6 +97,7 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
                   </div>
                 );
               })()}
+
             </div>
           );
         })}

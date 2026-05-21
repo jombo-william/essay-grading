@@ -1,12 +1,6 @@
-
-
-
-
-
-
 // src/componets/teacher/TeacherDashboard.jsx
 import { useState, useEffect, useCallback } from "react";
-import { Toast, Icon } from "./shared.jsx";
+import { Toast, btn } from "./shared.jsx";
 import { apiFetch } from "./api.js";
 import PendingTab        from "./PendingTab.jsx";
 import AssignmentsTab    from "./AssignmentsTab.jsx";
@@ -14,13 +8,13 @@ import StudentsTab       from "./StudentsTab.jsx";
 import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 import IntegrationsTab   from "./IntegrationsTab.jsx";
+// import TeacherQuizTab from "./TeacherQuizTab";
 
 const TABS = [
-  { id: "pending",      icon: "clock-hour-4",     label: "Pending"      },
-  { id: "assignments",  icon: "clipboard-list",   label: "Assignments"  },
-  { id: "students",     icon: "users",            label: "Students"     },
-  { id: "archived",     icon: "archive",          label: "Archived"     },
-  { id: "integrations", icon: "plug-connected",   label: "Integrations" },
+  { id: "pending",     icon: "⏳", label: "Pending"     },
+  // { id: "exams", icon: "📝", label: "Exams" },
+  { id: "archived",     icon: "📦", label: "Archived"      },
+  { id: "integrations", icon: "🔗", label: "Integrations" },
 ];
 
 const CLASS_PALETTES = [
@@ -395,6 +389,14 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
             assignments={assignments}
           />
         )}
+
+        {/* {tab === "quizzes" && (
+          <TeacherQuizTab
+             apiFetch={apiFetch}
+            showToast={showToast}
+            classes={[selectedClass]}
+          />
+        )} */}
       </div>
 
       {/* Modals */}

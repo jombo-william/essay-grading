@@ -496,8 +496,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
             {moodleLoading ? "Connecting…" : "Connect to Moodle"}
           </Btn>
           <a href={moodleSiteUrl || "https://essaygrade.moodlecloud.com"} target="_blank" rel="noopener noreferrer"
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: C.purple.bg, color: C.purple.text, border: `1px solid ${C.purple.border}`, fontWeight: 500, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-            <Icon name="external-link" size={13} style={{ color: C.purple.text }} />
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: C.gray.bg, color: C.gray.dark, border: `1px solid ${C.gray.border}`, fontWeight: 500, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
+            <Icon name="external-link" size={13} style={{ color: C.gray.dark }} />
             Open Moodle
           </a>
         </div>
@@ -564,8 +564,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
 
         {moodleResults && <ResultsBox results={moodleResults.results} total={moodleResults.total_graded} color="amber" />}
 
-        {/* ── Quiz / Exam section ── */}
-        {moodleConnected && moodleCourses.length > 0 && (
+        {/* ── Quiz / Exam section (not implemented) ────────────────────── */}
+        {/* {moodleConnected && moodleCourses.length > 0 && (
           <>
             <div style={{ height: 1, background: "#D3D1C7", margin: "24px 0" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
@@ -612,7 +612,8 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
 
             {quizResults && <ResultsBox results={quizResults.results} total={quizResults.total_graded} color="purple" />}
           </>
-        )}
+        )} */}
+
       </PlatformCard>
     </div>
   );
