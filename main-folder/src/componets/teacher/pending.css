@@ -124,7 +124,8 @@
   background: var(--surface);
   border-radius: 16px;
   border: 1px solid var(--border);
-  overflow: hidden;
+  overflow: auto; /* allow horizontal scroll on small screens */
+  -webkit-overflow-scrolling: touch;
   box-shadow: var(--shadow-sm);
 }
 
@@ -370,7 +371,7 @@
   color: var(--blue);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  white-space: nowrap;
+  white-space: nowrap; /* keep headings single-line on wide screens */
   border-bottom: 2px solid var(--blue-border);
 }
 
@@ -398,6 +399,19 @@
 .ai-pill--green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
 .ai-pill--amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
 .ai-pill--red   { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+
+/* Responsive adjustments */
+@media (max-width: 720px) {
+  .pg-main { padding: 20px 12px 64px; max-width: 100%; }
+  .pg-header { padding: 0 12px; }
+  .pg-th, .pg-td { white-space: normal; font-size: 12px; }
+  .pg-td { word-break: break-word; overflow-wrap: anywhere; }
+  .btn-outline-blue, .btn-sm-grade, .btn-sm-view, .btn-sm-ghost { white-space: normal; }
+  .pg-table { width: 100%; min-width: 0; }
+  img, .pg-sheet { max-width: 100%; height: auto; box-sizing: border-box; }
+  .pg-card { padding: 14px; }
+  .pg-sheet { max-width: 100%; border-radius: 12px 12px 0 0; }
+}
 
 /* ── Alert banners ── */
 .alert-red { background: var(--red-bg); border: 1px solid var(--red-border); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; gap: 6px; align-items: center; margin-top: 10px; }
