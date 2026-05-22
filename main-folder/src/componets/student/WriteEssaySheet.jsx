@@ -313,4 +313,3 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
     </Sheet>
   );
 }
-

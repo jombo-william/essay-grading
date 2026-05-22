@@ -105,54 +105,49 @@ function ResultCard({ s, onClick }) {
 }
 
 // ─── RESULTS TAB (main export) ─────────────────────────────────────────────
-export default function ResultsTab({ results, loading, onOpenResult }) {
+export default function ResultsTab({ results, loading, onOpenResult, studentName }) {
+  if (loading) {
+    return (
+      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:'48px 24px', textAlign:'center' }}>
+        <div style={{ width:32, height:32, border:`3px solid #e2e8f0`, borderTopColor:NAVY, borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
+        <p style={{ color:'#94a3b8', fontSize:14, margin:0 }}>Loading results…</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
-
-      {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '10px', color: '#8884A8' }}>
-          <Icon name="loader-2" size={20} style={{ animation: 'spin 0.8s linear infinite' }} />
-          <span style={{ fontSize: '14px' }}>Loading results…</span>
-        </div>
-      ) : (
+    <div>
+      {/* Header + legend */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
         <div>
-          <p style={{ fontSize: '15px', fontWeight: '600', color: '#1A1830', margin: '0 0 14px' }}>My results</p>
-
-          {/* Legend */}
-          <div style={{
-            background: '#fff', border: '1px solid #ECECF2', borderRadius: '10px',
-            padding: '10px 14px', marginBottom: '14px',
-            display: 'flex', flexWrap: 'wrap', gap: '14px',
-          }}>
-            {[
-              { color: 'green', icon: 'circle-check', label: 'Graded' },
-              { color: 'amber', icon: 'clock', label: 'Awaiting teacher' },
-              { color: 'red', icon: 'alert-triangle', label: 'AI flagged' },
-              { color: 'gray', icon: 'loader-2', label: 'Grading…' },
-            ].map(x => (
-              <Badge key={x.label} color={x.color} icon={x.icon}>{x.label}</Badge>
-            ))}
-          </div>
-
-          {results.length === 0 && (
-            <div style={{ ...C.card, textAlign: 'center', padding: '48px 24px' }}>
-              <Icon name="inbox" size={36} style={{ color: '#C0DD97', marginBottom: '12px' }} />
-              <p style={{ color: '#8884A8', fontSize: '14px', margin: 0 }}>
-                No submissions yet. Submit an assignment to see results here.
-              </p>
+          <p style={{ fontSize:20, fontWeight:800, color:'#1e293b', margin:0 }}>My Results</p>
+          <p style={{ fontSize:13, color:'#94a3b8', margin:'2px 0 0' }}>Click any card to view full feedback</p>
+        </div>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
+          {[{i:'✅',l:'Graded',c:'#16a34a'},{i:'⏳',l:'Pending',c:'#d97706'},{i:'🚨',l:'AI flagged',c:'#dc2626'},{i:'🤖',l:'Grading',c:NAVY}].map(x => (
+            <div key={x.l} style={{ display:'flex', alignItems:'center', gap:4 }}>
+              <span style={{ fontSize:12 }}>{x.i}</span>
+              <span style={{ fontSize:11, color:x.c, fontWeight:600 }}>{x.l}</span>
             </div>
-          )}
+          ))}
+        </div>
+      </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(480px,1fr))', gap: 0 }}>
-            {results.map(s => (
-              <ResultCard key={s.id} s={s} onClick={onOpenResult} />
-            ))}
-          </div>
+      {results.length === 0 && (
+        <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:'48px 24px', textAlign:'center' }}>
+          <p style={{ fontSize:36, margin:'0 0 10px' }}>📭</p>
+          <p style={{ fontWeight:700, color:'#64748b', fontSize:14, margin:0 }}>No submissions yet. Submit an assignment to see your results here.</p>
         </div>
       )}
-    </>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(480px,1fr))', gap:0 }}>
+        {results.map(s => (
+          <ResultCard key={s.id} s={s} onClick={onOpenResult} />
+        ))}
+      </div>
+
+      {/* AI Learning Progress Tracker */}
+      <LearningProgressTracker submissions={results} studentName={studentName || 'Student'} />
+    </div>
   );
 }

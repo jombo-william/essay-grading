@@ -4,7 +4,7 @@
 // src/components/auth/LoginPage.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setAuthToken } from '../teacher/api.js'
+import API_URL from '../../config.js'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -20,10 +20,12 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const res  = await fetch('http://localhost:8000/api/auth/login', {
-        method:  'POST',
+      // const res  = await fetch('https://jombo-essaygrade.fly.dev/api/auth/login', {
+       const res  = await fetch(`${API_URL}/api/auth/login`, {
+      method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ email, password }),
+        credentials: 'include',
       })
       const data = await res.json()
 

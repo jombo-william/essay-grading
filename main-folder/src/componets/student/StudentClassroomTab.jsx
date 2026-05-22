@@ -1,5 +1,3 @@
-
-// src/components/student/StudentClassroomTab.jsx
 import { useState, useEffect } from "react";
 import { apiFetch } from "./api.js";
 
@@ -14,11 +12,11 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
   const [submitting,     setSubmitting]     = useState(null);
 
   // ── Moodle state ───────────────────────────────────────────────────────────
-  const [moodleToken,       setMoodleToken]       = useState("");
-  const [moodleSiteUrl,     setMoodleSiteUrl]     = useState("");
-  const [moodleConnected,   setMoodleConnected]   = useState(false);
-  const [moodleLoading,     setMoodleLoading]     = useState(false);
-  const [moodleSiteDisplay, setMoodleSiteDisplay] = useState("");
+  const [moodleToken,      setMoodleToken]      = useState("");
+  const [moodleSiteUrl,    setMoodleSiteUrl]    = useState("");
+  const [moodleConnected,  setMoodleConnected]  = useState(false);
+  const [moodleLoading,    setMoodleLoading]    = useState(false);
+  const [moodleSiteDisplay,setMoodleSiteDisplay]= useState("");
 
   // ── Styles ─────────────────────────────────────────────────────────────────
   const card = {
@@ -28,50 +26,71 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     border: "1px solid #ECECF2",
     marginBottom: "16px",
   };
-  const input = {
-    width: "100%", padding: "10px 14px", borderRadius: "10px",
-    border: "1.5px solid #e2e8f0", fontSize: "13px",
-    fontFamily: "inherit", marginBottom: "12px",
-    boxSizing: "border-box",
+
+  const stepLabel = {
+    display: 'block',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#8884A8',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '8px',
   };
 
-  const platformBadge = (bg) => ({
-    width: "40px", height: "40px", borderRadius: "10px",
-    background: bg, display: "flex", alignItems: "center",
-    justifyContent: "center", flexShrink: 0, color: "#fff", fontSize: "18px",
+  const btn = (bg) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: bg,
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '8px 14px',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
   });
 
-  const btn = (bg = "#3b82f6", extra = {}) => ({
-    display: "inline-flex", alignItems: "center", gap: "6px",
-    padding: "9px 16px", background: bg, color: "#fff",
-    border: "none", borderRadius: "8px", fontWeight: "600",
-    fontSize: "13px", cursor: "pointer", fontFamily: "inherit", lineHeight: 1,
-    ...extra,
-  });
+  const divider = {
+    borderTop: '1px solid #F0EFF8',
+    margin: '14px 0',
+  };
 
   const selectStyle = {
-    width: "100%", padding: "9px 36px 9px 12px",
-    borderRadius: "8px", border: "1px solid #ECECF2",
-    fontSize: "13px", fontFamily: "inherit",
-    background: "#F8F7FF", appearance: "none", cursor: "pointer",
-    color: "#1A1830",
+    width: '100%',
+    padding: '10px 32px 10px 14px',
+    borderRadius: '10px',
+    border: '1.5px solid #e2e8f0',
+    fontSize: '13px',
+    fontFamily: 'inherit',
+    appearance: 'none',
+    background: '#fff',
+    cursor: 'pointer',
   };
 
   const inputStyle = {
-    width: "100%", padding: "9px 12px",
-    borderRadius: "8px", border: "1px solid #ECECF2",
-    fontSize: "13px", fontFamily: "inherit",
-    background: "#F8F7FF", color: "#1A1830", outline: "none",
-    boxSizing: "border-box",
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: '10px',
+    border: '1.5px solid #e2e8f0',
+    fontSize: '13px',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
   };
 
-  const stepLabel = {
-    fontWeight: "600", fontSize: "11px", color: "#8884A8",
-    marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em",
-    display: "block",
-  };
-
-  const divider = { height: "1px", background: "#F1EFE8", margin: "16px 0" };
+  const platformBadge = (color) => ({
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    background: color,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '18px',
+    color: '#fff',
+    flexShrink: 0,
+  });
 
   // ── Moodle status on load ──────────────────────────────────────────────────
   useEffect(() => {
@@ -163,7 +182,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
       });
       setMoodleConnected(true);
       setMoodleSiteDisplay(moodleSiteUrl);
-      showToast("Connected to Moodle successfully!", "success");
+      showToast("✅ Connected to Moodle successfully!", "success");
     } catch (err) {
       showToast(err.message || "Failed to connect to Moodle", "error");
     } finally {
@@ -186,6 +205,8 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
 
   return (
     <div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      
       <p style={{ fontSize: "16px", fontWeight: "600", color: "#1A1830", marginBottom: "16px" }}>
         Connected Platforms
       </p>
@@ -394,8 +415,6 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
           </div>
         )}
       </div>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

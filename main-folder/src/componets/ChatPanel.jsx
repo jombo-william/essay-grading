@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = "https://jombo-essaygrade.fly.dev";
 
 const styles = {
   panel: {

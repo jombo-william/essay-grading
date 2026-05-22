@@ -11,6 +11,8 @@ const aiBg     = s => s >= 50 ? '#FCEBEB'    : s >= 30 ? '#FAEEDA'    : '#EAF3DE
 const aiBorder = s => s >= 50 ? '#F7C1C1'    : s >= 30 ? '#FAC775'    : '#C0DD97';
 const aiIcon   = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
 
+const mq = typeof window !== 'undefined' && window.innerWidth < 640;
+
 function ScoreBar({ value, max }) {
   const pct = max > 0 ? Math.min(Math.round((value / max) * 100), 100) : 0;
   const color = pct >= 70 ? '#3B6D11' : pct >= 50 ? '#854F0B' : '#A32D2D';
@@ -30,6 +32,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
   const [gradeFeedback, setGradeFeedback] = useState('');
   const [saving,        setSaving]        = useState(false);
   const [approvingAll,  setApprovingAll]  = useState(false);
+  const [modalTab,      setModalTab]      = useState('essay'); // 'essay' | 'grade' — mobile tabs
 
   const approvable = pending.filter(s => s.ai_score !== null && s.ai_score !== undefined);
 
@@ -37,6 +40,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
     setGradeModal(sub);
     setGradeScore(sub.ai_score ?? '');
     setGradeFeedback(sub.teacher_feedback || '');
+    setModalTab('essay');
   };
 
   const handleSave = async () => {
@@ -81,8 +85,32 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
   return (
     <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif" }}>
 
+      {/* ── Responsive styles injected once ── */}
+      <style>{`
+        @media (max-width: 639px) {
+          .pending-header      { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+          .approve-btn         { width: 100% !important; justify-content: center !important; }
+          .sub-card-row        { flex-direction: column !important; gap: 10px !important; }
+          .sub-card-right      { text-align: left !important; display: flex !important; align-items: center !important; gap: 10px !important; flex-wrap: wrap; }
+          .sub-card-right-label{ display: none !important; }
+          .modal-body          { flex-direction: column !important; }
+          .modal-essay-pane    { border-right: none !important; border-bottom: 1px solid #ECECF2 !important; flex: unset !important; }
+          .modal-grade-pane    { width: 100% !important; }
+          .modal-footer        { flex-direction: column-reverse !important; }
+          .modal-footer button { width: 100% !important; justify-content: center !important; }
+          .modal-tabs          { display: flex !important; }
+        }
+        .modal-tabs { display: none; }
+        .modal-tab-btn {
+          flex: 1; padding: 10px; border: none; background: transparent;
+          font-family: inherit; font-size: 13px; font-weight: 600;
+          color: #8884A8; cursor: pointer; border-bottom: 2px solid transparent;
+        }
+        .modal-tab-btn.active { color: #1A1830; border-bottom-color: #1A1830; }
+      `}</style>
+
       {/* ── Header row ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div className="pending-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#1A1830' }}>
             Pending review
@@ -96,6 +124,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
 
         {approvable.length > 0 && (
           <button
+            className="approve-btn"
             onClick={handleApproveAll}
             disabled={approvingAll}
             style={{
@@ -161,7 +190,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
             padding: '18px 20px',
             marginBottom: 10,
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+            <div className="sub-card-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
 
               {/* Left — student info */}
               <div style={{ display: 'flex', gap: 12, flex: 1 }}>
@@ -275,11 +304,34 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
         <div style={{
           position: 'fixed', inset: 0, zIndex: 500,
           background: 'rgba(15,13,40,0.55)',
-          display: 'flex', alignItems: 'stretch', justifyContent: 'center',
-          padding: 20, backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          // On desktop: center it; CSS below overrides align-items for wider screens
+          backdropFilter: 'blur(4px)',
         }}>
-          <div style={{
-            background: '#fff', borderRadius: 18,
+          <style>{`
+            @media (min-width: 640px) {
+              .grade-modal-shell {
+                align-self: center !important;
+                max-height: 92vh !important;
+                border-radius: 18px !important;
+              }
+            }
+            @media (max-width: 639px) {
+              .grade-modal-shell {
+                border-radius: 18px 18px 0 0 !important;
+                max-height: 94vh !important;
+              }
+              .modal-essay-pane {
+                display: ${modalTab === 'essay' ? 'block' : 'none'} !important;
+              }
+              .modal-grade-pane {
+                display: ${modalTab === 'grade' ? 'flex' : 'none'} !important;
+              }
+            }
+          `}</style>
+
+          <div className="grade-modal-shell" style={{
+            background: '#fff',
             width: '100%', maxWidth: 1100,
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
@@ -290,12 +342,13 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
             {/* Modal header */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px 22px', borderBottom: '1px solid #ECECF2',
+              padding: '14px 16px', borderBottom: '1px solid #ECECF2',
               background: '#F8F7FF', flexShrink: 0,
+              gap: 8,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                 <div style={{
-                  width: 38, height: 38, borderRadius: 10,
+                  width: 38, height: 38, borderRadius: 10, flexShrink: 0,
                   background: (gradeModal.ai_detection_score ?? 0) >= 50 ? '#FCEBEB' : '#E6F1FB',
                   color: (gradeModal.ai_detection_score ?? 0) >= 50 ? '#A32D2D' : '#185FA5',
                   fontWeight: 700, fontSize: 15,
@@ -303,26 +356,30 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
                 }}>
                   {gradeModal.student_name?.charAt(0)?.toUpperCase()}
                 </div>
-                <div>
-                  <p style={{ fontWeight: 700, fontSize: 14, color: '#1A1830', margin: 0 }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: '#1A1830', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {gradeModal.student_name}
                   </p>
-                  <p style={{ fontSize: 12, color: '#8884A8', margin: 0 }}>{gradeModal.assignment_title}</p>
+                  <p style={{ fontSize: 12, color: '#8884A8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {gradeModal.assignment_title}
+                  </p>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                 {gradeModal.ai_detection_score !== null && gradeModal.ai_detection_score !== undefined && (
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '3px 10px', borderRadius: 20,
+                    padding: '3px 8px', borderRadius: 20,
                     fontSize: 11, fontWeight: 600,
                     background: aiBg(gradeModal.ai_detection_score ?? 0),
                     color: aiColor(gradeModal.ai_detection_score ?? 0),
                     border: `1px solid ${aiBorder(gradeModal.ai_detection_score ?? 0)}`,
+                    whiteSpace: 'nowrap',
                   }}>
                     <Icon name={aiIcon(gradeModal.ai_detection_score ?? 0)} size={11} style={{ color: aiColor(gradeModal.ai_detection_score ?? 0) }} />
-                    {gradeModal.ai_detection_score}% AI · {aiLabel(gradeModal.ai_detection_score ?? 0)}
+                    <span className="ai-label-full">{gradeModal.ai_detection_score}% AI · {aiLabel(gradeModal.ai_detection_score ?? 0)}</span>
+                    <span className="ai-label-short" style={{ display: 'none' }}>{gradeModal.ai_detection_score}%</span>
                   </span>
                 )}
                 <button onClick={() => setGradeModal(null)} style={{
@@ -330,22 +387,39 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
                   border: '1px solid #ECECF2', background: '#fff',
                   cursor: 'pointer', color: '#5F5E5A',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
                 }}>
                   <Icon name="x" size={15} />
                 </button>
               </div>
             </div>
 
+            {/* Mobile tab switcher */}
+            <div className="modal-tabs" style={{ borderBottom: '1px solid #ECECF2', background: '#fff', flexShrink: 0 }}>
+              <button
+                className={`modal-tab-btn ${modalTab === 'essay' ? 'active' : ''}`}
+                onClick={() => setModalTab('essay')}
+              >
+                Essay
+              </button>
+              <button
+                className={`modal-tab-btn ${modalTab === 'grade' ? 'active' : ''}`}
+                onClick={() => setModalTab('grade')}
+              >
+                Grade
+              </button>
+            </div>
+
             {/* Modal body */}
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+            <div className="modal-body" style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
 
               {/* LEFT — essay */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24, borderRight: '1px solid #ECECF2' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div className="modal-essay-pane" style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', borderRight: '1px solid #ECECF2' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 6 }}>
                   <p style={{ fontSize: 10, fontWeight: 700, color: '#B0AECB', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
                     Student essay
                   </p>
-                  <div style={{ display: 'flex', gap: 14, fontSize: 12, color: '#8884A8', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 10, fontSize: 12, color: '#8884A8', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Icon name="calendar" size={12} style={{ color: '#B0AECB' }} />
                       {new Date(gradeModal.submitted_at).toLocaleDateString()}
@@ -380,16 +454,16 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
 
                 <div style={{
                   background: '#FDFCF7', border: '1px solid #ECECF2', borderRadius: 12,
-                  padding: '24px 28px', fontSize: 14, lineHeight: 1.9, color: '#1A1830',
-                  whiteSpace: 'pre-wrap', minHeight: 400, fontFamily: 'Georgia, serif',
+                  padding: '18px 16px', fontSize: 14, lineHeight: 1.9, color: '#1A1830',
+                  whiteSpace: 'pre-wrap', minHeight: 300, fontFamily: 'Georgia, serif',
                 }}>
                   {gradeModal.essay_text || 'No essay text available.'}
                 </div>
               </div>
 
               {/* RIGHT — grading panel */}
-              <div style={{
-                width: 300, flexShrink: 0, overflowY: 'auto', padding: 22,
+              <div className="modal-grade-pane" style={{
+                width: 300, flexShrink: 0, overflowY: 'auto', padding: 16,
                 background: '#F8F7FF', display: 'flex', flexDirection: 'column', gap: 14,
               }}>
                 <p style={{ fontSize: 10, fontWeight: 700, color: '#B0AECB', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
@@ -476,9 +550,9 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
             </div>
 
             {/* Modal footer */}
-            <div style={{
+            <div className="modal-footer" style={{
               display: 'flex', justifyContent: 'flex-end', gap: 8,
-              padding: '12px 22px', borderTop: '1px solid #ECECF2',
+              padding: '12px 16px', borderTop: '1px solid #ECECF2',
               background: '#F8F7FF', flexShrink: 0,
             }}>
               <button onClick={() => setGradeModal(null)} style={{

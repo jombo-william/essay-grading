@@ -1,37 +1,42 @@
 
 // src/components/student/AssignmentsTab.jsx
 import { useState } from 'react';
-import { C, Icon, Badge, scoreColor, scoreLabel, scoreBg } from './shared.jsx';
+import { C, Icon } from './shared.jsx';
 import AssignmentDetail from './AssignmentDetail.jsx';
 
-const STATUS = {
-  open:      { color: 'purple', icon: 'circle-dot',  label: 'Open'      },
-  submitted: { color: 'green',  icon: 'circle-check', label: 'Submitted' },
-  past:      { color: 'red',    icon: 'clock-off',    label: 'Past due'  },
-};
-
-function getStatus(a) {
-  if (a.submitted) return 'submitted';
-  if (a.isPast)    return 'past';
-  return 'open';
+// ── Helpers ──────────────────────────────────────────────────
+function scoreColor(pct) {
+  if (pct >= 75) return '#3B6D11';
+  if (pct >= 50) return '#B45309';
+  return '#DC2626';
 }
 
-const BORDER = { open: '#3C3489', submitted: '#3B6D11', past: '#A32D2D' };
-
-export default function AssignmentsTab({ assignments, loading, onWrite, onViewEssay, onViewResult }) {
-  const [selected, setSelected] = useState(null);
-
-  const selectedAssignment = assignments.find(a => a.id === selected) || null;
-
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '10px', color: '#8884A8' }}>
-      <Icon name="loader-2" size={20} style={{ animation: 'spin 0.8s linear infinite' }} />
-      <span style={{ fontSize: '14px' }}>Loading assignments…</span>
-    </div>
+function Badge({ color, icon, children }) {
+  const colors = {
+    red:   { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' },
+    amber: { bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
+    gray:  { bg: '#f8fafc', text: '#64748b', border: '#e2e8f0' },
+  };
+  const c = colors[color] || colors.gray;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: '4px',
+      fontSize: '11px', fontWeight: '600', padding: '2px 8px',
+      borderRadius: '20px', background: c.bg, color: c.text,
+      border: `1px solid ${c.border}`,
+    }}>
+      <Icon name={icon} size={11} />
+      {children}
+    </span>
   );
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: selectedAssignment ? '340px 1fr' : '1fr', gap: '20px', alignItems: 'start' }}>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: selectedAssignment ? '340px 1fr' : '1fr',
+      gap: '20px',
+      alignItems: 'start',
+    }}>
 
       {/* ── Left: list ── */}
       <div>
@@ -53,56 +58,68 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
 
           return (
             <div
-              key={a.id}
-              onClick={() => setSelected(isActive ? null : a.id)}
-              style={{
-                ...C.card,
-                borderLeft: `3px solid ${BORDER[st]}`,
-                cursor: 'pointer',
-                transition: 'box-shadow 0.15s, border-color 0.15s',
-                outline: isActive ? `2px solid ${BORDER[st]}` : 'none',
-                outlineOffset: '0px',
-              }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.boxShadow = '0 2px 12px rgba(60,52,137,0.09)'; }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.boxShadow = 'none'; }}
+              key={a.id ?? idx}
+              onClick={() => setSelected(isActive ? null : a)}
+              style={{ cursor: 'pointer' }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px', color: '#1A1830' }}>{a.title}</span>
-                    <Badge color={s.color} icon={s.icon}>{s.label}</Badge>
+              {/* Submission status row */}
+              {a.submitted && a.submission && (() => {
+                const sub = a.submission;
+                const isAI = (sub.ai_detection_score ?? 0) >= 50;
+                return (
+                  <div style={{
+                    marginTop: '10px',
+                    background: isAI ? '#fef2f2' : '#faf5ff',
+                    border: `1px solid ${isAI ? '#fecaca' : '#e9d5ff'}`,
+                    borderRadius: '10px', padding: '10px 14px',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '16px' }}>
+                        {sub.final_score !== null ? '✅'
+                          : isAI ? '🚨'
+                          : sub.status === 'pending' ? '⏳'
+                          : sub.ai_score !== null ? '🔍' : '⏳'}
+                      </span>
+                      <div>
+                        <p style={{ fontSize: '12px', fontWeight: '700', color: isAI ? '#dc2626' : '#6d28d9', margin: 0 }}>
+                          {sub.final_score !== null
+                            ? `Graded: ${sub.final_score}/${sub.max_score} (${Math.round((sub.final_score / sub.max_score) * 100)}%)`
+                            : isAI     ? `AI Flagged (${sub.ai_detection_score}%) — Score: 0`
+                            : sub.status === 'pending' ? 'Grading in progress...'
+                            : 'AI graded — awaiting teacher'}
+                        </p>
+                        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                          Submitted {new Date(sub.submitted_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Icon
+                      name="chevron-right" size={16}
+                      style={{
+                        color: '#C0BDEA', flexShrink: 0, marginTop: '2px',
+                        transform: isActive ? 'rotate(90deg)' : 'none',
+                        transition: 'transform 0.15s',
+                      }}
+                    />
                   </div>
-                  <p style={{ fontSize: '12px', color: '#8884A8', margin: '0 0 8px', lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {a.description}
-                  </p>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#8884A8' }}>
-                      <Icon name="calendar" size={13} />
-                      {new Date(a.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#8884A8' }}>
-                      <Icon name="trophy" size={13} />
-                      {a.max_score} pts
-                    </span>
-                  </div>
-                </div>
-                <Icon name={isActive ? 'chevron-right' : 'chevron-right'} size={16} style={{ color: '#C0BDEA', flexShrink: 0, marginTop: '2px', transform: isActive ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
-              </div>
+                );
+              })()}
 
               {/* Submission preview row */}
               {a.submitted && a.submission && (() => {
                 const sub = a.submission;
                 const isAI = (sub.ai_detection_score ?? 0) >= 50;
-                const pct  = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
+                const pct  = sub.final_score !== null
+                  ? Math.round((sub.final_score / sub.max_score) * 100)
+                  : null;
                 return (
                   <div style={{
-                    marginTop: '10px',
-                    paddingTop: '10px',
+                    marginTop: '10px', paddingTop: '10px',
                     borderTop: '1px solid #F0EFF8',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between', gap: '8px',
                   }}>
                     <span style={{ fontSize: '12px', color: '#8884A8', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <Icon name="clock" size={13} />
@@ -140,6 +157,7 @@ export default function AssignmentsTab({ assignments, loading, onWrite, onViewEs
           />
         </div>
       )}
+
     </div>
   );
 }

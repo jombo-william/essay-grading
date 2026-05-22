@@ -85,6 +85,7 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
         </div>
       )}
 
+      {/* Info grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         {[
           { label: 'Max score',  value: `${a.max_score} pts`, icon: 'trophy'    },

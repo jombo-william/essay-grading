@@ -1,5 +1,5 @@
-// src/components/teacher/api.js
 
+<<<<<<< HEAD
 const BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/teacher`;
 
 // Mock data for development/fallback when API fails
@@ -40,8 +40,21 @@ export async function apiFetch(path, options = {}) {
   const storedToken = getAuthToken();
 
   console.log('API Fetch:', path, 'Has Token:', !!storedToken, 'Has CSRF:', !!csrfToken);
+=======
+
+// const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
+const BASE_URL = `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/teacher`;
+
+export async function apiFetch(path, options = {}) {
+  const csrfToken    = getToken('csrf_token', 'token');
+  const sessionToken = getToken('session_token', 'session_token');
+
+   console.log('csrfToken:', csrfToken);        // ← ADD THIS
+  console.log('sessionToken:', sessionToken);  // ← ADD THIS
+>>>>>>> f9a70ba45be21c52cb98854e36c9e948af32002e
 
   const routeMap = {
+    // ── Legacy PHP → FastAPI mappings (kept for backward compat) ──────────
     '/get_assignments.php':     '/assignments',
     '/get_submissions.php':     '/submissions',
     '/get_pending_grading.php': '/submissions/pending',
@@ -50,11 +63,24 @@ export async function apiFetch(path, options = {}) {
     '/override_grade.php':      '/submissions/grade',
   };
 
-  const cleanPath = path.startsWith('/') ? path : '/' + path;
+  const cleanPath  = path.startsWith('/') ? path : '/' + path;
   const mappedPath = routeMap[cleanPath] || cleanPath;
-  const url = `${BASE_URL}${mappedPath}`;
+  const url        = `${BASE_URL}${mappedPath}`;
 
+<<<<<<< HEAD
   console.log('Fetching URL:', url);
+=======
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type':  'application/json',
+      ...(csrfToken    ? { 'X-CSRF-Token':  csrfToken    } : {}),
+      ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+      ...(options.headers || {}),
+    },
+    credentials: 'include',
+    ...options,
+  });
+>>>>>>> f9a70ba45be21c52cb98854e36c9e948af32002e
 
   // For GET requests, you can use mock data as fallback
   const isGetRequest = !options.method || options.method === 'GET';
@@ -113,6 +139,7 @@ export async function apiFetch(path, options = {}) {
   }
 }
 
+<<<<<<< HEAD
 function getCsrfToken() {
   // Try to get from cookie
   const cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
@@ -156,3 +183,18 @@ export async function logout() {
   localStorage.removeItem('csrf_token');
   document.cookie = 'csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
+=======
+
+
+
+function getToken(cookieName, localKey) {
+  const cookieMatch = document.cookie.match(
+    new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]+)')
+  );
+  if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
+  return sessionStorage.getItem(cookieName) 
+      || sessionStorage.getItem(localKey)
+      || localStorage.getItem(localKey) 
+      || '';
+}
+>>>>>>> f9a70ba45be21c52cb98854e36c9e948af32002e
