@@ -33,6 +33,73 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     boxSizing: "border-box",
   };
 
+// ── Local style constants ──────────────────────────────────────────────────
+  const stepLabel = {
+    display: 'block',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#8884A8',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '8px',
+  };
+
+  const btn = (bg) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: bg,
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '8px 14px',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  });
+
+  const divider = {
+    borderTop: '1px solid #F0EFF8',
+    margin: '14px 0',
+  };
+
+  const selectStyle = {
+    width: '100%',
+    padding: '10px 32px 10px 14px',
+    borderRadius: '10px',
+    border: '1.5px solid #e2e8f0',
+    fontSize: '13px',
+    fontFamily: 'inherit',
+    appearance: 'none',
+    background: '#fff',
+    cursor: 'pointer',
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: '10px',
+    border: '1.5px solid #e2e8f0',
+    fontSize: '13px',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+  };
+
+  const platformBadge = (color) => ({
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    background: color,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '18px',
+    color: '#fff',
+    flexShrink: 0,
+  });
+
+
   // ── Check Moodle connection status on load ─────────────────────────────────
   useEffect(() => {
     apiFetch("/moodle/status")

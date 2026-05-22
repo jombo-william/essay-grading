@@ -1,6 +1,7 @@
 // src/componets/teacher/TeacherDashboard.jsx
 import { useState, useEffect, useCallback } from "react";
-import { Toast, btn } from "./shared.jsx";
+// import { Toast, btn } from "./shared.jsx";
+import { C, Icon, Toast } from '../student/shared.jsx';
 import { apiFetch } from "./api.js";
 import PendingTab        from "./PendingTab.jsx";
 import AssignmentsTab    from "./AssignmentsTab.jsx";
@@ -9,13 +10,14 @@ import { GradeModal, EditGradeModal } from "./GradeModals.jsx";
 import SubmissionDetail  from "./SubmissionDetail.jsx";
 import IntegrationsTab   from "./IntegrationsTab.jsx";
 // import TeacherQuizTab from "./TeacherQuizTab";
-
 const TABS = [
+  { id: "assignments", icon: "📋", label: "Assignments" },
   { id: "pending",     icon: "⏳", label: "Pending"     },
-  // { id: "exams", icon: "📝", label: "Exams" },
-  { id: "archived",     icon: "📦", label: "Archived"      },
-  { id: "integrations", icon: "🔗", label: "Integrations" },
+  { id: "students",    icon: "👥", label: "Students"    },
+  { id: "archived",    icon: "📦", label: "Archived"    },
+  { id: "integrations",icon: "🔗", label: "Integrations"},
 ];
+
 
 const CLASS_PALETTES = [
   { bg: "#1A3A6B", accent: "#E6F1FB" },
