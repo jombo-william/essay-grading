@@ -10,7 +10,7 @@ const FILE_TYPES = [
 ];
 
 //const API_BASE = "https://jombo-essaygrade.fly.dev/api";
-const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
+const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
 
 const loadPdfJs = () =>
   new Promise(resolve => {
