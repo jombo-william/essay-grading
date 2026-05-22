@@ -1,7 +1,13 @@
 // src/components/teacher/api.js
 
+<<<<<<< HEAD
 // const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
 const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
+=======
+
+const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
+
+>>>>>>> c5bc8778 (solving the deployiment issues  and merge issue)
 export async function apiFetch(path, options = {}) {
   const csrfToken = getCsrfToken();
 

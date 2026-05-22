@@ -1,5 +1,9 @@
 // src/components/student/api.js
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c5bc8778 (solving the deployiment issues  and merge issue)
 const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/student';
 
 export async function apiFetch(path, options = {}) {

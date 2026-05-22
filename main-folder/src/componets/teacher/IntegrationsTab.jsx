@@ -113,20 +113,33 @@ function ResultsBox({ results, total, color = "green" }) {
           Graded {total} essays successfully
         </p>
       </div>
-      {results?.map((r, i) => (
-        <div key={i} style={{
-          padding: "7px 11px", borderRadius: 8, marginBottom: 6, fontSize: 12,
-          background: r.status === "graded" ? C.green.bg : C.red.bg,
-          border: `1px solid ${r.status === "graded" ? C.green.border : C.red.border}`,
-          color: r.status === "graded" ? C.green.text : C.red.text,
-          display: "flex", alignItems: "center", gap: 6,
-        }}>
-          <Icon name={r.status === "graded" ? "circle-check" : "circle-x"} size={12} style={{ color: r.status === "graded" ? C.green.text : C.red.text, flexShrink: 0 }} />
-          {r.status === "graded"
-            ? `${r.google_student_id || `User ${r.moodle_user_id}`} — Score: ${r.score}`
-            : `${r.google_student_id || `User ${r.moodle_user_id}`} — ${r.error}`}
-        </div>
-      ))}
+      {results?.map((r, i) => {
+        // Use real name if available, fallback to ID
+        const displayName = r.student_name && r.student_name !== "Unknown"
+          ? r.student_name
+          : r.student_name || r.google_student_id || `User ${r.moodle_user_id}`;
+
+        return (
+          <div key={i} style={{
+            padding: "7px 11px", borderRadius: 8, marginBottom: 6, fontSize: 12,
+            background: r.status === "graded" ? C.green.bg : C.red.bg,
+            border: `1px solid ${r.status === "graded" ? C.green.border : C.red.border}`,
+            color: r.status === "graded" ? C.green.text : C.red.text,
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <Icon
+              name={r.status === "graded" ? "circle-check" : "circle-x"}
+              size={12}
+              style={{ color: r.status === "graded" ? C.green.text : C.red.text, flexShrink: 0 }}
+            />
+            <span style={{ fontWeight: 600 }}>{displayName}</span>
+            {r.status === "graded"
+              ? <span style={{ marginLeft: "auto" }}>Score: <strong>{r.score}</strong></span>
+              : <span style={{ marginLeft: "auto", color: C.red.text }}>{r.error}</span>
+            }
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -326,10 +339,31 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
     }
   };
 
+  // const syncFromGc = async (courseId) => {
+  //   setGcLoading(true);
+  //   try {
+  //     const res = await apiFetch(`/classroom/courses/${courseId}/sync`, { method: "POST" });
+  //     showToast(res.message, "success");
+  //   } catch (err) {
+  //     showToast(err.message || "Sync failed", "error");
+  //   } finally {
+  //     setGcLoading(false);
+  //   }
+  // };
+
+
+
   const syncFromGc = async (courseId) => {
+    if (!linkClassId) {
+      showToast("Please select a local class to link before syncing", "error");
+      return;
+    }
     setGcLoading(true);
     try {
-      const res = await apiFetch(`/classroom/courses/${courseId}/sync`, { method: "POST" });
+      const res = await apiFetch(
+        `/classroom/courses/${courseId}/sync?local_class_id=${linkClassId}`,
+        { method: "POST" }
+      );
       showToast(res.message, "success");
     } catch (err) {
       showToast(err.message || "Sync failed", "error");
@@ -337,6 +371,9 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
       setGcLoading(false);
     }
   };
+
+
+
 
   const gradeFromClassroom = async () => {
     if (!selectedCourse || !selectedGcWork || !selectedLocalId) {
@@ -419,7 +456,11 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
                     </div>
                     <Btn icon="link" color="green" small loading={linking} onClick={() => linkCourseToClass(course.id)}>Link</Btn>
                     <Btn icon="list" color="purple" small loading={gcLoading} onClick={() => loadGcAssignments(course.id)}>Assignments</Btn>
-                    <Btn icon="refresh" color="amber" small loading={gcLoading} onClick={() => syncFromGc(course.id)}>Sync</Btn>
+                    {/* <Btn icon="refresh" color="amber" small loading={gcLoading} onClick={() => syncFromGc(course.id)}>Sync</Btn> */}
+                  <Btn icon="refresh" color="amber" small loading={gcLoading} onClick={() => {
+                        if (!linkClassId) { showToast("Select a local class first, then click Sync", "error"); return; }
+                        syncFromGc(course.id);
+                      }}>Sync</Btn>
                   </div>
                 </div>
               ))}
