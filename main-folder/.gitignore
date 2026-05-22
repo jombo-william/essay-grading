@@ -1,13 +1,6 @@
-# .vercel
-# node_modules/
-# //node_modules/
-# dist/
-# .vite/
-# *.local
-
-
-vercel
+.vercel
 node_modules/
-dist/
-.vite/
-*.local
+<<<<<<< HEAD
+node_modules/
+=======
+>>>>>>> b16cdfdddcf511486e091b190679515b8f33bb8f

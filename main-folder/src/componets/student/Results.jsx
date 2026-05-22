@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 // C:\PROJECTS\Essay-Grader\src\Student\Results.jsx
-=======
-
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -49,11 +45,7 @@ async function mockAiGrade({ essayText, assignment }) {
   return { total_score: totalScore, ai_detection_percentage: aiPct, overall_feedback: feedbackLines.join('\n'), rubric_breakdown: breakdown }
 }
 
-<<<<<<< HEAD
 // ─── SENTENCE-LEVEL AI DETECTION ───────────────────────────────────────────
-=======
-
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 function analyzeSentences(text, overallAiPct) {
   if (!text || !overallAiPct) return []
   const genericPhrases = ['multifaceted','furthermore','it is important to note','plays a crucial role','in today\'s world','throughout history','significantly impacts','one must consider','it is worth noting','as mentioned above','on the other hand','has fundamentally transformed','the intersection of']
@@ -74,11 +66,7 @@ function analyzeSentences(text, overallAiPct) {
   })
 }
 
-<<<<<<< HEAD
 // ─── RADAR CHART (pure SVG) ─────────────────────────────────────────────────
-=======
-
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 function RadarChart({ breakdown, size = 200 }) {
   if (!breakdown || breakdown.length === 0) return null
   const cx = size / 2, cy = size / 2
@@ -458,11 +446,7 @@ const INITIAL_SUBMISSIONS = [
   { id:103, assignment_id:97, assignment_title:'Globalisation & Inequality', max_score:100, essay_text:`Globalisation represents a multifaceted phenomenon that has fundamentally transformed the economic landscape. The intersection of trade liberalisation, technological advancement, and capital mobility has created opportunities while exacerbating inequalities.`, submitted_at:'2026-03-03T11:00:00', submit_mode:'write', file_name:null, ai_score:0, ai_detection_score:81, final_score:null, ai_feedback:`⚠️ HIGH AI CONTENT DETECTED\n\nAn estimated 81% of this essay appears AI-generated.\n\nPer academic integrity policy, essays with ≥50% AI content receive a score of 0/100.\n\nIndicators:\n• Unnaturally uniform sentence structure\n• Generic phrasing with no personal examples\n\nPlease rewrite in your own voice with specific examples.`, teacher_feedback:null, status:'ai_graded', rubric_breakdown:[] },
 ]
 
-<<<<<<< HEAD
 // ─── COLOUR TOKENS ─────────────────────────────────────────────────────────
-=======
-
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 const NAVY      = '#1a2e5a'
 const NAVY_DARK = '#0f1d3a'
 const GOLD      = '#c9a227'
@@ -689,11 +673,7 @@ Give exactly 4 suggestions. Be specific, reference the actual essay content.`,
   )
 }
 
-<<<<<<< HEAD
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────
-=======
-
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
 export default function Results() {
   const [tab, setTab]                 = useState('results')
   const [submissions, setSubmissions] = useState(INITIAL_SUBMISSIONS)
@@ -759,7 +739,6 @@ export default function Results() {
       )}
       {underDevModal && <UnderDevelopmentModal feature={underDevModal} onClose={() => setUnderDevModal(null)} />}
 
-<<<<<<< HEAD
       {/* NAV */}
       <nav style={{ background:NAVY, position:'sticky', top:0, zIndex:100, boxShadow:'0 2px 16px rgba(0,0,0,0.18)' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', height:68 }}>
@@ -789,14 +768,6 @@ export default function Results() {
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>
 
         {/* STATS */}
-=======
-     
-
-      {}
-      <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>
-
-        {}
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12, marginBottom:28 }}>
           {[
             { label:'To Submit', value: MOCK_ASSIGNMENTS.filter(a => !submissions.find(s=>s.assignment_id===a.id) && new Date()<new Date(a.due_date)).length, icon:'📋', bg:`${NAVY}18` },
@@ -845,11 +816,7 @@ export default function Results() {
 
       </div>
 
-<<<<<<< HEAD
       {/* DETAIL SHEET */}
-=======
-      {}
->>>>>>> b13407f6f2fa8ebd68e308793d34221f56d12c63
       {resultModal && (
         <Sheet
           onClose={() => setResultModal(null)}
