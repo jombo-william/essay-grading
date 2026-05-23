@@ -1,6 +1,5 @@
 // src/components/student/EssayViewSheet.jsx
-import { C, Sheet } from './shared.jsx';
-import ChatPanel from '../ChatPanel.jsx';
+import { C, Icon, Sheet } from './shared.jsx';
 
 export default function EssayViewSheet({ sub, user, canUnsubmit, onClose, onUnsubmit }) {
   if (!sub) return null;

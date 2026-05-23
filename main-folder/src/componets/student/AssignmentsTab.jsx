@@ -1,11 +1,17 @@
 // src/components/student/AssignmentsTab.jsx
-import { C } from './shared.jsx';
+import { useState } from 'react';
+import { C, Icon, Badge, scoreColor } from './shared.jsx';
+import AssignmentDetail from './AssignmentDetail.jsx';
 
 export default function AssignmentsTab({
   assignments,
   loading,
-  onOpenDetail,
+  onWrite,
+  onViewEssay,
+  onViewResult,
 }) {
+  const [selectedAssignment, setSelected] = useState(null);
+
   if (loading) {
     return (
       <div style={{ ...C.card, textAlign: 'center', padding: '48px 24px' }}>
@@ -33,8 +39,38 @@ export default function AssignmentsTab({
 
         {assignments.map((a, idx) => {
           const isActive = selectedAssignment?.id === a.id;
+          const dueText = a.due_date
+            ? new Date(a.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+            : 'No deadline';
           return (
-            <div key={a.id ?? idx}>
+            <div
+              key={a.id ?? idx}
+              onClick={() => setSelected(a)}
+              style={{
+                ...C.card,
+                cursor: 'pointer',
+                borderColor: isActive ? '#CECBF6' : '#ECECF2',
+                boxShadow: isActive ? '0 4px 16px rgba(60,52,137,0.12)' : 'none',
+                transition: 'box-shadow 0.15s, border-color 0.15s',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '15px', fontWeight: '600', color: '#1A1830', margin: '0 0 4px' }}>
+                    {a.title}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#8884A8', margin: 0 }}>
+                    Due {dueText} - {a.max_score ?? 0} pts
+                  </p>
+                </div>
+                <Icon name="chevron-right" size={16} style={{ color: '#C0BDEA', flexShrink: 0, marginTop: '2px', transform: isActive ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
+              </div>
+
+              {a.description && (
+                <p style={{ fontSize: '13px', color: '#5F5E5A', lineHeight: 1.55, margin: '10px 0 0' }}>
+                  {a.description}
+                </p>
+              )}
 
               {/* Submission status row */}
               {a.submitted && a.submission && (() => {
