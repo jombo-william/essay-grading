@@ -1,5 +1,5 @@
 // src/componets/teacher/SubmissionDetail.jsx
-import { Sheet, ScoreBar, btn, label, colors } from "./shared.jsx";
+import { Sheet, ScoreBar, Icon } from "./shared.jsx";
 import ChatPanel from "../ChatPanel.jsx";
 
 // ── Color tokens ──────────────────────────────────────────────────────────────

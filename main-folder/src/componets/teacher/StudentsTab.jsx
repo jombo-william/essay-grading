@@ -1,12 +1,10 @@
 
-
-
-
 // src/components/teacher/StudentsTab.jsx
 // No external CSS — all styles inline. Uses Tabler Icons via shared.jsx Icon component.
 
 import { useState, useMemo } from 'react';
 import { Icon, Badge } from './shared.jsx';
+import './students.css';
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 const scoreColor = p => p >= 70 ? '#3B6D11' : p >= 50 ? '#854F0B' : '#A32D2D';
@@ -103,7 +101,6 @@ function AtRiskPanel({ submissions, onClose }) {
           <Icon name="alert-triangle" size={16} style={{ color: '#A32D2D', flexShrink: 0 }} />
           <div>
             <p style={{ fontWeight: 700, fontSize: 13, color: '#A32D2D', margin: 0 }}>Need Support Students</p>
-            {/* <p style={{ fontSize: 11, color: '#791F1F', margin: 0 }}>Based on scores, AI flags and submission patterns</p> */}
           </div>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A32D2D', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4 }}>
@@ -310,14 +307,31 @@ export default function StudentsTab({ students, submissions, assignments, loadin
     </div>
   );
 
+  // ── shared button height so all header controls line up ──
+  const HDR_H = 34;
+
   return (
     <div style={{ minHeight: '100vh', background: '#F1EFE8', fontFamily: "'DM Sans','Segoe UI',sans-serif" }}>
 
       {/* ── Header ── */}
-      <div style={{ background: '#022aa4', padding: '0 20px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 12px rgba(2,42,164,0.35)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 38, height: 38, background: 'rgba(255,255,255,0.18)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name="writing" size={19} style={{ color: '#fff' }} />
+      <div style={{
+        background: '#1a2e5a',
+        padding: '0 20px',
+        height: 62,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        boxShadow: '0 2px 12px rgba(15,29,58,0.35)',
+      }}>
+
+        {/* Left — logo + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ width: 38, height: 38, background: '#c9a227', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="writing" size={19} style={{ color: '#1a2e5a' }} />
           </div>
           <div>
             <p style={{ fontWeight: 700, fontSize: 15, color: '#fff', margin: 0 }}>EssayGrade AI</p>
@@ -325,23 +339,53 @@ export default function StudentsTab({ students, submissions, assignments, loadin
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        {/* Right — search + buttons, all same height */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+
           {/* Search */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Icon name="search" size={13} style={{ position: 'absolute', left: 9, color: '#8884A8', pointerEvents: 'none' }} />
+            <Icon name="search" size={14} style={{ position: 'absolute', left: 10, color: '#8884A8', pointerEvents: 'none' }} />
             <input
               type="text"
               placeholder="Search student…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ padding: '7px 12px 7px 28px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.25)', fontSize: 13, color: '#1A1830', background: '#fff', outline: 'none', width: 180, fontFamily: 'inherit' }}
+              style={{
+                height: HDR_H,
+                padding: '0 12px 0 32px',
+                borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.25)',
+                fontSize: 13,
+                color: '#1A1830',
+                background: '#fff',
+                outline: 'none',
+                width: 180,
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
 
           {/* Export */}
           <button
             onClick={() => handleExportStudents(submissions)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 8, cursor: 'pointer', border: '1px solid #C0DD97', background: '#EAF3DE', color: '#3B6D11', fontSize: 13, fontWeight: 500, fontFamily: 'inherit' }}
+            style={{
+              height: HDR_H,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 13px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              border: '1px solid #C0DD97',
+              background: '#EAF3DE',
+              color: '#3B6D11',
+              fontSize: 13,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
+            }}
           >
             <Icon name="file-export" size={14} style={{ color: '#3B6D11' }} />
             Export PDF
@@ -350,7 +394,24 @@ export default function StudentsTab({ students, submissions, assignments, loadin
           {/* Watchlist */}
           <button
             onClick={() => setShowAtRisk(prev => !prev)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 8, cursor: 'pointer', border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)', background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)', color: '#A32D2D', fontSize: 13, fontWeight: 500, fontFamily: 'inherit', transition: 'all 0.15s' }}
+            style={{
+              height: HDR_H,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 13px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)',
+              background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)',
+              color: '#A32D2D',
+              fontSize: 13,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
+              transition: 'all 0.15s',
+            }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#A32D2D', flexShrink: 0, animation: 'atRiskPulse 1.4s ease-in-out infinite' }} />
             <Icon name="users-group" size={14} style={{ color: '#A32D2D' }} />
@@ -362,7 +423,10 @@ export default function StudentsTab({ students, submissions, assignments, loadin
         </div>
       </div>
 
-      <style>{`@keyframes atRiskPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.45; transform:scale(1.4); } } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes atRiskPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.45; transform:scale(1.4); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
 
       {/* ── Main ── */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '28px 16px 64px' }}>

@@ -1,6 +1,6 @@
 // src/componets/teacher/TeacherDashboard.jsx
 import { useState, useEffect, useCallback } from "react";
-import { Toast, btn } from "./shared.jsx";
+import { Toast, Icon } from "./shared.jsx";
 import { apiFetch } from "./api.js";
 import PendingTab        from "./PendingTab.jsx";
 import AssignmentsTab    from "./AssignmentsTab.jsx";
@@ -12,6 +12,8 @@ import IntegrationsTab   from "./IntegrationsTab.jsx";
 
 const TABS = [
   { id: "pending",     icon: "⏳", label: "Pending"     },
+  { id: "assignments", icon: "📝", label: "Assignments" },
+  { id: "students",    icon: "👥", label: "Students"    },
   // { id: "exams", icon: "📝", label: "Exams" },
   { id: "archived",     icon: "📦", label: "Archived"      },
   { id: "integrations", icon: "🔗", label: "Integrations" },

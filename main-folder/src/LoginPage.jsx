@@ -272,7 +272,7 @@ export default function LoginPage() {
 }
 
 
-export default function LoginPage({ onSelect }) {
+function DemoLoginPage({ onSelect }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", gap: "24px", fontFamily: "system-ui, sans-serif" }}>
       
