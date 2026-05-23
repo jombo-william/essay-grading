@@ -36,6 +36,70 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     letterSpacing: '0.05em',
     marginBottom: '8px',
   };
+  const stepLabel = {
+    display: "block",
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#8884A8",
+    textTransform: "uppercase",
+    letterSpacing: "0.07em",
+    marginBottom: "8px",
+  };
+  const divider = {
+    height: "1px",
+    background: "#F1EFE8",
+    margin: "16px 0",
+  };
+  const btn = background => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    padding: "9px 16px",
+    borderRadius: "9px",
+    border: "none",
+    background,
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: "13px",
+    cursor: "pointer",
+    fontFamily: "inherit",
+  });
+  const selectStyle = {
+    width: "100%",
+    padding: "10px 36px 10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #D3D1C7",
+    fontSize: "13px",
+    fontFamily: "inherit",
+    background: "#F8F7FF",
+    color: "#1A1830",
+    appearance: "none",
+    boxSizing: "border-box",
+  };
+  const inputStyle = {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #D3D1C7",
+    fontSize: "13px",
+    fontFamily: "inherit",
+    background: "#F8F7FF",
+    color: "#1A1830",
+    outline: "none",
+    boxSizing: "border-box",
+  };
+  const platformBadge = background => ({
+    width: "40px",
+    height: "40px",
+    borderRadius: "10px",
+    background,
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  });
 
   const btn = (bg) => ({
     display: 'inline-flex',

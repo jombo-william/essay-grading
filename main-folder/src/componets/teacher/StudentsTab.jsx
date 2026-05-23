@@ -1,15 +1,20 @@
+
+// src/components/teacher/StudentsTab.jsx
+// No external CSS — all styles inline. Uses Tabler Icons via shared.jsx Icon component.
+
 import { useState, useMemo } from 'react';
 import { Icon, Badge } from './shared.jsx';
+import './students.css';
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-const scoreColor   = p => p >= 70 ? '#3B6D11' : p >= 50 ? '#854F0B' : '#A32D2D';
-const scoreBg      = p => p >= 70 ? '#EAF3DE' : p >= 50 ? '#FAEEDA' : '#FCEBEB';
-const scoreBorder  = p => p >= 70 ? '#C0DD97' : p >= 50 ? '#FAC775' : '#F7C1C1';
+const scoreColor = p => p >= 70 ? '#3B6D11' : p >= 50 ? '#854F0B' : '#A32D2D';
+const scoreBg = p => p >= 70 ? '#EAF3DE' : p >= 50 ? '#FAEEDA' : '#FCEBEB';
+const scoreBorder = p => p >= 70 ? '#C0DD97' : p >= 50 ? '#FAC775' : '#F7C1C1';
 
-const aiColor  = s => s >= 50 ? '#A32D2D' : s >= 30 ? '#854F0B' : '#3B6D11';
-const aiBg     = s => s >= 50 ? '#FCEBEB' : s >= 30 ? '#FAEEDA' : '#EAF3DE';
+const aiColor = s => s >= 50 ? '#A32D2D' : s >= 30 ? '#854F0B' : '#3B6D11';
+const aiBg = s => s >= 50 ? '#FCEBEB' : s >= 30 ? '#FAEEDA' : '#EAF3DE';
 const aiBorder = s => s >= 50 ? '#F7C1C1' : s >= 30 ? '#FAC775' : '#C0DD97';
-const aiIcon   = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
+const aiIcon = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
 
 function detectAtRiskStudents(submissions) {
   const byStudent = {};
@@ -23,9 +28,9 @@ function detectAtRiskStudents(submissions) {
     const reasons = [];
     let riskScore = 0;
 
-    const gradedSubs     = subs.filter(s => s.final_score !== null);
+    const gradedSubs = subs.filter(s => s.final_score !== null);
     const ungradedAiSubs = subs.filter(s => s.status === 'ai_graded' && s.final_score === null);
-    const flaggedSubs    = subs.filter(s => s.ai_detection_score >= 50);
+    const flaggedSubs = subs.filter(s => s.ai_detection_score >= 50);
     const borderlineSubs = subs.filter(s => s.ai_detection_score >= 30 && s.ai_detection_score < 50);
 
     if (flaggedSubs.length > 0) {
@@ -72,7 +77,7 @@ function StatusBadge({ status, aiDetection }) {
   );
   if (status === 'ai_graded') return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: '#FAEEDA', color: '#854F0B', border: '1px solid #FAC775' }}>
-      <Icon name="clock" size={11} style={{ color: '#854F0B' }} /> Pending
+      <Icon name="clock" size={11} style={{ color: '#854F0B' }} /> Not Graded
     </span>
   );
   return (
@@ -84,36 +89,34 @@ function StatusBadge({ status, aiDetection }) {
 
 // ── AT-RISK PANEL ─────────────────────────────────────────────────────────────
 function AtRiskPanel({ submissions, onClose }) {
-  const atRiskList     = useMemo(() => detectAtRiskStudents(submissions), [submissions]);
-  const critical       = atRiskList.filter(s => s.level === 'critical');
-  const watch          = atRiskList.filter(s => s.level === 'watch');
+  const atRiskList = useMemo(() => detectAtRiskStudents(submissions), [submissions]);
+  const critical = atRiskList.filter(s => s.level === 'critical');
+  const watch = atRiskList.filter(s => s.level === 'watch');
   const uniqueStudents = [...new Set(submissions.map(s => s.student_name))].length;
 
   return (
     <div style={{ background: '#fff', border: '1px solid #F7C1C1', borderRadius: 13, overflow: 'hidden', marginBottom: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#FCEBEB', borderBottom: '1px solid #F7C1C1', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#FCEBEB', borderBottom: '1px solid #F7C1C1' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon name="alert-triangle" size={16} style={{ color: '#A32D2D', flexShrink: 0 }} />
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontWeight: 700, fontSize: 13, color: '#A32D2D', margin: 0 }}>AI At-Risk Detection</p>
-            <p style={{ fontSize: 11, color: '#791F1F', margin: 0 }}>Scores, AI flags & submission patterns</p>
+          <div>
+            <p style={{ fontWeight: 700, fontSize: 13, color: '#A32D2D', margin: 0 }}>Need Support Students</p>
           </div>
         </div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A32D2D', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4, flexShrink: 0 }}>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A32D2D', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4 }}>
           <Icon name="x" size={16} style={{ color: '#A32D2D' }} />
         </button>
       </div>
 
-      {/* Stats — 3 cols on all sizes, compact on mobile */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, padding: '12px 16px', borderBottom: '1px solid #F1EFE8' }}>
         {[
-          { num: critical.length, label: 'Critical',      color: '#A32D2D' },
-          { num: watch.length,    label: 'Watch',         color: '#854F0B' },
-          { num: uniqueStudents,  label: 'Total students',color: '#185FA5' },
+          { num: critical.length, label: 'Critical risk', color: '#A32D2D' },
+          { num: watch.length, label: 'Watch closely', color: '#854F0B' },
+          { num: uniqueStudents, label: 'Students total', color: '#185FA5' },
         ].map(s => (
-          <div key={s.label} style={{ background: '#F8F7FF', borderRadius: 8, padding: '10px 8px', textAlign: 'center' }}>
+          <div key={s.label} style={{ background: '#F8F7FF', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <p style={{ fontSize: 22, fontWeight: 700, color: s.color, margin: 0, lineHeight: 1 }}>{s.num}</p>
-            <p style={{ fontSize: 11, color: '#8884A8', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.label}</p>
+            <p style={{ fontSize: 11, color: '#8884A8', margin: '3px 0 0' }}>{s.label}</p>
           </div>
         ))}
       </div>
@@ -128,27 +131,27 @@ function AtRiskPanel({ submissions, onClose }) {
           const isCritical = student.level === 'critical';
           return (
             <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '11px 0', borderBottom: idx < atRiskList.length - 1 ? '1px solid #F1EFE8' : 'none' }}>
-              <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, background: isCritical ? '#FCEBEB' : '#FAEEDA', color: isCritical ? '#A32D2D' : '#854F0B' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, background: isCritical ? '#FCEBEB' : '#FAEEDA', color: isCritical ? '#A32D2D' : '#854F0B' }}>
                 {student.name.charAt(0)}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 3 }}>
-                  <p style={{ fontWeight: 700, fontSize: 13, color: '#1A1830', margin: 0 }}>{student.name}</p>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: isCritical ? '#FCEBEB' : '#FAEEDA', color: isCritical ? '#791F1F' : '#633806', border: `1px solid ${isCritical ? '#F7C1C1' : '#FAC775'}` }}>
-                    <Icon name={isCritical ? 'alert-triangle' : 'alert-circle'} size={10} style={{ color: isCritical ? '#A32D2D' : '#854F0B' }} />
-                    {isCritical ? 'Critical' : 'Watch'}
-                  </span>
-                </div>
+                <p style={{ fontWeight: 700, fontSize: 13, color: '#1A1830', margin: '0 0 2px' }}>{student.name}</p>
                 {student.reasons.map((r, i) => (
                   <p key={i} style={{ fontSize: 11, color: '#8884A8', margin: '1px 0 0', lineHeight: 1.4 }}>{r}</p>
                 ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flexShrink: 0 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: isCritical ? '#FCEBEB' : '#FAEEDA', color: isCritical ? '#791F1F' : '#633806', border: `1px solid ${isCritical ? '#F7C1C1' : '#FAC775'}` }}>
+                  <Icon name={isCritical ? 'alert-triangle' : 'alert-circle'} size={10} style={{ color: isCritical ? '#A32D2D' : '#854F0B' }} />
+                  {isCritical ? 'Critical' : 'Watch'}
+                </span>
                 {student.lowestScore !== null && (
-                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ flex: 1, height: 4, background: '#F1EFE8', borderRadius: 2, overflow: 'hidden' }}>
+                  <>
+                    <div style={{ width: 70, height: 4, background: '#F1EFE8', borderRadius: 2, overflow: 'hidden' }}>
                       <div style={{ height: '100%', borderRadius: 2, width: `${Math.min(student.lowestScore, 100)}%`, background: isCritical ? '#A32D2D' : '#854F0B' }} />
                     </div>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: 0, color: isCritical ? '#A32D2D' : '#854F0B', flexShrink: 0 }}>{student.lowestScore}/100</p>
-                  </div>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: 0, color: isCritical ? '#A32D2D' : '#854F0B' }}>{student.lowestScore}/100</p>
+                  </>
                 )}
               </div>
             </div>
@@ -171,9 +174,9 @@ function Sheet({ onClose, title, subtitle, children, footer }) {
           <div style={{ width: 36, height: 4, background: '#D3D1C7', borderRadius: 2 }} />
         </div>
         <div style={{ padding: '10px 22px 14px', borderBottom: '1px solid #ECECF2', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1 }}>
             <h2 style={{ fontWeight: 700, fontSize: 17, color: '#1A1830', margin: '0 0 2px', lineHeight: 1.3 }}>{title}</h2>
-            {subtitle && <p style={{ fontSize: 12, color: '#8884A8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</p>}
+            {subtitle && <p style={{ fontSize: 12, color: '#8884A8', margin: 0 }}>{subtitle}</p>}
           </div>
           <button onClick={onClose} aria-label="Close" style={{ background: '#F1EFE8', border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', color: '#5F5E5A', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="x" size={16} />
@@ -203,10 +206,10 @@ function handleExportStudents(submissions) {
     const assignmentRows = student.assignments
       .sort((a, b) => a.assignment_title.localeCompare(b.assignment_title))
       .map(sub => {
-        const isFlagged  = sub.ai_detection_score >= 50;
-        const aiScore    = sub.ai_score !== null ? (isFlagged ? `0/${sub.max_score}` : `${sub.ai_score}/${sub.max_score}`) : '—';
+        const isFlagged = sub.ai_detection_score >= 50;
+        const aiScore = sub.ai_score !== null ? (isFlagged ? `0/${sub.max_score}` : `${sub.ai_score}/${sub.max_score}`) : '—';
         const finalScore = sub.final_score !== null ? `${sub.final_score}/${sub.max_score}` : '—';
-        const status     = sub.status === 'graded' ? 'Graded' : sub.status === 'ai_graded' ? 'Pending' : 'Processing';
+        const status = sub.status === 'graded' ? 'Graded' : sub.status === 'ai_graded' ? 'Pending' : 'Processing';
         return `
           <tr>
             <td style="padding:8px 12px;border-bottom:1px solid #F1EFE8;font-size:13px;color:#5F5E5A;">${sub.assignment_title}</td>
@@ -287,93 +290,12 @@ function handleExportStudents(submissions) {
   win.document.close();
 }
 
-// ── SUBMISSION CARD (mobile) — replaces table row on small screens ─────────────
-function SubmissionCard({ sub, onGrade, onEditGrade, onFeedback }) {
-  const isFlagged = sub.ai_detection_score >= 50;
-  const aiPct     = sub.ai_detection_score ?? 0;
-  const finalPct  = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
-
-  return (
-    <div style={{ padding: '14px 16px', borderBottom: '1px solid #F1EFE8' }}>
-      {/* Title row */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontWeight: 600, fontSize: 13, color: '#1A1830', margin: '0 0 3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {sub.assignment_title}
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Icon name="calendar" size={11} style={{ color: '#B0AECB' }} />
-            <span style={{ fontSize: 11, color: '#B0AECB' }}>
-              {new Date(sub.submitted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-            </span>
-            {sub.file_name && (
-              <>
-                <span style={{ color: '#D3D1C7', fontSize: 11 }}>·</span>
-                <Icon name="paperclip" size={11} style={{ color: '#185FA5' }} />
-                <span style={{ fontSize: 11, color: '#185FA5', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 100 }}>{sub.file_name}</span>
-              </>
-            )}
-          </div>
-        </div>
-        <StatusBadge status={sub.status} aiDetection={sub.ai_detection_score} />
-      </div>
-
-      {/* Score row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-        {/* AI Score */}
-        <div style={{ background: '#F8F7FF', borderRadius: 8, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#B0AECB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI</span>
-          <span style={{ fontWeight: 700, fontSize: 13, color: isFlagged ? '#A32D2D' : '#185FA5' }}>
-            {sub.ai_score !== null ? `${isFlagged ? 0 : sub.ai_score}/${sub.max_score}` : '—'}
-          </span>
-        </div>
-
-        {/* Final Score */}
-        <div style={{ background: '#F8F7FF', borderRadius: 8, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#B0AECB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final</span>
-          <span style={{ fontWeight: 700, fontSize: 13, color: finalPct !== null ? scoreColor(finalPct) : '#B0AECB' }}>
-            {sub.final_score !== null ? `${sub.final_score}/${sub.max_score}` : '—'}
-          </span>
-        </div>
-
-        {/* AI Flag */}
-        {sub.ai_detection_score !== null && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: aiBg(aiPct), color: aiColor(aiPct), border: `1px solid ${aiBorder(aiPct)}` }}>
-            <Icon name={aiIcon(aiPct)} size={11} style={{ color: aiColor(aiPct) }} />
-            {aiPct}% AI
-          </span>
-        )}
-      </div>
-
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {sub.status === 'ai_graded' && (
-          <button onClick={() => onGrade(sub)} style={{ flex: 1, padding: '7px 10px', borderRadius: 7, border: 'none', background: '#1A1830', color: '#fff', fontWeight: 500, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <Icon name="pencil" size={11} style={{ color: '#EEEDFE' }} /> Grade
-          </button>
-        )}
-        {sub.status === 'graded' && onEditGrade && (
-          <button onClick={() => onEditGrade(sub)} style={{ flex: 1, padding: '7px 10px', borderRadius: 7, border: '1px solid #B5D4F4', background: '#E6F1FB', color: '#185FA5', fontWeight: 500, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <Icon name="refresh" size={11} style={{ color: '#185FA5' }} /> Edit grade
-          </button>
-        )}
-        {(sub.status === 'graded' || sub.status === 'ai_graded') && (
-          <button onClick={() => onFeedback(sub)} style={{ padding: '7px 12px', borderRadius: 7, border: '1px solid #D3D1C7', background: '#F1EFE8', color: '#5F5E5A', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <Icon name="message-circle" size={13} style={{ color: '#5F5E5A' }} /> Feedback
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function StudentsTab({ students, submissions, assignments, loading, onGrade, onEditGrade }) {
-  const [searchQuery,   setSearchQuery]   = useState('');
-  const [showAtRisk,    setShowAtRisk]    = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAtRisk, setShowAtRisk] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState(null);
   const [gradeFeedback, setGradeFeedback] = useState('');
-  const [showSearch,    setShowSearch]    = useState(false);
 
   const atRiskCount = useMemo(() => detectAtRiskStudents(submissions), [submissions]).length;
   const openFeedback = sub => { setFeedbackModal(sub); setGradeFeedback(sub.teacher_feedback || ''); };
@@ -385,95 +307,115 @@ export default function StudentsTab({ students, submissions, assignments, loadin
     </div>
   );
 
+  // ── shared button height so all header controls line up ──
+  const HDR_H = 34;
+
   return (
     <div style={{ minHeight: '100vh', background: '#F1EFE8', fontFamily: "'DM Sans','Segoe UI',sans-serif" }}>
 
-      <style>{`
-        @keyframes atRiskPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.45; transform:scale(1.4); } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Desktop header: single row */
-        .st-header-actions { display: flex; align-items: center; gap: 8px; }
-        .st-search-wrap { position: relative; display: flex; align-items: center; }
-        .st-search-desktop { display: flex; }
-        .st-search-mobile-btn { display: none; }
-        .st-search-mobile-bar { display: none; }
-
-        /* Hide table / show cards on mobile */
-        .st-table-wrap { display: block; }
-        .st-cards-wrap  { display: none; }
-
-        @media (max-width: 639px) {
-          .st-header-actions { gap: 6px; }
-
-          /* Replace text labels with icon-only on very small screens */
-          .st-btn-label { display: none; }
-          .st-search-desktop { display: none; }
-          .st-search-mobile-btn { display: flex; }
-
-          /* Full-width search bar below header when open */
-          .st-search-mobile-bar { display: flex; }
-
-          /* Table → cards */
-          .st-table-wrap { display: none; }
-          .st-cards-wrap  { display: block; }
-        }
-      `}</style>
-
       {/* ── Header ── */}
-      <div style={{ background: '#022aa4', padding: '0 16px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 12px rgba(2,42,164,0.35)', gap: 10 }}>
-        {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <div style={{ width: 38, height: 38, background: 'rgba(255,255,255,0.18)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name="writing" size={19} style={{ color: '#fff' }} />
+      <div style={{
+        background: '#1a2e5a',
+        padding: '0 20px',
+        height: 62,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        boxShadow: '0 2px 12px rgba(15,29,58,0.35)',
+      }}>
+
+        {/* Left — logo + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ width: 38, height: 38, background: '#c9a227', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="writing" size={19} style={{ color: '#1a2e5a' }} />
           </div>
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontWeight: 700, fontSize: 15, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>EssayGrade AI</p>
+          <div>
+            <p style={{ fontWeight: 700, fontSize: 15, color: '#fff', margin: 0 }}>EssayGrade AI</p>
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', margin: 0 }}>Students</p>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="st-header-actions" style={{ flexShrink: 0 }}>
+        {/* Right — search + buttons, all same height */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
 
-          {/* Desktop search */}
-          <div className="st-search-wrap st-search-desktop">
-            <Icon name="search" size={13} style={{ position: 'absolute', left: 9, color: '#8884A8', pointerEvents: 'none', zIndex: 1 }} />
+          {/* Search */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Icon name="search" size={14} style={{ position: 'absolute', left: 10, color: '#8884A8', pointerEvents: 'none' }} />
             <input
               type="text"
               placeholder="Search student…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ padding: '7px 12px 7px 28px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.25)', fontSize: 13, color: '#1A1830', background: '#fff', outline: 'none', width: 180, fontFamily: 'inherit' }}
+              style={{
+                height: HDR_H,
+                padding: '0 12px 0 32px',
+                borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.25)',
+                fontSize: 13,
+                color: '#1A1830',
+                background: '#fff',
+                outline: 'none',
+                width: 180,
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
-
-          {/* Mobile search icon toggle */}
-          <button
-            className="st-search-mobile-btn"
-            onClick={() => setShowSearch(s => !s)}
-            style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid rgba(255,255,255,0.25)', background: showSearch ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Icon name={showSearch ? 'x' : 'search'} size={15} style={{ color: '#fff' }} />
-          </button>
 
           {/* Export */}
           <button
             onClick={() => handleExportStudents(submissions)}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 11px', borderRadius: 8, cursor: 'pointer', border: '1px solid #C0DD97', background: '#EAF3DE', color: '#3B6D11', fontSize: 13, fontWeight: 500, fontFamily: 'inherit', flexShrink: 0 }}
+            style={{
+              height: HDR_H,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 13px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              border: '1px solid #C0DD97',
+              background: '#EAF3DE',
+              color: '#3B6D11',
+              fontSize: 13,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
+            }}
           >
             <Icon name="file-export" size={14} style={{ color: '#3B6D11' }} />
-            <span className="st-btn-label">Export PDF</span>
+            Export PDF
           </button>
 
           {/* Watchlist */}
           <button
             onClick={() => setShowAtRisk(prev => !prev)}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 11px', borderRadius: 8, cursor: 'pointer', border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)', background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)', color: '#A32D2D', fontSize: 13, fontWeight: 500, fontFamily: 'inherit', transition: 'all 0.15s', flexShrink: 0 }}
+            style={{
+              height: HDR_H,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 13px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)',
+              background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)',
+              color: '#A32D2D',
+              fontSize: 13,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
+              transition: 'all 0.15s',
+            }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#A32D2D', flexShrink: 0, animation: 'atRiskPulse 1.4s ease-in-out infinite' }} />
             <Icon name="users-group" size={14} style={{ color: '#A32D2D' }} />
-            <span className="st-btn-label">Watchlist</span>
+            Watchlist
             {atRiskCount > 0 && (
               <span style={{ background: '#A32D2D', color: '#fff', fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 20 }}>{atRiskCount}</span>
             )}
@@ -481,29 +423,17 @@ export default function StudentsTab({ students, submissions, assignments, loadin
         </div>
       </div>
 
-      {/* Mobile search bar (below header) */}
-      {showSearch && (
-        <div className="st-search-mobile-bar" style={{ background: '#0230b8', padding: '8px 16px 12px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
-          <div style={{ position: 'relative', width: '100%' }}>
-            <Icon name="search" size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#8884A8', pointerEvents: 'none' }} />
-            <input
-              autoFocus
-              type="text"
-              placeholder="Search student…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{ width: '100%', padding: '9px 12px 9px 30px', borderRadius: 9, border: 'none', fontSize: 14, color: '#1A1830', background: '#fff', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
-            />
-          </div>
-        </div>
-      )}
+      <style>{`
+        @keyframes atRiskPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.45; transform:scale(1.4); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
 
       {/* ── Main ── */}
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '20px 12px 64px' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '28px 16px 64px' }}>
 
         {showAtRisk && <AtRiskPanel submissions={submissions} onClose={() => setShowAtRisk(false)} />}
 
-        <p style={{ fontSize: 17, fontWeight: 700, color: '#1A1830', margin: '0 0 14px' }}>Students</p>
+        <p style={{ fontSize: 17, fontWeight: 700, color: '#1A1830', margin: '0 0 18px' }}>Students</p>
 
         {submissions.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #ECECF2', textAlign: 'center', padding: '64px 24px' }}>
@@ -535,9 +465,9 @@ export default function StudentsTab({ students, submissions, assignments, loadin
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {sorted.map(student => {
-                const gradedCount  = student.assignments.filter(s => s.final_score !== null).length;
+                const gradedCount = student.assignments.filter(s => s.final_score !== null).length;
                 const flaggedCount = student.assignments.filter(s => s.ai_detection_score >= 50).length;
-                const avgFinal     = gradedCount > 0
+                const avgFinal = gradedCount > 0
                   ? Math.round(student.assignments.filter(s => s.final_score !== null).reduce((sum, s) => sum + (s.final_score / s.max_score) * 100, 0) / gradedCount)
                   : null;
 
@@ -547,35 +477,34 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                   <div key={student.name} style={{ background: '#fff', borderRadius: 13, border: '1px solid #ECECF2', borderLeft: `4px solid ${accentColor}`, overflow: 'hidden' }}>
 
                     {/* Student header */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: '#F8F7FF', borderBottom: '1px solid #ECECF2', gap: 10, flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: '#F8F7FF', borderBottom: '1px solid #ECECF2', gap: 12, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, background: flaggedCount > 0 ? '#FCEBEB' : '#E6F1FB', color: flaggedCount > 0 ? '#A32D2D' : '#185FA5', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {student.name.charAt(0)}
                         </div>
-                        <div style={{ minWidth: 0 }}>
-                          <p style={{ fontWeight: 700, fontSize: 14, color: '#1A1830', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{student.name}</p>
-                          <p style={{ fontSize: 11, color: '#8884A8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{student.email}</p>
+                        <div>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: '#1A1830', margin: 0 }}>{student.name}</p>
+                          <p style={{ fontSize: 11, color: '#8884A8', margin: 0 }}>{student.email}</p>
                         </div>
                       </div>
 
-                      {/* Badges — scroll horizontally rather than wrap on very small screens */}
-                      <div style={{ display: 'flex', gap: 5, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 2 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#E6F1FB', color: '#185FA5', border: '1px solid #B5D4F4', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#E6F1FB', color: '#185FA5', border: '1px solid #B5D4F4' }}>
                           <Icon name="file-text" size={11} style={{ color: '#185FA5' }} />
-                          {student.assignments.length} sub{student.assignments.length !== 1 ? 's' : ''}
+                          {student.assignments.length} submission{student.assignments.length !== 1 ? 's' : ''}
                         </span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#EAF3DE', color: '#3B6D11', border: '1px solid #C0DD97', whiteSpace: 'nowrap' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#EAF3DE', color: '#3B6D11', border: '1px solid #C0DD97' }}>
                           <Icon name="circle-check" size={11} style={{ color: '#3B6D11' }} />
                           {gradedCount} graded
                         </span>
                         {avgFinal !== null && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: scoreBg(avgFinal), color: scoreColor(avgFinal), border: `1px solid ${scoreBorder(avgFinal)}`, whiteSpace: 'nowrap' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: scoreBg(avgFinal), color: scoreColor(avgFinal), border: `1px solid ${scoreBorder(avgFinal)}` }}>
                             <Icon name="chart-bar" size={11} style={{ color: scoreColor(avgFinal) }} />
                             Avg {avgFinal}%
                           </span>
                         )}
                         {flaggedCount > 0 && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#A32D2D', border: '1px solid #F7C1C1', whiteSpace: 'nowrap' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#A32D2D', border: '1px solid #F7C1C1' }}>
                             <Icon name="alert-triangle" size={11} style={{ color: '#A32D2D' }} />
                             {flaggedCount} flagged
                           </span>
@@ -598,9 +527,9 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                             .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
                             .map((sub, subIdx) => {
                               const isFlagged = sub.ai_detection_score >= 50;
-                              const finalPct  = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
-                              const isLast    = subIdx === student.assignments.length - 1;
-                              const aiPct     = sub.ai_detection_score ?? 0;
+                              const finalPct = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
+                              const isLast = subIdx === student.assignments.length - 1;
+                              const aiPct = sub.ai_detection_score ?? 0;
                               return (
                                 <tr key={sub.id} style={{ borderBottom: isLast ? 'none' : '1px solid #F1EFE8' }}>
                                   <td style={{ padding: '12px 14px' }}>
@@ -664,22 +593,6 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                         </tbody>
                       </table>
                     </div>
-
-                    {/* MOBILE — cards */}
-                    <div className="st-cards-wrap">
-                      {student.assignments
-                        .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
-                        .map(sub => (
-                          <SubmissionCard
-                            key={sub.id}
-                            sub={sub}
-                            onGrade={onGrade}
-                            onEditGrade={onEditGrade}
-                            onFeedback={openFeedback}
-                          />
-                        ))}
-                    </div>
-
                   </div>
                 );
               })}

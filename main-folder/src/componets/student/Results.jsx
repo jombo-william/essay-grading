@@ -1,3 +1,4 @@
+// C:\PROJECTS\Essay-Grader\src\Student\Results.jsx
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -44,6 +45,7 @@ async function mockAiGrade({ essayText, assignment }) {
   return { total_score: totalScore, ai_detection_percentage: aiPct, overall_feedback: feedbackLines.join('\n'), rubric_breakdown: breakdown }
 }
 
+// ─── SENTENCE-LEVEL AI DETECTION ───────────────────────────────────────────
 function analyzeSentences(text, overallAiPct) {
   if (!text || !overallAiPct) return []
   const genericPhrases = ['multifaceted','furthermore','it is important to note','plays a crucial role','in today\'s world','throughout history','significantly impacts','one must consider','it is worth noting','as mentioned above','on the other hand','has fundamentally transformed','the intersection of']
@@ -64,6 +66,7 @@ function analyzeSentences(text, overallAiPct) {
   })
 }
 
+// ─── RADAR CHART (pure SVG) ─────────────────────────────────────────────────
 function RadarChart({ breakdown, size = 200 }) {
   if (!breakdown || breakdown.length === 0) return null
   const cx = size / 2, cy = size / 2
@@ -443,6 +446,7 @@ const INITIAL_SUBMISSIONS = [
   { id:103, assignment_id:97, assignment_title:'Globalisation & Inequality', max_score:100, essay_text:`Globalisation represents a multifaceted phenomenon that has fundamentally transformed the economic landscape. The intersection of trade liberalisation, technological advancement, and capital mobility has created opportunities while exacerbating inequalities.`, submitted_at:'2026-03-03T11:00:00', submit_mode:'write', file_name:null, ai_score:0, ai_detection_score:81, final_score:null, ai_feedback:`⚠️ HIGH AI CONTENT DETECTED\n\nAn estimated 81% of this essay appears AI-generated.\n\nPer academic integrity policy, essays with ≥50% AI content receive a score of 0/100.\n\nIndicators:\n• Unnaturally uniform sentence structure\n• Generic phrasing with no personal examples\n\nPlease rewrite in your own voice with specific examples.`, teacher_feedback:null, status:'ai_graded', rubric_breakdown:[] },
 ]
 
+// ─── COLOUR TOKENS ─────────────────────────────────────────────────────────
 const NAVY      = '#1a2e5a'
 const NAVY_DARK = '#0f1d3a'
 const GOLD      = '#c9a227'
@@ -669,6 +673,7 @@ Give exactly 4 suggestions. Be specific, reference the actual essay content.`,
   )
 }
 
+// ─── MAIN COMPONENT ────────────────────────────────────────────────────────
 export default function Results() {
   const [tab, setTab]                 = useState('results')
   const [submissions, setSubmissions] = useState(INITIAL_SUBMISSIONS)
@@ -734,12 +739,35 @@ export default function Results() {
       )}
       {underDevModal && <UnderDevelopmentModal feature={underDevModal} onClose={() => setUnderDevModal(null)} />}
 
-     
+      {/* NAV */}
+      <nav style={{ background:NAVY, position:'sticky', top:0, zIndex:100, boxShadow:'0 2px 16px rgba(0,0,0,0.18)' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', height:68 }}>
+          <Link to="/" style={{ display:'flex', alignItems:'center', gap:14, textDecoration:'none' }}>
+            <div style={{ width:46, height:46, background:GOLD, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Playfair Display',serif", fontSize:'1.1rem', fontWeight:700, color:NAVY_DARK, flexShrink:0 }}>U</div>
+            <div style={{ display:'flex', flexDirection:'column' }}>
+              <span style={{ fontFamily:"'Playfair Display',serif", fontSize:'1rem', color:'#fff', lineHeight:1.2, fontWeight:700 }}>AI Essay Grader</span>
+              <span style={{ fontSize:'0.68rem', color:GOLD_L, letterSpacing:'0.08em', textTransform:'uppercase' }}>University of Malawi</span>
+            </div>
+          </Link>
+          <ul className={`nav-links-row${menuOpen?' open':''}`} style={{ display:'flex', alignItems:'center', gap:4, listStyle:'none', margin:0, padding:0 }}>
+            <li><Link to="/" className="nav-link">Home</Link></li>
+            <li><button onClick={() => setTab('results')} className="nav-link" style={{ border:'none', cursor:'pointer', background: tab==='results'?'rgba(255,255,255,0.12)':'transparent', color: tab==='results'?'#fff':'rgba(255,255,255,0.82)', fontFamily:'inherit' }}>📊 My Results</button></li>
+            <li><button onClick={() => setUnderDevModal('Assignments')} className="nav-link" style={{ border:'none', cursor:'pointer', background:'transparent', color:'rgba(255,255,255,0.82)', fontFamily:'inherit' }}>📋 Assignments</button></li>
+            <li>
+              <div className="profile-pill">
+                <div style={{ width:28, height:28, background:`linear-gradient(135deg,${GOLD},#a07a18)`, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, color:NAVY_DARK, flexShrink:0 }}>{studentName.charAt(0).toUpperCase()}</div>
+                <span style={{ fontSize:13, color:'#fff', fontWeight:600 }}>{studentName}</span>
+              </div>
+            </li>
+          </ul>
+          <button className="hamburger" onClick={() => setMenuOpen(o=>!o)} aria-label="Menu"><span/><span/><span/></button>
+        </div>
+      </nav>
 
-      {}
+      {/* MAIN */}
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>
 
-        {}
+        {/* STATS */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12, marginBottom:28 }}>
           {[
             { label:'To Submit', value: MOCK_ASSIGNMENTS.filter(a => !submissions.find(s=>s.assignment_id===a.id) && new Date()<new Date(a.due_date)).length, icon:'📋', bg:`${NAVY}18` },
@@ -788,7 +816,7 @@ export default function Results() {
 
       </div>
 
-      {}
+      {/* DETAIL SHEET */}
       {resultModal && (
         <Sheet
           onClose={() => setResultModal(null)}
