@@ -1,21 +1,11 @@
 // src/components/student/ResultDetailSheet.jsx
 import { useState, useEffect } from 'react';
 import { C, Icon, Sheet, scoreColor, scoreLabel, scoreBg } from './shared.jsx';
-import ChatPanel from '../ChatPanel.jsx';
 
 // ─── COLOUR TOKENS ─────────────────────────────────────────────────────────
 const NAVY = '#1a2e5a';
 const NAVY_DARK = '#0f1d3a';
 const GOLD = '#c9a227';
-
-// ─── SCORE HELPERS ─────────────────────────────────────────────────────────
-const scoreColorHelper = p => p >= 70 ? '#16a34a' : p >= 50 ? '#d97706' : '#dc2626';
-const scoreLabelHelper = p => p >= 70 ? 'Pass' : p >= 50 ? 'Borderline' : 'Fail';
-
-const sL = {
-  display: 'block', fontSize: 11, fontWeight: 700, color: '#94a3b8',
-  textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8,
-};
 
 // ─── BOTTOM SHEET ──────────────────────────────────────────────────────────
 function BottomSheet({ onClose, title, subtitle, children, footer }) {
@@ -38,46 +28,6 @@ function BottomSheet({ onClose, title, subtitle, children, footer }) {
         {footer && <div style={{ padding: '14px 20px 20px', borderTop: '1px solid #f1f5f9' }}>{footer}</div>}
       </div>
     </div>
-  );
-}
-
-// ─── RADAR CHART ───────────────────────────────────────────────────────────
-function RadarChart({ breakdown, size = 200 }) {
-  if (!breakdown || breakdown.length === 0) return null;
-  const cx = size / 2, cy = size / 2;
-  const r = size * 0.36;
-  const n = breakdown.length;
-  const angle = i => (Math.PI * 2 * i) / n - Math.PI / 2;
-  const points = breakdown.map((b, i) => {
-    const ratio = b.pct / 100;
-    return {
-      x: cx + r * ratio * Math.cos(angle(i)), y: cy + r * ratio * Math.sin(angle(i)),
-      labelX: cx + (r + 24) * Math.cos(angle(i)), labelY: cy + (r + 24) * Math.sin(angle(i)),
-      gridX: cx + r * Math.cos(angle(i)), gridY: cy + r * Math.sin(angle(i)),
-      label: b.criterion.charAt(0).toUpperCase() + b.criterion.slice(1),
-      pct: b.pct,
-    };
-  });
-  const polygon = pts => pts.map(p => `${p.x},${p.y}`).join(' ');
-  const gridLevels = [0.25, 0.5, 0.75, 1.0];
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {gridLevels.map((lvl, gi) => {
-        const gPts = breakdown.map((_, i) => ({ x: cx + r * lvl * Math.cos(angle(i)), y: cy + r * lvl * Math.sin(angle(i)) }));
-        return <polygon key={gi} points={polygon(gPts)} fill="none" stroke="#e2e8f0" strokeWidth="1" />;
-      })}
-      {points.map((p, i) => <line key={i} x1={cx} y1={cy} x2={p.gridX} y2={p.gridY} stroke="#e2e8f0" strokeWidth="1" />)}
-      <polygon points={polygon(points)} fill={`${NAVY}22`} stroke={NAVY} strokeWidth="2" strokeLinejoin="round" />
-      {points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="4" fill={NAVY} />)}
-      {points.map((p, i) => (
-        <text key={i} x={p.labelX} y={p.labelY} textAnchor="middle" dominantBaseline="middle" fontSize="9" fontWeight="700" fill="#475569">
-          {p.label}
-          <tspan x={p.labelX} dy="12" fontSize="8" fill={NAVY}>
-            {p.pct}%
-          </tspan>
-        </text>
-      ))}
-    </svg>
   );
 }
 
@@ -104,18 +54,21 @@ function analyzeSentences(text, overallAiPct) {
 
 function SentenceHighlighter({ text, aiPct }) {
   const [enabled, setEnabled] = useState(false);
-  const [data, setData] = useState([]);
-  const [hover, setHover] = useState(null);
+  const [sentences, setSentences] = useState([]);
+  const [tooltip, setTooltip] = useState(null);
 
   useEffect(() => {
-    setData(analyzeSentences(text, aiPct));
+    setSentences(analyzeSentences(text, aiPct || 0));
   }, [text, aiPct]);
+
+  const riskBg = r => r >= 60 ? '#ef444428' : r >= 35 ? '#f59e0b22' : 'transparent';
+  const riskBorder = r => r >= 60 ? '#ef4444' : r >= 35 ? '#f59e0b' : 'transparent';
+  const riskLabel = r => r >= 60 ? 'High AI risk' : r >= 35 ? 'Moderate AI risk' : 'Likely human';
 
   return (
     <div style={{ marginTop: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <span style={C.sL}>Your Submission</span>
-
         {aiPct > 0 && (
           <button
             onClick={() => setEnabled(!enabled)}
@@ -128,12 +81,12 @@ function SentenceHighlighter({ text, aiPct }) {
               cursor: 'pointer',
             }}
           >
-            🔬 AI Scan
+            🔬 {enabled ? 'Hide AI Scan' : 'Show AI Scan'}
           </button>
         )}
       </div>
 
-      {showHighlight && (
+      {enabled && sentences.length > 0 ? (
         <div>
           {sentences.map((s, idx) => (
             <div
@@ -159,148 +112,106 @@ function SentenceHighlighter({ text, aiPct }) {
             </div>
           )}
         </div>
-      )}
-      {!showHighlight && (
+      ) : (
         <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>{text}</p>
       )}
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// IMPROVEMENT COACH
-// ─────────────────────────────────────────────────────────────
+// ─── IMPROVEMENT COACH ─────────────────────────────────────────────────────
 function ImprovementCoach({ submission }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState(null);
+  const [error, setError] = useState(null);
+
+  const runCoach = async () => {
+    setOpen(true);
+    if (suggestions) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const systemPrompt = `You are an academic writing coach for university students. Analyse the essay and return ONLY valid JSON — no markdown, no preamble — in this exact shape:\n{"overall":"2-sentence overall impression","suggestions":[{"type":"strength"|"weakness"|"tip","title":"short title","detail":"1-2 sentences of specific advice"}],"rewrite":{"original":"exact sentence from the essay that could be improved","improved":"your improved version of that sentence","why":"brief reason"}}\nGive exactly 4 suggestions. Be specific, reference the actual essay content.`;
+      const userPrompt = `Assignment: ${submission.assignment_title}\n\nEssay:\n${submission.essay_text}`;
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+            generationConfig: { maxOutputTokens: 1000, temperature: 0.7 },
+          }),
+        }
+      );
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      setSuggestions(JSON.parse(text.replace(/```json|```/g, '').trim()));
+    } catch {
+      setError('Could not load suggestions. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const typeStyle = t => ({ strength: { bg: '#f0fdf4', border: '#86efac', icon: '💪', color: '#15803d' }, weakness: { bg: '#fef2f2', border: '#fecaca', icon: '⚠️', color: '#dc2626' }, tip: { bg: '#eff6ff', border: '#bfdbfe', icon: '💡', color: '#2563eb' } }[t] || { bg: '#f8fafc', border: '#e2e8f0', icon: '📝', color: '#64748b' });
 
   return (
-    <div style={{ marginTop: 12 }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          width: '100%',
-          padding: 12,
-          background: `linear-gradient(135deg, ${NAVY}, ${NAVY_DARK})`,
-          color: '#fff',
-          borderRadius: 10,
-          border: 'none',
-          fontWeight: 700,
-          cursor: 'pointer',
-        }}
-      >
-        🧠 AI Writing Coach
+    <div style={{ marginBottom: 14 }}>
+      <button onClick={runCoach}
+        style={{ width: '100%', padding: '13px 16px', background: `linear-gradient(135deg,${NAVY},#2d4a8a)`, border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        🧠 AI Writing Coach — Get Improvement Suggestions
       </button>
 
       {open && (
-        <div style={{ marginTop: 10, padding: 12, background: '#f8fafc' }}>
-          <p style={{ fontSize: 13 }}>
-            AI coaching feature placeholder (Gemini integration already in your
-            original logic).
-          </p>
+        <div style={{ marginTop: 12, background: '#fff', border: `1.5px solid ${NAVY}25`, borderRadius: 14, overflow: 'hidden' }}>
+          <div style={{ background: `linear-gradient(135deg,${NAVY}10,${GOLD}15)`, padding: '12px 16px', borderBottom: `1px solid ${NAVY}15`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontWeight: 800, fontSize: 13, color: NAVY }}>🧠 AI Writing Coach</span>
+            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: '#64748b' }}>×</button>
+          </div>
+          <div style={{ padding: 16 }}>
+            {loading && (
+              <div style={{ textAlign: 'center', padding: '28px 0' }}>
+                <div style={{ width: 36, height: 36, border: `3px solid ${NAVY}20`, borderTopColor: NAVY, borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+                <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>Analysing your essay...</p>
+              </div>
+            )}
+            {error && <p style={{ color: '#dc2626', fontSize: 13, textAlign: 'center' }}>{error}</p>}
+            {suggestions && !loading && (
+              <>
+                <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.7, marginBottom: 14, padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>{suggestions.overall}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+                  {suggestions.suggestions?.map((s, i) => {
+                    const ts = typeStyle(s.type);
+                    return (
+                      <div key={i} style={{ background: ts.bg, border: `1px solid ${ts.border}`, borderRadius: 10, padding: '10px 12px' }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, color: ts.color, margin: '0 0 4px' }}>{ts.icon} {s.title}</p>
+                        <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.6 }}>{s.detail}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                {suggestions.rewrite && (
+                  <div style={{ background: `${GOLD}12`, border: `1px solid ${GOLD}50`, borderRadius: 10, padding: 14 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>✍️ Suggested Rewrite</p>
+                    <div style={{ background: '#fef2f2', borderRadius: 8, padding: '8px 12px', marginBottom: 8 }}>
+                      <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 3px', fontWeight: 600 }}>ORIGINAL</p>
+                      <p style={{ fontSize: 12, color: '#7f1d1d', margin: 0, fontStyle: 'italic' }}>"{suggestions.rewrite.original}"</p>
+                    </div>
+                    <div style={{ background: '#f0fdf4', borderRadius: 8, padding: '8px 12px', marginBottom: 8 }}>
+                      <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 3px', fontWeight: 600 }}>IMPROVED</p>
+                      <p style={{ fontSize: 12, color: '#14532d', margin: 0, fontWeight: 600 }}>"{suggestions.rewrite.improved}"</p>
+                    </div>
+                    <p style={{ fontSize: 11, color: '#92400e', margin: 0 }}>💬 {suggestions.rewrite.why}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────────────────────
-export default function ResultDetailSheet({
-  sub,
-  canUnsubmit,
-  onClose,
-  onUnsubmit,
-}) {
-  const [tab, setTab] = useState('overview');
-
-  if (!sub) return null;
-
-  const pct =
-    sub.final_score !== null
-      ? Math.round((sub.final_score / sub.max_score) * 100)
-      : null;
-
-  const isAI = (sub.ai_detection_score ?? 0) >= 50;
-
-  return (
-    <Sheet
-      onClose={onClose}
-      title={sub.assignment_title}
-      subtitle={new Date(sub.submitted_at).toLocaleDateString()}
-      footer={
-        <div style={{ display: 'flex', gap: 10 }}>
-          {canUnsubmit && (
-            <button
-              onClick={() => onUnsubmit(sub)}
-              style={C.dBtn}
-            >
-              ↩ Unsubmit
-            </button>
-          )}
-          <button onClick={onClose} style={C.gBtn}>
-            Close
-          </button>
-        </div>
-      }
-    >
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-        {['overview', 'ai', 'coach'].map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            style={{
-              flex: 1,
-              padding: 8,
-              borderRadius: 8,
-              border: 'none',
-              background: tab === t ? NAVY : '#f1f5f9',
-              color: tab === t ? '#fff' : '#64748b',
-              fontWeight: 700,
-              fontSize: 12,
-            }}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* OVERVIEW */}
-      {tab === 'overview' && (
-        <>
-          <div
-            style={{
-              background: `linear-gradient(135deg, ${NAVY}, ${NAVY_DARK})`,
-              color: '#fff',
-              padding: 20,
-              borderRadius: 14,
-              textAlign: 'center',
-            }}
-          >
-            <h1 style={{ fontSize: 48, margin: 0 }}>
-              {sub.final_score ?? '—'}/{sub.max_score}
-            </h1>
-            <p>{pct}% • {scoreLabel(pct)}</p>
-          </div>
-
-          <SentenceHighlighter text={sub.essay_text} aiPct={0} />
-        </>
-      )}
-
-      {/* AI TAB */}
-      {tab === 'ai' && (
-        <SentenceHighlighter
-          text={sub.essay_text}
-          aiPct={sub.ai_detection_score}
-        />
-      )}
-
-      {/* COACH TAB */}
-      {tab === 'coach' && (
-        <ImprovementCoach submission={sub} />
-      )}
-    </Sheet>
   );
 }
 
@@ -319,13 +230,13 @@ export default function ResultDetailSheet({ sub, canUnsubmit, onClose, onUnsubmi
   return (
     <>
       <style>{`
-        @keyframes spin   { to { transform:rotate(360deg); } }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
-        .modal-tab { flex:1; padding:8px 4px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; }
-        .modal-tab.active   { background:${NAVY}; color:#fff; }
-        .modal-tab.inactive { background:transparent; color:#64748b; }
-        .modal-tab.inactive:hover { background:#f1f5f9; color:#1e293b; }
-        .fade-in { animation:fadeIn 0.22s ease; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .modal-tab { flex: 1; padding: 8px 4px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .modal-tab.active { background: ${NAVY}; color: #fff; }
+        .modal-tab.inactive { background: transparent; color: #64748b; }
+        .modal-tab.inactive:hover { background: #f1f5f9; color: #1e293b; }
+        .fade-in { animation: fadeIn 0.22s ease; }
       `}</style>
 
       <BottomSheet
@@ -335,7 +246,7 @@ export default function ResultDetailSheet({ sub, canUnsubmit, onClose, onUnsubmi
         footer={
           <div style={{ display: 'flex', gap: 10 }}>
             {canUnsubmit && (
-              <button onClick={() => { if (window.confirm('Unsubmit?')) onUnsubmit(sub); }}
+              <button onClick={() => { if (window.confirm('Unsubmit this essay?')) onUnsubmit(sub); }}
                 style={{ flex: 1, padding: 13, background: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: 12, color: '#dc2626', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
                 ↩ Unsubmit
               </button>

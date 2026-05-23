@@ -291,12 +291,7 @@ const FILE_TYPES = [
   { label: "📎 Any File",   accept: "*",                bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
 ];
 
-<<<<<<< HEAD
-//const API_BASE = "https://jombo-essaygrade.fly.dev/api";
-const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
-=======
 const BASE_URL = `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/teacher`;
->>>>>>> f9a70ba45be21c52cb98854e36c9e948af32002e
 
 const loadPdfJs = () =>
   new Promise(resolve => {
