@@ -344,6 +344,7 @@
 import { useState } from 'react';
 import { apiFetch } from './api.js';
 import { Icon, Badge } from './shared.jsx';
+import './pending.css';
 
 const aiLabel  = s => s >= 50 ? 'High AI'    : s >= 30 ? 'Borderline' : 'Original';
 const aiColor  = s => s >= 50 ? '#A32D2D'    : s >= 30 ? '#854F0B'    : '#3B6D11';
