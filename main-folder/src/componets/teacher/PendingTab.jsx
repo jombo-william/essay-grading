@@ -26,7 +26,7 @@
 //     setGradeFeedback('');
 //   };
 
-  
+
 
 // const handleSave = async () => {
 //   if (!gradeScore) return;
@@ -314,7 +314,7 @@
 //               background: '#f8fafc', flexShrink: 0,
 //             }}>
 //               <button onClick={() => setGradeModal(null)} style={btnGhost}>Cancel</button>
-             
+
 //                               <button
 //               onClick={handleSave}
 //               disabled={!gradeScore || saving}
@@ -346,11 +346,11 @@ import { apiFetch } from './api.js';
 import { Icon, Badge } from './shared.jsx';
 import './pending.css';
 
-const aiLabel  = s => s >= 50 ? 'High AI'    : s >= 30 ? 'Borderline' : 'Original';
-const aiColor  = s => s >= 50 ? '#A32D2D'    : s >= 30 ? '#854F0B'    : '#3B6D11';
-const aiBg     = s => s >= 50 ? '#FCEBEB'    : s >= 30 ? '#FAEEDA'    : '#EAF3DE';
-const aiBorder = s => s >= 50 ? '#F7C1C1'    : s >= 30 ? '#FAC775'    : '#C0DD97';
-const aiIcon   = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
+const aiLabel = s => s >= 50 ? 'High AI' : s >= 30 ? 'Borderline' : 'Original';
+const aiColor = s => s >= 50 ? '#A32D2D' : s >= 30 ? '#854F0B' : '#3B6D11';
+const aiBg = s => s >= 50 ? '#FCEBEB' : s >= 30 ? '#FAEEDA' : '#EAF3DE';
+const aiBorder = s => s >= 50 ? '#F7C1C1' : s >= 30 ? '#FAC775' : '#C0DD97';
+const aiIcon = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
 
 function ScoreBar({ value, max }) {
   const pct = max > 0 ? Math.min(Math.round((value / max) * 100), 100) : 0;
@@ -366,11 +366,11 @@ function ScoreBar({ value, max }) {
 }
 
 export default function PendingTab({ pending = [], loading, onViewEssay, onGrade, classId }) {
-  const [gradeModal,    setGradeModal]    = useState(null);
-  const [gradeScore,    setGradeScore]    = useState('');
+  const [gradeModal, setGradeModal] = useState(null);
+  const [gradeScore, setGradeScore] = useState('');
   const [gradeFeedback, setGradeFeedback] = useState('');
-  const [saving,        setSaving]        = useState(false);
-  const [approvingAll,  setApprovingAll]  = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [approvingAll, setApprovingAll] = useState(false);
 
   const approvable = pending.filter(s => s.ai_score !== null && s.ai_score !== undefined);
 
@@ -388,8 +388,8 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
         method: 'POST',
         body: JSON.stringify({
           submission_id: gradeModal.id,
-          score:         Number(gradeScore),
-          feedback:      gradeFeedback,
+          score: Number(gradeScore),
+          feedback: gradeFeedback,
         }),
       });
       setGradeModal(null);
@@ -442,15 +442,15 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
             style={{
               padding: '8px 16px', borderRadius: 9, border: 'none',
               background: approvingAll ? '#8884A8' : '#1A5C3A',
-              color: '#fff', fontWeight: 500, fontSize: 13,
+              color: '#fff', fontWeight: 500, fontSize: 12,
               cursor: approvingAll ? 'not-allowed' : 'pointer',
               fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', gap: 6,
             }}
           >
             {approvingAll
-              ? <><Icon name="loader" size={13} style={{ color: '#fff' }} /> Approving…</>
-              : <><Icon name="checks" size={13} style={{ color: '#fff' }} /> Approve all ({approvable.length})</>
+              ? <><Icon name="loader" size={12} style={{ color: '#fff' }} /> Approving…</>
+              : <><Icon name="checks" size={12} style={{ color: '#fff' }} /> Approve all ({approvable.length})</>
             }
           </button>
         )}
@@ -464,7 +464,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
             border: '2px solid #E8E6FF', borderTopColor: '#3C3489',
             borderRadius: '50%', animation: 'spin 0.7s linear infinite',
           }} />
-          <p style={{ fontSize: 13, color: '#8884A8', fontWeight: 500 }}>Loading submissions…</p>
+          <p style={{ fontSize: 12, color: '#8884A8', fontWeight: 500 }}>Loading submissions…</p>
         </div>
       )}
 
@@ -489,9 +489,9 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
       {/* ── Submission cards ── */}
       {!loading && pending.map(sub => {
         const hasAiScore = sub.ai_score !== null && sub.ai_score !== undefined;
-        const aiPct      = sub.ai_detection_score ?? 0;
-        const isHighAI   = aiPct >= 50;
-        const leftColor  = isHighAI ? '#A32D2D' : hasAiScore ? '#854F0B' : '#B5D4F4';
+        const aiPct = sub.ai_detection_score ?? 0;
+        const isHighAI = aiPct >= 50;
+        const leftColor = isHighAI ? '#A32D2D' : hasAiScore ? '#854F0B' : '#B5D4F4';
 
         return (
           <div key={sub.id} style={{
@@ -551,11 +551,11 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                       padding: '2px 8px', borderRadius: 20,
-                      fontSize: 11, fontWeight: 600,
+                      fontSize: 12, fontWeight: 600,
                       background: aiBg(aiPct), color: aiColor(aiPct),
                       border: `1px solid ${aiBorder(aiPct)}`,
                     }}>
-                      <Icon name={aiIcon(aiPct)} size={11} style={{ color: aiColor(aiPct) }} />
+                      <Icon name={aiIcon(aiPct)} size={12} style={{ color: aiColor(aiPct) }} />
                       {aiPct}% AI
                     </span>
                   </div>
