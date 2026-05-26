@@ -1,583 +1,277 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import AssignmentsTab from "./AssignmentsTab.jsx";
+import EssayViewSheet from "./EssayViewSheet.jsx";
+import ExamsTab from "./ExamsTab.jsx";
+import ExamTakeSheet from "./ExamTakeSheet.jsx";
+import ResultDetailSheet from "./ResultDetailSheet.jsx";
+import ResultsTab from "./ResultsTab.jsx";
+import StudentClassroomTab from "./StudentClassroomTab.jsx";
+import WriteEssaySheet from "./WriteEssaySheet.jsx";
+import { apiFetch } from "./api.js";
+import { Icon, Toast } from "./shared.jsx";
 
-
-// src/components/student/StudentDashboard.jsx
-
-import { useState, useEffect, useCallback } from 'react';
-import { apiFetch } from './api.js';
-import { C, Icon, Toast } from './shared.jsx';
-import AssignmentsTab from './AssignmentsTab.jsx';
-import ResultsTab from './ResultsTab.jsx';
-import WriteEssaySheet from './WriteEssaySheet.jsx';
-import EssayViewSheet from './EssayViewSheet.jsx';
-import ResultDetailSheet from './ResultDetailSheet.jsx';
-import StudentClassroomTab from './StudentClassroomTab.jsx';
-// import StudentQuizPage from "./StudentQuizPage";
-
-const TABS = [
-  { id: 'assignments', label: 'Assignments', icon: 'clipboard-text' },
-  { id: 'results', label: 'My results', icon: 'chart-bar' },
-  { id: 'classroom', label: 'Classroom', icon: 'building-community' },
+const tabs = [
+  { id: "assignments", label: "Assignments", icon: "clipboard-list" },
+  { id: "results", label: "Results", icon: "chart-bar" },
+  { id: "exams", label: "Exams", icon: "file-text" },
+  { id: "platforms", label: "Platforms", icon: "plug-connected" },
 ];
 
-export default function StudentDashboard({ user, onBack }) {
+function normalizeAssignments(assignments = []) {
+  const now = new Date();
+  return assignments.map(assignment => ({
+    ...assignment,
+    isPast: assignment.due_date ? new Date(assignment.due_date) < now : false,
+    submitted: !!assignment.submitted || !!assignment.submission,
+  }));
+}
 
-  const [tab, setTab] = useState('assignments');
+export default function StudentDashboard({ user, onBack }) {
+  const [tab, setTab] = useState("assignments");
   const [assignments, setAssignments] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [gradingStatus, setGradingStatus] = useState('');
-
   const [writeAssignment, setWriteAssignment] = useState(null);
-  const [essayViewSub, setEssayViewSub] = useState(null);
-  const [resultSub, setResultSub] = useState(null);
+  const [viewEssay, setViewEssay] = useState(null);
+  const [viewResult, setViewResult] = useState(null);
+  const [examToTake, setExamToTake] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [gradingStatus, setGradingStatus] = useState("");
 
-  const showToast = (msg, type = 'success') => {
+  const studentName = user?.full_name || user?.name || "Student";
+
+  const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
-  };
-
-  // ── Fetch Data ───────────────────────────────────────────────
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
-
-    try {
-
-      const [aData, rData] = await Promise.all([
-        apiFetch('/get_assignments.php'),
-        apiFetch('/get_results.php'),
-      ]);
-
-      setAssignments(aData.assignments || []);
-      setResults(rData.results || []);
-
-    } catch (err) {
-
-      showToast(err.message || 'Failed to load data.', 'error');
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
   }, []);
 
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [assignmentRes, resultRes] = await Promise.all([
+        apiFetch("/assignments"),
+        apiFetch("/results"),
+      ]);
+      setAssignments(normalizeAssignments(assignmentRes.assignments || []));
+      setResults(resultRes.results || resultRes.submissions || []);
+    } catch (err) {
+      showToast(err.message || "Failed to load student dashboard data.", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
   useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-    fetchAll();
+  const stats = useMemo(() => {
+    const submitted = assignments.filter(a => a.submitted).length;
+    const active = assignments.filter(a => !a.submitted && !a.isPast).length;
+    const graded = results.filter(r => r.final_score !== null && r.final_score !== undefined);
+    const average = graded.length
+      ? Math.round(graded.reduce((sum, r) => sum + (Number(r.final_score) / Number(r.max_score || 100)) * 100, 0) / graded.length)
+      : null;
 
-  }, [fetchAll]);
-
-  // ── Poll Pending Results ─────────────────────────────────────
-  useEffect(() => {
-
-    const hasPending = results.some(r => r.status === 'pending');
-
-    if (!hasPending) return;
-
-    const iv = setInterval(async () => {
-
-      try {
-
-        const rData = await apiFetch('/get_results.php');
-        const updated = rData.results || [];
-
-        setResults(updated);
-
-        if (!updated.some(r => r.status === 'pending')) {
-          clearInterval(iv);
-        }
-
-      } catch {
-        // silently retry
-      }
-
-    }, 5000);
-
-    return () => clearInterval(iv);
-
-  }, [results]);
-
-  // ── Derived Data ─────────────────────────────────────────────
-  const enriched = assignments.map(a => ({
-    ...a,
-    isPast: new Date() > new Date(a.due_date),
-    submission: results.find(r => r.assignment_id === a.id) || null,
-    submitted: results.some(r => r.assignment_id === a.id),
-  }));
-
-  const graded = results.filter(r => r.final_score !== null);
-
-  const avgPct = graded.length
-    ? Math.round(
-        graded.reduce(
-          (s, r) => s + (r.final_score / r.max_score) * 100,
-          0
-        ) / graded.length
-      )
-    : null;
+    return [
+      { label: "To submit", value: active, icon: "clipboard-list", color: "#185FA5", bg: "#E6F1FB" },
+      { label: "Submitted", value: submitted, icon: "send", color: "#3C3489", bg: "#EEEDFE" },
+      { label: "Average", value: average === null ? "-" : `${average}%`, icon: "chart-bar", color: "#3B6D11", bg: "#EAF3DE" },
+    ];
+  }, [assignments, results]);
 
   const canUnsubmit = sub => {
-
-    const a = assignments.find(a => a.id === sub.assignment_id);
-
-    return (
-      sub.final_score === null &&
-      a &&
-      new Date() < new Date(a.due_date)
-    );
-
+    const assignment = assignments.find(a => a.id === sub.assignment_id);
+    return !!assignment && !assignment.isPast && sub.final_score == null;
   };
 
-  // ── Submit Essay ─────────────────────────────────────────────
-  const handleSubmit = async ({
-    assignment,
-    submitMode,
-    essayText,
-    uploadFile,
-    uploadText,
-    activeText
-  }) => {
-
-    const wordCount = activeText
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean).length;
-
-    if (submitMode === 'write' && wordCount < 50) {
-      showToast('Please write at least 50 words.', 'error');
-      return;
-    }
-
-    if (submitMode === 'upload' && !uploadFile) {
-      showToast('Please select a file to upload.', 'error');
-      return;
-    }
-
+  const handleSubmitEssay = async ({ assignment, submitMode, uploadFile, activeText }) => {
     setSubmitting(true);
-    setGradingStatus('Submitting…');
-
+    setGradingStatus("Submitting...");
     try {
-
-      const csrfToken = sessionStorage.getItem('csrf_token') || '';
-
-      await apiFetch('/submit_essay.php', {
-        method: 'POST',
+      const res = await apiFetch("/submit", {
+        method: "POST",
         body: JSON.stringify({
           assignment_id: assignment.id,
           essay_text: activeText,
-          csrf_token: csrfToken
+          submit_mode: submitMode,
+          file_name: uploadFile?.name || null,
         }),
       });
-
+      showToast(res.message || "Essay submitted successfully.", "success");
       setWriteAssignment(null);
-      setTab('results');
-
-      showToast('Submitted and graded. Awaiting teacher approval.');
-
-      await fetchAll();
-
+      await loadData();
+      setTab("results");
     } catch (err) {
-
-      showToast(
-        err.message || 'Submission failed. Please try again.',
-        'error'
-      );
-
+      showToast(err.message || "Could not submit essay.", "error");
     } finally {
-
       setSubmitting(false);
-      setGradingStatus('');
-
+      setGradingStatus("");
     }
-
   };
 
-  // ── Unsubmit Essay ───────────────────────────────────────────
   const handleUnsubmit = async sub => {
-
     try {
-
-      const csrfToken = sessionStorage.getItem('csrf_token') || '';
-
-      await apiFetch('/unsubmit_essay.php', {
-        method: 'POST',
-        body: JSON.stringify({
-          submission_id: sub.id,
-          csrf_token: csrfToken
-        }),
+      await apiFetch("/unsubmit", {
+        method: "POST",
+        body: JSON.stringify({ submission_id: sub.id }),
       });
-
-      setEssayViewSub(null);
-      setResultSub(null);
-
-      showToast(
-        'Essay unsubmitted. You can rewrite before the deadline.'
-      );
-
-      await fetchAll();
-
+      showToast("Essay unsubmitted.", "success");
+      setViewEssay(null);
+      setViewResult(null);
+      await loadData();
     } catch (err) {
-
-      showToast(
-        err.message || 'Could not unsubmit.',
-        'error'
-      );
-
+      showToast(err.message || "Failed to unsubmit essay.", "error");
     }
-
   };
-
-  // ── Stats ────────────────────────────────────────────────────
-  const stats = [
-    {
-      label: 'To submit',
-      value: loading
-        ? '…'
-        : enriched.filter(a => !a.submitted && !a.isPast).length,
-      icon: 'clipboard-text',
-      color: '#185FA5',
-      bg: '#E6F1FB',
-    },
-
-    {
-      label: 'Submitted',
-      value: loading ? '…' : results.length,
-      icon: 'file-check',
-      color: '#534AB7',
-      bg: '#EEEDFE',
-    },
-
-    {
-      label: 'Average score',
-      value: loading
-        ? '…'
-        : avgPct !== null
-          ? `${avgPct}%`
-          : '—',
-      icon: 'chart-bar',
-      color: '#3B6D11',
-      bg: '#EAF3DE',
-    },
-  ];
 
   return (
-
-    <div style={C.page}>
-
+    <div style={{ minHeight: "100vh", background: "#F6F5FB", fontFamily: "'DM Sans','Segoe UI',sans-serif" }}>
       <style>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 760px) {
+          .student-shell { padding: 18px !important; }
+          .student-nav { overflow-x: auto; justify-content: flex-start !important; }
+          .student-stats { grid-template-columns: 1fr !important; }
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
       `}</style>
-
       <Toast toast={toast} />
 
-      {/* ── Header ───────────────────────────────────────── */}
-
-      <header style={C.header}>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
-
-          <div style={{
-            width: '36px',
-            height: '36px',
-            background: '#3C3489',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Icon
-              name="pencil"
-              size={18}
-              style={{ color: '#EEEDFE' }}
-            />
-          </div>
-
-          <div>
-            <p style={{
-              fontWeight: '600',
-              fontSize: '14px',
-              color: '#1A1830',
-              margin: 0
-            }}>
-              EssayGrade
-            </p>
-
-            <p style={{
-              fontSize: '11px',
-              color: '#8884A8',
-              margin: 0
-            }}>
-              Student Portal
-            </p>
-          </div>
-
-        </div>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '7px',
-            background: '#F8F7FF',
-            border: '1px solid #E8E6FF',
-            borderRadius: '20px',
-            padding: '4px 12px 4px 4px',
-          }}>
-
-            <div style={{
-              width: '26px',
-              height: '26px',
-              background: '#EEEDFE',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '11px',
-              fontWeight: '600',
-              color: '#3C3489',
-            }}>
-              {(user?.name || 'S').charAt(0).toUpperCase()}
+      <header style={{ background: "#1A1830", color: "#fff", position: "sticky", top: 0, zIndex: 80, boxShadow: "0 2px 16px rgba(0,0,0,0.16)" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#C9A227", color: "#1A1830", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
+              {studentName.charAt(0).toUpperCase()}
             </div>
-
-            <span style={{
-              fontSize: '13px',
-              color: '#1A1830',
-              fontWeight: '500'
-            }}>
-              {user?.name || 'Student'}
-            </span>
-
+            <div>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>AI Essay Grading System</p>
+              <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.68)" }}>{studentName}</p>
+            </div>
           </div>
-
           <button
             onClick={onBack}
-            style={{
-              background: 'none',
-              border: '1px solid #ECECF2',
-              borderRadius: '8px',
-              color: '#6B6890',
-              fontWeight: '500',
-              fontSize: '12px',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-            }}
+            style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", color: "#fff", borderRadius: 9, padding: "8px 13px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}
           >
-            <Icon name="door-exit" size={13} />
             Logout
           </button>
-
         </div>
-
       </header>
 
-      {/* ── Main ─────────────────────────────────────────── */}
-
-      <div style={C.main}>
-
-        {/* ── Stats ─────────────────────────────────────── */}
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3,1fr)',
-          gap: '12px',
-          marginBottom: '22px'
-        }}>
-
-          {stats.map(s => (
-
-            <div
-              key={s.label}
-              style={{
-                background: '#fff',
-                borderRadius: '12px',
-                padding: '14px 16px',
-                border: '1px solid #ECECF2',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}
-            >
-
-              <div style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '10px',
-                background: s.bg,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <Icon
-                  name={s.icon}
-                  size={18}
-                  style={{ color: s.color }}
-                />
+      <main className="student-shell" style={{ maxWidth: 1180, margin: "0 auto", padding: "26px 24px 56px" }}>
+        <section className="student-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 18 }}>
+          {stats.map(stat => (
+            <div key={stat.label} style={{ background: "#fff", border: "1px solid #ECECF2", borderRadius: 14, padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 42, height: 42, borderRadius: 11, background: stat.bg, color: stat.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name={stat.icon} size={21} />
               </div>
-
               <div>
-
-                <p style={{
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: '#1A1830',
-                  margin: 0,
-                  lineHeight: 1
-                }}>
-                  {s.value}
-                </p>
-
-                <p style={{
-                  fontSize: '11px',
-                  color: '#8884A8',
-                  margin: '2px 0 0',
-                  fontWeight: '500'
-                }}>
-                  {s.label}
-                </p>
-
+                <p style={{ margin: 0, fontSize: 23, lineHeight: 1, color: "#1A1830", fontWeight: 800 }}>{stat.value}</p>
+                <p style={{ margin: "4px 0 0", color: "#8884A8", fontSize: 12, fontWeight: 600 }}>{stat.label}</p>
               </div>
-
             </div>
-
           ))}
+        </section>
 
-        </div>
+        <nav className="student-nav" style={{ background: "#fff", border: "1px solid #ECECF2", borderRadius: 14, padding: 6, display: "flex", gap: 6, justifyContent: "center", marginBottom: 20 }}>
+          {tabs.map(item => {
+            const active = tab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 7,
+                  padding: "9px 14px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: active ? "#3C3489" : "transparent",
+                  color: active ? "#fff" : "#5F5E5A",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Icon name={item.icon} size={16} />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        {/* ── Tabs ──────────────────────────────────────── */}
-
-        <div style={{
-          display: 'flex',
-          background: '#F1EFE8',
-          borderRadius: '10px',
-          padding: '3px',
-          marginBottom: '22px',
-          gap: '2px',
-          width: 'fit-content',
-        }}>
-
-          {TABS.map(t => (
-
-            <button
-              key={t.id}
-              style={C.tab(tab === t.id)}
-              onClick={() => setTab(t.id)}
-            >
-              <Icon name={t.icon} size={14} />
-              {t.label}
-            </button>
-
-          ))}
-
-        </div>
-
-        {/* ── Assignments ───────────────────────────────── */}
-
-        {tab === 'assignments' && (
-
+        {tab === "assignments" && (
           <AssignmentsTab
-            assignments={enriched}
+            assignments={assignments}
             loading={loading}
             onWrite={setWriteAssignment}
-            onViewEssay={setEssayViewSub}
-            onViewResult={setResultSub}
+            onViewEssay={setViewEssay}
+            onViewResult={setViewResult}
           />
-
         )}
 
-        {/* ── Results ───────────────────────────────────── */}
-
-        {tab === 'results' && (
-
+        {tab === "results" && (
           <ResultsTab
             results={results}
             loading={loading}
-            onOpenResult={setResultSub}
+            onOpenResult={setViewResult}
+            studentName={studentName}
           />
-
         )}
 
-        {/* ── Classroom ─────────────────────────────────── */}
+        {tab === "exams" && (
+          <ExamsTab onStartExam={setExamToTake} />
+        )}
 
-        {tab === 'classroom' && (
-
+        {tab === "platforms" && (
           <StudentClassroomTab
-            assignments={assignments}
             showToast={showToast}
-            onSubmitted={() => {
-              fetchAll();
-              setTab('results');
-            }}
+            onSubmitted={loadData}
           />
-
         )}
+      </main>
 
-        {/* ── Quiz Page ───────────────────────────────────
+      {writeAssignment && (
+        <WriteEssaySheet
+          assignment={writeAssignment}
+          onClose={() => setWriteAssignment(null)}
+          onSubmit={handleSubmitEssay}
+          submitting={submitting}
+          gradingStatus={gradingStatus}
+        />
+      )}
 
-        <StudentQuizPage
-          apiFetch={apiFetch}
+      {viewEssay && (
+        <EssayViewSheet
+          sub={viewEssay}
+          user={user}
+          canUnsubmit={canUnsubmit(viewEssay)}
+          onClose={() => setViewEssay(null)}
+          onUnsubmit={handleUnsubmit}
+        />
+      )}
+
+      {viewResult && (
+        <ResultDetailSheet
+          sub={viewResult}
+          canUnsubmit={canUnsubmit(viewResult)}
+          onClose={() => setViewResult(null)}
+          onUnsubmit={handleUnsubmit}
+        />
+      )}
+
+      {examToTake && (
+        <ExamTakeSheet
+          exam={examToTake}
+          onClose={() => setExamToTake(null)}
+          onSubmitted={loadData}
           showToast={showToast}
-        /> */}
-
-      </div>
-
-      {/* ── Modals ─────────────────────────────────────── */}
-
-      <WriteEssaySheet
-        assignment={writeAssignment}
-        onClose={() => setWriteAssignment(null)}
-        onSubmit={handleSubmit}
-        submitting={submitting}
-        gradingStatus={gradingStatus}
-      />
-
-      <EssayViewSheet
-        sub={essayViewSub}
-        user={user}
-        canUnsubmit={
-          essayViewSub
-            ? canUnsubmit(essayViewSub)
-            : false
-        }
-        onClose={() => setEssayViewSub(null)}
-        onUnsubmit={handleUnsubmit}
-      />
-
-      <ResultDetailSheet
-        sub={resultSub}
-        user={user}
-        canUnsubmit={
-          resultSub
-            ? canUnsubmit(resultSub)
-            : false
-        }
-        onClose={() => setResultSub(null)}
-        onUnsubmit={handleUnsubmit}
-      />
-
+        />
+      )}
     </div>
-
   );
-
 }

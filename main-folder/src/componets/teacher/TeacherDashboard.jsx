@@ -11,12 +11,11 @@ import IntegrationsTab   from "./IntegrationsTab.jsx";
 // import TeacherQuizTab from "./TeacherQuizTab";
 
 const TABS = [
-  { id: "pending",     icon: "⏳", label: "Pending"     },
-  { id: "assignments", icon: "📝", label: "Assignments" },
-  { id: "students",    icon: "👥", label: "Students"    },
-  // { id: "exams", icon: "📝", label: "Exams" },
-  { id: "archived",     icon: "📦", label: "Archived"      },
-  { id: "integrations", icon: "🔗", label: "Integrations" },
+  { id: "pending", icon: "clock", label: "Pending" },
+  { id: "assignments", icon: "clipboard-list", label: "Assignments" },
+  { id: "students", icon: "users", label: "Students" },
+  { id: "archived", icon: "archive", label: "Archived" },
+  { id: "integrations", icon: "plug", label: "Integrations" },
 ];
 
 const CLASS_PALETTES = [
@@ -52,6 +51,10 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
   };
 
   const fetchAll = useCallback(async () => {
+    if (!selectedClass?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setFetchError(null);
     try {
@@ -69,7 +72,7 @@ export default function TeacherDashboard({ user, selectedClass, classIndex = 0, 
     } finally {
       setLoading(false);
     }
-  }, [selectedClass.id]);
+  }, [selectedClass?.id]);
 
   useEffect(() => {
     setTab("pending");

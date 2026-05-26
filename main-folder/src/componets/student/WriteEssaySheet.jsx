@@ -1,8 +1,3 @@
-
-
-
-
-// src/components/student/WriteEssaySheet.jsx
 import { useRef, useState } from 'react';
 import { C, Icon, Sheet } from './shared.jsx';
 

@@ -20,30 +20,45 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // const res  = await fetch('https://jombo-essaygrade.fly.dev/api/auth/login', {
-       const res  = await fetch(`${API_URL}/api/auth/login`, {
-      method:  'POST',
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }),
         credentials: 'include',
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(data.detail || 'Invalid email or password')
+        setError(data.detail || data.message || 'Invalid email or password')
         return
       }
 
-      localStorage.setItem('user',          JSON.stringify(data.user))
-      localStorage.setItem('token',         data.csrf_token)
-      localStorage.setItem('session_token', data.session_token)
-      sessionStorage.setItem('csrf_token',    data.csrf_token)
-      sessionStorage.setItem('session_token', data.session_token)
+      const user = data.user || data
+      const role = user.role || data.role
+      const token = data.session_token || data.token || data.access_token
 
-      navigate(data.user.role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+      if (!role) {
+        setError('Login succeeded, but the server did not return a user role.')
+        return
+      }
 
-    } catch {
-      setError('Cannot reach server. Make sure the backend is running on port 8000.')
+      localStorage.setItem('user', JSON.stringify({ ...user, role }))
+
+      if (data.csrf_token) {
+        localStorage.setItem('csrf_token', data.csrf_token)
+        sessionStorage.setItem('csrf_token', data.csrf_token)
+      }
+
+      if (token) {
+        localStorage.setItem('session_token', token)
+        localStorage.setItem('token', token)
+        sessionStorage.setItem('session_token', token)
+      }
+
+      navigate(role === 'teacher' ? '/teacher-dashboard' : '/dashboard')
+
+    } catch (err) {
+      setError(`Cannot reach ${API_URL}. Check that the backend is running and that VITE_API_URL is correct.`)
     } finally {
       setLoading(false)
     }

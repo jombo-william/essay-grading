@@ -1,15 +1,12 @@
 // src/components/teacher/api.js
 
 
-// const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
-//const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
-
-
-const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
+const BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/teacher`;
 
 
 export async function apiFetch(path, options = {}) {
   const csrfToken = getCsrfToken();
+  const authToken = getAuthToken();
 
   const routeMap = {
     '/get_assignments.php':     '/assignments',
@@ -27,6 +24,7 @@ export async function apiFetch(path, options = {}) {
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       ...(options.headers || {}),
     },
@@ -46,6 +44,15 @@ export async function apiFetch(path, options = {}) {
 function getCsrfToken() {
   const cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-  return sessionStorage.getItem('csrf_token') || '';
+  return sessionStorage.getItem('csrf_token') || localStorage.getItem('csrf_token') || '';
+}
+
+function getAuthToken() {
+  return sessionStorage.getItem('auth_token')
+    || sessionStorage.getItem('session_token')
+    || localStorage.getItem('session_token')
+    || localStorage.getItem('auth_token')
+    || localStorage.getItem('token')
+    || '';
 }
 
