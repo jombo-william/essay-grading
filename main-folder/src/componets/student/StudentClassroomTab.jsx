@@ -1,179 +1,148 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "./api.js";
+import { Icon } from "./shared.jsx";
 
-export default function StudentClassroomTab({ assignments, showToast, onSubmitted }) {
+const C = {
+  blue: { bg: "#185FA5", soft: "#E6F1FB", border: "#B5D4F4", text: "#185FA5" },
+  green: { bg: "#3B6D11", soft: "#EAF3DE", border: "#C0DD97", text: "#3B6D11" },
+  amber: { bg: "#854F0B", soft: "#FAEEDA", border: "#FAC775", text: "#854F0B" },
+  purple: { bg: "#3C3489", soft: "#EEEDFE", border: "#CECBF6", text: "#3C3489" },
+  red: { bg: "#A32D2D", soft: "#FCEBEB", border: "#F7C1C1", text: "#A32D2D" },
+  gray: { bg: "#5F5E5A", soft: "#F1EFE8", border: "#D3D1C7", text: "#5F5E5A" },
+};
 
-  // ── Google Classroom state ─────────────────────────────────────────────────
-  const [connected,      setConnected]      = useState(false);
-  const [courses,        setCourses]        = useState([]);
-  const [gcAssignments,  setGcAssignments]  = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [loading,        setLoading]        = useState(false);
-  const [submitting,     setSubmitting]     = useState(null);
+function Button({ children, icon, loading, color = "blue", fullWidth = false, disabled, onClick }) {
+  const palette = C[color] || C.blue;
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 7,
+        width: fullWidth ? "100%" : undefined,
+        padding: "9px 16px",
+        borderRadius: 9,
+        border: "none",
+        background: disabled || loading ? "#D3D1C7" : palette.bg,
+        color: "#fff",
+        fontWeight: 600,
+        fontSize: 13,
+        cursor: disabled || loading ? "not-allowed" : "pointer",
+        fontFamily: "inherit",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <Icon
+        name={loading ? "loader-2" : icon}
+        size={14}
+        style={loading ? { animation: "spin 0.8s linear infinite" } : undefined}
+      />
+      {children}
+    </button>
+  );
+}
 
-  // ── Moodle state ───────────────────────────────────────────────────────────
-  const [moodleToken,      setMoodleToken]      = useState("");
-  const [moodleSiteUrl,    setMoodleSiteUrl]    = useState("");
-  const [moodleConnected,  setMoodleConnected]  = useState(false);
-  const [moodleLoading,    setMoodleLoading]    = useState(false);
-  const [moodleSiteDisplay,setMoodleSiteDisplay]= useState("");
+function PlatformCard({ icon, color, title, subtitle, children, connected }) {
+  const palette = C[color] || C.blue;
+  return (
+    <div style={{ background: "#fff", borderRadius: 14, padding: 22, border: "1px solid #ECECF2", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+        <div style={{ width: 42, height: 42, borderRadius: 11, background: palette.bg, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+          <Icon name={icon} size={21} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: "#1A1830" }}>{title}</p>
+          <p style={{ margin: 0, fontSize: 12, color: connected ? C.green.text : "#8884A8" }}>{subtitle}</p>
+        </div>
+        {connected && <Icon name="circle-check" size={19} style={{ color: C.green.text }} />}
+      </div>
+      {children}
+    </div>
+  );
+}
 
-  // ── Styles ─────────────────────────────────────────────────────────────────
-  const card = {
-    background: "#fff",
-    borderRadius: "14px",
-    padding: "22px",
-    border: "1px solid #ECECF2",
-    marginBottom: "16px",
-  };
+function Step({ label, children }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <span style={{
+        display: "block",
+        fontSize: 11,
+        fontWeight: 700,
+        color: "#8884A8",
+        textTransform: "uppercase",
+        letterSpacing: "0.07em",
+        marginBottom: 8,
+      }}>
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
 
-  const stepLabel = {
-    display: 'block',
-    fontSize: '12px',
-    fontWeight: '600',
-    color: '#8884A8',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '8px',
-  };
-  const stepLabel = {
-    display: "block",
-    fontSize: "11px",
-    fontWeight: "700",
-    color: "#8884A8",
-    textTransform: "uppercase",
-    letterSpacing: "0.07em",
-    marginBottom: "8px",
-  };
-  const divider = {
-    height: "1px",
-    background: "#F1EFE8",
-    margin: "16px 0",
-  };
-  const btn = background => ({
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "6px",
-    padding: "9px 16px",
-    borderRadius: "9px",
-    border: "none",
-    background,
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: "13px",
-    cursor: "pointer",
-    fontFamily: "inherit",
-  });
-  const selectStyle = {
-    width: "100%",
-    padding: "10px 36px 10px 12px",
-    borderRadius: "10px",
-    border: "1px solid #D3D1C7",
-    fontSize: "13px",
-    fontFamily: "inherit",
-    background: "#F8F7FF",
-    color: "#1A1830",
-    appearance: "none",
-    boxSizing: "border-box",
-  };
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: "10px",
-    border: "1px solid #D3D1C7",
-    fontSize: "13px",
-    fontFamily: "inherit",
-    background: "#F8F7FF",
-    color: "#1A1830",
-    outline: "none",
-    boxSizing: "border-box",
-  };
-  const platformBadge = background => ({
-    width: "40px",
-    height: "40px",
-    borderRadius: "10px",
-    background,
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  });
+function Divider() {
+  return <div style={{ height: 1, background: "#F1EFE8", margin: "16px 0" }} />;
+}
 
-  const btn = (bg) => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: bg,
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '8px 14px',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-  });
+const inputStyle = {
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: 10,
+  border: "1px solid #D3D1C7",
+  fontSize: 13,
+  fontFamily: "inherit",
+  background: "#F8F7FF",
+  color: "#1A1830",
+  outline: "none",
+  boxSizing: "border-box",
+};
 
-  const divider = {
-    borderTop: '1px solid #F0EFF8',
-    margin: '14px 0',
-  };
+const selectStyle = {
+  ...inputStyle,
+  paddingRight: 36,
+  appearance: "none",
+  cursor: "pointer",
+};
 
-  const selectStyle = {
-    width: '100%',
-    padding: '10px 32px 10px 14px',
-    borderRadius: '10px',
-    border: '1.5px solid #e2e8f0',
-    fontSize: '13px',
-    fontFamily: 'inherit',
-    appearance: 'none',
-    background: '#fff',
-    cursor: 'pointer',
-  };
+export default function StudentClassroomTab({ showToast, onSubmitted }) {
+  const [courses, setCourses] = useState([]);
+  const [gcAssignments, setGcAssignments] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(null);
 
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 14px',
-    borderRadius: '10px',
-    border: '1.5px solid #e2e8f0',
-    fontSize: '13px',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box',
-  };
+  const [moodleToken, setMoodleToken] = useState("");
+  const [moodleSiteUrl, setMoodleSiteUrl] = useState("");
+  const [moodleConnected, setMoodleConnected] = useState(false);
+  const [moodleLoading, setMoodleLoading] = useState(false);
+  const [moodleSiteDisplay, setMoodleSiteDisplay] = useState("");
 
-  const platformBadge = (color) => ({
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    background: color,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '18px',
-    color: '#fff',
-    flexShrink: 0,
-  });
-
-  // ── Moodle status on load ──────────────────────────────────────────────────
   useEffect(() => {
     apiFetch("/moodle/status")
       .then(res => {
-        setMoodleConnected(res.connected);
+        setMoodleConnected(!!res.connected);
         if (res.site_url) setMoodleSiteDisplay(res.site_url);
       })
       .catch(() => {});
   }, []);
 
-  // ── Google Classroom handlers ──────────────────────────────────────────────
   const connectGoogle = async () => {
+    const popup = window.open("", "_blank", "width=600,height=700");
+    if (!popup) {
+      showToast("Popup was blocked. Please allow popups and try again.", "error");
+      return;
+    }
+    popup.document.write("<p style='font-family:sans-serif;padding:24px'>Connecting to Google Classroom...</p>");
+
     try {
       const res = await apiFetch("/auth/google/classroom");
-      window.open(res.auth_url, "_blank", "width=600,height=700");
-      showToast("Complete login in the popup, then click 'Load My Courses'", "success");
-      setConnected(true);
+      popup.location.href = res.auth_url;
+      showToast("Complete Google login, then load your courses.", "success");
     } catch (err) {
+      popup.close();
       showToast(err.message || "Could not connect to Google", "error");
     }
   };
@@ -182,12 +151,9 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     setLoading(true);
     try {
       const res = await apiFetch("/classroom/courses");
-      setCourses(res.courses || []);
-      setConnected(true);
-      if ((res.courses || []).length === 0)
-        showToast("No active Google Classroom courses found.", "error");
-      else
-        showToast(`Found ${res.courses.length} course(s)`, "success");
+      const nextCourses = res.courses || [];
+      setCourses(nextCourses);
+      showToast(nextCourses.length ? `Found ${nextCourses.length} course(s)` : "No active Google Classroom courses found.", nextCourses.length ? "success" : "error");
     } catch (err) {
       showToast(err.message || "Failed to load courses", "error");
     } finally {
@@ -195,10 +161,12 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     }
   };
 
-  const loadAssignments = async (courseId) => {
-    setLoading(true);
+  const loadAssignments = async courseId => {
     setSelectedCourse(courseId);
     setGcAssignments([]);
+    if (!courseId) return;
+
+    setLoading(true);
     try {
       const res = await apiFetch(`/classroom/courses/${courseId}/assignments`);
       setGcAssignments(res.assignments || []);
@@ -209,19 +177,20 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     }
   };
 
-  const submitFromClassroom = async (gcAssignment) => {
-    if (!gcAssignment.local_assignment_id) {
-      showToast("This assignment hasn't been linked by your teacher yet.", "error");
+  const submitFromClassroom = async assignment => {
+    if (!assignment.local_assignment_id) {
+      showToast("This assignment has not been linked by your teacher yet.", "error");
       return;
     }
-    setSubmitting(gcAssignment.id);
+
+    setSubmitting(assignment.id);
     try {
       const res = await apiFetch(
-        `/classroom/submit?gc_course_id=${selectedCourse}&gc_coursework_id=${gcAssignment.id}&local_assignment_id=${gcAssignment.local_assignment_id}`,
+        `/classroom/submit?gc_course_id=${selectedCourse}&gc_coursework_id=${assignment.id}&local_assignment_id=${assignment.local_assignment_id}`,
         { method: "POST" }
       );
-      showToast(`Submitted! Score: ${res.score}/${res.max_score}`, "success");
-      if (onSubmitted) onSubmitted();
+      showToast(`Submitted. Score: ${res.score}/${res.max_score}`, "success");
+      onSubmitted?.();
     } catch (err) {
       showToast(err.message || "Submission failed", "error");
     } finally {
@@ -229,24 +198,23 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     }
   };
 
-  // ── Moodle handlers ────────────────────────────────────────────────────────
   const connectMoodle = async () => {
-    if (!moodleToken || !moodleSiteUrl) {
-      showToast("Please enter both Moodle site URL and token", "error");
+    const siteUrl = moodleSiteUrl.trim().replace(/\/$/, "");
+    if (!siteUrl || !moodleToken.trim()) {
+      showToast("Please enter both Moodle site URL and token.", "error");
       return;
     }
+
     setMoodleLoading(true);
     try {
       await apiFetch("/moodle/connect", {
         method: "POST",
-        body: JSON.stringify({
-          token:    moodleToken,
-          site_url: moodleSiteUrl.trim().replace(/\/$/, ""),
-        }),
+        body: JSON.stringify({ site_url: siteUrl, token: moodleToken.trim() }),
       });
       setMoodleConnected(true);
-      setMoodleSiteDisplay(moodleSiteUrl);
-      showToast("✅ Connected to Moodle successfully!", "success");
+      setMoodleSiteDisplay(siteUrl);
+      setMoodleToken("");
+      showToast("Connected to Moodle successfully.", "success");
     } catch (err) {
       showToast(err.message || "Failed to connect to Moodle", "error");
     } finally {
@@ -255,230 +223,192 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
   };
 
   const disconnectMoodle = async () => {
+    setMoodleLoading(true);
     try {
       await apiFetch("/moodle/disconnect", { method: "DELETE" });
       setMoodleConnected(false);
-      setMoodleToken("");
       setMoodleSiteUrl("");
       setMoodleSiteDisplay("");
-      showToast("Disconnected from Moodle", "success");
+      showToast("Disconnected from Moodle.", "success");
     } catch (err) {
-      showToast(err.message || "Failed to disconnect", "error");
+      showToast(err.message || "Failed to disconnect Moodle", "error");
+    } finally {
+      setMoodleLoading(false);
     }
   };
 
   return (
     <div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      
-      <p style={{ fontSize: "16px", fontWeight: "600", color: "#1A1830", marginBottom: "16px" }}>
-        Connected Platforms
+
+      <p style={{ fontSize: 17, fontWeight: 700, color: "#1A1830", margin: "0 0 16px" }}>
+        Connected platforms
       </p>
 
-      {/* ── Google Classroom ── */}
-      <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
-          <div style={platformBadge("#185FA5")}>
-            <i className="ti ti-school" aria-hidden="true" />
-          </div>
-          <div>
-            <p style={{ margin: 0, fontWeight: "600", fontSize: "14px", color: "#1A1830" }}>
-              Google Classroom
-            </p>
-            <p style={{ margin: 0, fontSize: "12px", color: "#8884A8" }}>
-              Submit assignments and sync results
-            </p>
-          </div>
-        </div>
+      <PlatformCard
+        icon="brand-google"
+        color="blue"
+        title="Google Classroom"
+        subtitle="Submit linked classroom assignments through EssayGrade"
+      >
+        <Step label="Step 1 - Connect your Google account">
+          <Button icon="lock" color="blue" onClick={connectGoogle}>Connect Google Classroom</Button>
+        </Step>
 
-        {/* Step 1 */}
-        <div style={{ marginBottom: "14px" }}>
-          <span style={stepLabel}>Step 1 — Connect your Google account</span>
-          <button onClick={connectGoogle} style={btn("#185FA5")}>
-            <i className="ti ti-lock" aria-hidden="true" style={{ fontSize: "13px" }} />
-            Connect Google Classroom
-          </button>
-        </div>
+        <Divider />
 
-        <div style={divider} />
+        <Step label="Step 2 - Load your enrolled courses">
+          <Button icon="refresh" color="purple" loading={loading} onClick={loadCourses}>
+            {loading ? "Loading..." : "Load my courses"}
+          </Button>
+        </Step>
 
-        {/* Step 2 */}
-        <div style={{ marginBottom: courses.length > 0 ? 0 : undefined }}>
-          <span style={stepLabel}>Step 2 — Load your enrolled courses</span>
-          <button onClick={loadCourses} disabled={loading} style={btn("#534AB7")}>
-            <i
-              className={`ti ${loading ? "ti-loader-2" : "ti-refresh"}`}
-              aria-hidden="true"
-              style={{ fontSize: "13px", ...(loading ? { animation: "spin 1s linear infinite" } : {}) }}
-            />
-            {loading ? "Loading..." : "Load My Courses"}
-          </button>
-        </div>
-
-        {/* Step 3 — Course selector */}
         {courses.length > 0 && (
           <>
-            <div style={divider} />
-            <div>
-              <span style={stepLabel}>Step 3 — Select a course</span>
+            <Divider />
+            <Step label="Step 3 - Select a course">
               <div style={{ position: "relative" }}>
-                <select style={selectStyle} defaultValue="" onChange={e => loadAssignments(e.target.value)}>
-                  <option value="" disabled>Choose a course...</option>
-                  {courses.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} {c.section}</option>
+                <select value={selectedCourse} onChange={e => loadAssignments(e.target.value)} style={selectStyle}>
+                  <option value="">Choose a course...</option>
+                  {courses.map(course => (
+                    <option key={course.id} value={course.id}>{course.name} {course.section}</option>
                   ))}
                 </select>
-                <i
-                  className="ti ti-chevron-down"
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute", right: "10px", top: "50%",
-                    transform: "translateY(-50%)", fontSize: "14px",
-                    color: "#8884A8", pointerEvents: "none",
-                  }}
-                />
+                <Icon name="chevron-down" size={14} style={{ position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)", color: "#8884A8", pointerEvents: "none" }} />
               </div>
-            </div>
+            </Step>
           </>
         )}
 
-        {/* Step 4 — Assignments */}
         {gcAssignments.length > 0 && (
           <>
-            <div style={divider} />
-            <span style={stepLabel}>Step 4 — Import and submit</span>
-            {gcAssignments.map(a => (
-              <div
-                key={a.id}
-                style={{
-                  padding: "11px 14px",
-                  border: `1px solid ${a.local_assignment_id ? "#C0DD97" : "#ECECF2"}`,
-                  borderRadius: "9px", marginBottom: "8px",
-                  background: a.local_assignment_id ? "#EAF3DE" : "#F8F7FF",
-                  display: "flex", alignItems: "center",
-                  justifyContent: "space-between", flexWrap: "wrap", gap: "10px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "9px", flex: 1 }}>
-                  <i
-                    className={`ti ${a.local_assignment_id ? "ti-circle-check" : "ti-alert-triangle"}`}
-                    aria-hidden="true"
+            <Divider />
+            <Step label="Step 4 - Import and submit">
+              {gcAssignments.map(assignment => {
+                const linked = !!assignment.local_assignment_id;
+                return (
+                  <div
+                    key={assignment.id}
                     style={{
-                      fontSize: "15px", marginTop: "1px", flexShrink: 0,
-                      color: a.local_assignment_id ? "#3B6D11" : "#8884A8",
+                      padding: "12px 14px",
+                      border: `1px solid ${linked ? C.green.border : "#ECECF2"}`,
+                      borderRadius: 10,
+                      marginBottom: 8,
+                      background: linked ? C.green.soft : "#F8F7FF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: 10,
                     }}
-                  />
-                  <div>
-                    <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px", color: "#1A1830" }}>
-                      {a.title}
-                    </p>
-                    <p style={{ margin: 0, fontSize: "11px", color: "#8884A8" }}>
-                      {a.local_assignment_id ? "Linked — ready to submit" : "Not yet linked by teacher"}
-                    </p>
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 9, flex: 1, minWidth: 220 }}>
+                      <Icon name={linked ? "circle-check" : "alert-triangle"} size={16} style={{ color: linked ? C.green.text : "#8884A8", marginTop: 1 }} />
+                      <div>
+                        <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 13, color: "#1A1830" }}>{assignment.title}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: "#8884A8" }}>
+                          {linked ? "Linked and ready to submit" : "Not yet linked by your teacher"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      icon="upload"
+                      color={linked ? "green" : "gray"}
+                      loading={submitting === assignment.id}
+                      disabled={!linked}
+                      onClick={() => submitFromClassroom(assignment)}
+                    >
+                      {submitting === assignment.id ? "Submitting..." : "Import & submit"}
+                    </Button>
                   </div>
-                </div>
-                <button
-                  onClick={() => submitFromClassroom(a)}
-                  disabled={!a.local_assignment_id || submitting === a.id}
-                  style={{
-                    ...btn(a.local_assignment_id ? "#3B6D11" : "#D3D1C7"),
-                    cursor: !a.local_assignment_id ? "not-allowed" : "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <i
-                    className={`ti ${submitting === a.id ? "ti-loader-2" : "ti-upload"}`}
-                    aria-hidden="true"
-                    style={{ fontSize: "13px", ...(submitting === a.id ? { animation: "spin 1s linear infinite" } : {}) }}
-                  />
-                  {submitting === a.id ? "Submitting..." : "Import & Submit"}
-                </button>
-              </div>
-            ))}
+                );
+              })}
+            </Step>
           </>
         )}
-      </div>
+      </PlatformCard>
 
-      {/* ── Moodle ── */}
-      <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
-          <div style={platformBadge("#854F0B")}>
-            <i className="ti ti-book-2" aria-hidden="true" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: "600", fontSize: "14px", color: "#1A1830" }}>Moodle</p>
-            <p style={{ margin: 0, fontSize: "12px", color: moodleConnected ? "#3B6D11" : "#8884A8" }}>
-              {moodleConnected
-                ? `Connected to ${moodleSiteDisplay}`
-                : "Connect to sync submissions with Moodle"}
-            </p>
-          </div>
-          {moodleConnected && (
-            <i className="ti ti-circle-check" aria-hidden="true" style={{ fontSize: "18px", color: "#3B6D11" }} />
-          )}
-        </div>
-
+      <PlatformCard
+        icon="book-2"
+        color="amber"
+        title="Moodle"
+        subtitle={moodleConnected ? `Connected to ${moodleSiteDisplay}` : "Connect your Moodle account for teacher-linked sync"}
+        connected={moodleConnected}
+      >
         {!moodleConnected ? (
           <>
-            <div style={{ marginBottom: "12px" }}>
-              <span style={stepLabel}>Step 1 — Moodle site URL</span>
+            <Step label="Step 1 - Moodle site URL">
               <input
-                style={inputStyle}
-                placeholder="https://yourschool.moodlecloud.com"
                 value={moodleSiteUrl}
                 onChange={e => setMoodleSiteUrl(e.target.value)}
-              />
-            </div>
-            <div style={{ marginBottom: "14px" }}>
-              <span style={stepLabel}>Step 2 — Web service token</span>
-              <input
+                placeholder="https://yourschool.moodlecloud.com"
                 style={inputStyle}
-                type="password"
-                placeholder="Paste your Moodle token..."
+              />
+            </Step>
+            <Step label="Step 2 - Web service token">
+              <input
                 value={moodleToken}
                 onChange={e => setMoodleToken(e.target.value)}
+                type="password"
+                placeholder="Paste your Moodle token..."
+                style={inputStyle}
               />
-            </div>
-            <button
-              onClick={connectMoodle}
-              disabled={moodleLoading}
-              style={{ ...btn("#854F0B"), width: "100%", justifyContent: "center", padding: "10px" }}
-            >
-              <i
-                className={`ti ${moodleLoading ? "ti-loader-2" : "ti-plug-connected"}`}
-                aria-hidden="true"
-                style={{ fontSize: "14px", ...(moodleLoading ? { animation: "spin 1s linear infinite" } : {}) }}
-              />
+            </Step>
+            <Button icon="plug-connected" color="amber" fullWidth loading={moodleLoading} onClick={connectMoodle}>
               {moodleLoading ? "Connecting..." : "Connect to Moodle"}
-            </button>
+            </Button>
           </>
         ) : (
           <div>
             <div style={{
-              background: "#EAF3DE", border: "1px solid #C0DD97",
-              borderRadius: "9px", padding: "12px 14px", marginBottom: "12px",
-              display: "flex", gap: "10px", alignItems: "flex-start",
+              background: C.green.soft,
+              border: `1px solid ${C.green.border}`,
+              borderRadius: 10,
+              padding: "12px 14px",
+              marginBottom: 12,
+              display: "flex",
+              gap: 10,
+              alignItems: "flex-start",
             }}>
-              <i className="ti ti-link" aria-hidden="true" style={{ fontSize: "15px", color: "#3B6D11", marginTop: "1px", flexShrink: 0 }} />
+              <Icon name="link" size={16} style={{ color: C.green.text, marginTop: 1 }} />
               <div>
-                <p style={{ margin: "0 0 2px", fontWeight: "600", fontSize: "13px", color: "#3B6D11" }}>
+                <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 13, color: C.green.text }}>
                   Moodle connected
                 </p>
-                <p style={{ margin: 0, fontSize: "12px", color: "#27500A", lineHeight: 1.5 }}>
-                  Submissions will sync to Moodle when linked by your teacher.
+                <p style={{ margin: 0, fontSize: 12, color: C.green.bg, lineHeight: 1.5 }}>
+                  Teacher-linked Moodle submissions can now sync with your EssayGrade account.
                 </p>
               </div>
             </div>
-            <button
-              onClick={disconnectMoodle}
-              style={{ ...btn("#A32D2D"), fontSize: "12px", padding: "7px 14px" }}
-            >
-              <i className="ti ti-plug" aria-hidden="true" style={{ fontSize: "13px" }} />
-              Disconnect Moodle
-            </button>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <a
+                href={moodleSiteDisplay || "https://essaygrade.moodlecloud.com"}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  padding: "8px 14px",
+                  borderRadius: 9,
+                  background: C.gray.soft,
+                  color: C.gray.text,
+                  border: `1px solid ${C.gray.border}`,
+                  fontWeight: 600,
+                  fontSize: 12,
+                  textDecoration: "none",
+                }}
+              >
+                <Icon name="external-link" size={14} />
+                Open Moodle
+              </a>
+              <Button icon="plug" color="red" loading={moodleLoading} onClick={disconnectMoodle}>
+                Disconnect Moodle
+              </Button>
+            </div>
           </div>
         )}
-      </div>
+      </PlatformCard>
     </div>
   );
 }
