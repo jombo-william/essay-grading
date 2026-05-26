@@ -347,7 +347,7 @@ export default function StudentsTab({ students, submissions, assignments, loadin
             <Icon name="search" size={14} style={{ position: 'absolute', left: 10, color: '#8884A8', pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Search student…"
+              placeholder="search student…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               style={{
@@ -355,7 +355,7 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                 padding: '0 12px 0 32px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.25)',
-                fontSize: 13,
+                fontSize: 12,
                 color: '#1A1830',
                 background: '#fff',
                 outline: 'none',
@@ -380,14 +380,14 @@ export default function StudentsTab({ students, submissions, assignments, loadin
               border: '1px solid #C0DD97',
               background: '#EAF3DE',
               color: '#3B6D11',
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 500,
               fontFamily: 'inherit',
               whiteSpace: 'nowrap',
               boxSizing: 'border-box',
             }}
           >
-            <Icon name="file-export" size={14} style={{ color: '#3B6D11' }} />
+            <Icon name="file-export" size={12} style={{ color: '#3B6D11' }} />
             Export PDF
           </button>
 
@@ -405,7 +405,7 @@ export default function StudentsTab({ students, submissions, assignments, loadin
               border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)',
               background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)',
               color: '#A32D2D',
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 500,
               fontFamily: 'inherit',
               whiteSpace: 'nowrap',
