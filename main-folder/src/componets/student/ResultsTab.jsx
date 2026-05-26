@@ -1,5 +1,106 @@
-// src/components/student/ResultsTab.jsx
+
 import { C, Icon, Badge, scoreColor, scoreLabel, scoreBg } from './shared.jsx';
+
+const NAVY = '#1a2e5a';
+
+function MiniTrendChart({ points }) {
+  if (points.length < 2) return null;
+
+  const width = 420;
+  const height = 120;
+  const pad = { top: 14, right: 18, bottom: 28, left: 34 };
+  const innerW = width - pad.left - pad.right;
+  const innerH = height - pad.top - pad.bottom;
+  const xScale = i => pad.left + (i / (points.length - 1)) * innerW;
+  const yScale = value => pad.top + innerH - (value / 100) * innerH;
+  const path = points.map((point, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(point.score)}`).join(' ');
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', overflow: 'visible' }}>
+      {[0, 50, 70, 100].map(value => (
+        <g key={value}>
+          <line x1={pad.left} y1={yScale(value)} x2={width - pad.right} y2={yScale(value)} stroke={value === 70 ? '#16a34a55' : '#eef2f7'} strokeDasharray={value === 70 ? '4 4' : 'none'} />
+          <text x={pad.left - 8} y={yScale(value)} textAnchor="end" dominantBaseline="middle" fontSize="9" fill="#94a3b8">{value}</text>
+        </g>
+      ))}
+      <path d={path} fill="none" stroke={NAVY} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {points.map((point, i) => (
+        <g key={`${point.label}-${i}`}>
+          <circle cx={xScale(i)} cy={yScale(point.score)} r="4.5" fill="#fff" stroke={NAVY} strokeWidth="2" />
+          <text x={xScale(i)} y={yScale(point.score) - 9} textAnchor="middle" fontSize="9" fontWeight="800" fill={NAVY}>{point.score}%</text>
+          <text x={xScale(i)} y={height - 8} textAnchor="middle" fontSize="8.5" fill="#94a3b8">{point.label}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function LearningProgressTracker({ submissions }) {
+  const scoredSubmissions = submissions
+    .filter(s => (
+      (s.final_score !== null && s.final_score !== undefined) ||
+      (s.ai_score !== null && s.ai_score !== undefined && Number(s.ai_score) > 0)
+    ) && Number(s.ai_detection_score ?? 0) < 50)
+    .sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at));
+
+  if (scoredSubmissions.length < 2) return null;
+
+  const points = scoredSubmissions.map(s => ({
+    label: (s.assignment_title || 'Essay').split(' ').slice(0, 2).join(' '),
+    score: Math.round(((s.final_score ?? s.ai_score) / (s.max_score || 100)) * 100),
+  }));
+  const first = points[0].score;
+  const latest = points[points.length - 1].score;
+  const delta = latest - first;
+  const allRubric = {};
+
+  scoredSubmissions.forEach(s => {
+    s.rubric_breakdown?.forEach(item => {
+      if (!allRubric[item.criterion]) allRubric[item.criterion] = [];
+      allRubric[item.criterion].push(Number(item.pct));
+    });
+  });
+
+  const rubricAverages = Object.entries(allRubric)
+    .map(([criterion, values]) => ({
+      criterion,
+      avg: Math.round(values.reduce((sum, value) => sum + value, 0) / values.length),
+    }))
+    .sort((a, b) => b.avg - a.avg);
+
+  return (
+    <section style={{ marginTop: 34 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 14 }}>
+        <div>
+          <p style={{ fontSize: 18, fontWeight: 800, color: '#1e293b', margin: 0 }}>Learning Progress</p>
+          <p style={{ fontSize: 13, color: '#94a3b8', margin: '2px 0 0' }}>Your score trend across graded submissions</p>
+        </div>
+        <div style={{ background: delta >= 0 ? '#EAF3DE' : '#FCEBEB', color: delta >= 0 ? '#3B6D11' : '#A32D2D', borderRadius: 12, padding: '8px 12px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap' }}>
+          {delta >= 0 ? '+' : ''}{delta}% change
+        </div>
+      </div>
+
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 18 }}>
+        <MiniTrendChart points={points} />
+        {rubricAverages.length > 0 && (
+          <div style={{ marginTop: 16, display: 'grid', gap: 10 }}>
+            {rubricAverages.map(item => (
+              <div key={item.criterion}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{item.criterion}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: scoreColor(item.avg) }}>{item.avg}%</span>
+                </div>
+                <div style={{ height: 8, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
+                  <div style={{ width: `${item.avg}%`, height: '100%', background: scoreBg(item.avg), borderRight: `3px solid ${scoreColor(item.avg)}` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
 
 function ResultCard({ s, onClick }) {
   const pct = s.final_score !== null ? Math.round((s.final_score / s.max_score) * 100) : null;
