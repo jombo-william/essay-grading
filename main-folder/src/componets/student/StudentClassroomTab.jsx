@@ -382,7 +382,7 @@ export default function StudentClassroomTab({ showToast, onSubmitted }) {
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <a
-                href={moodleSiteDisplay || "https://essaygrade.moodlecloud.com"}
+                href={moodleSiteDisplay || "https://essaygrade2.moodlecloud.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
