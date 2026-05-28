@@ -1,6 +1,6 @@
 // src/components/student/api.js
 
-const BASE_URL = `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/student`;
+const BASE_URL = `${import.meta.env.VITE_API_URL || 'https://jombo-essaygrade.fly.dev'}/api/student`;
 
 export async function apiFetch(path, options = {}) {
   const csrfToken = getToken('csrf_token', 'token');

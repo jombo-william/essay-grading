@@ -1,7 +1,7 @@
 // src/components/teacher/api.js
 
 
-const BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/teacher`;
+const BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'https://jombo-essaygrade.fly.dev'}/teacher`;
 
 
 export async function apiFetch(path, options = {}) {
