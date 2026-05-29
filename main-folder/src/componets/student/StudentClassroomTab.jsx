@@ -351,7 +351,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
             <button
               onClick={connectMoodle}
               disabled={moodleLoading}
-              style={{ ...btn("#854F0B"), width: "100%", justifyContent: "center", padding: "10px" }}
+              style={{ ...btn("#a3835c"), width: "100%", justifyContent: "center", padding: "10px" }}
             >
               <i
                 className={`ti ${moodleLoading ? "ti-loader-2" : "ti-plug-connected"}`}

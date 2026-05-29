@@ -168,7 +168,7 @@ export default function IntegrationsTab({ selectedClass, showToast, assignments 
 
   // ── Moodle state ───────────────────────────────────────────────────────
   const [moodleToken,          setMoodleToken]          = useState("");
-  const [moodleSiteUrl,        setMoodleSiteUrl]        = useState("https://essaygrade.moodlecloud.com");
+  const [moodleSiteUrl,        setMoodleSiteUrl]        = useState("https://essaygrade2.moodlecloud.com");
   const [moodleCourses,        setMoodleCourses]        = useState([]);
   const [moodleAssignments,    setMoodleAssignments]    = useState([]);
   const [selectedMoodleCourse, setSelectedMoodleCourse] = useState(null);
@@ -533,7 +533,7 @@ const gradeQuizFromMoodle = async () => {
           <Btn icon="plug-connected" color="amber" loading={moodleLoading} onClick={connectMoodle}>
             {moodleLoading ? "Connecting…" : "Connect to Moodle"}
           </Btn>
-          <a href={moodleSiteUrl || "https://essaygrade.moodlecloud.com"} target="_blank" rel="noopener noreferrer"
+          <a href={moodleSiteUrl || "https://essaygrade2.moodlecloud.com"} target="_blank" rel="noopener noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: C.purple.bg, color: C.purple.text, border: `1px solid ${C.purple.border}`, fontWeight: 500, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
             <Icon name="external-link" size={13} style={{ color: C.purple.text }} />
             Open Moodle
