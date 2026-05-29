@@ -1,7 +1,8 @@
 // src/components/teacher/api.js
 
+import API_URL from "../../config.js";
 
-const BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'https://jombo-essaygrade.fly.dev'}/teacher`;
+const BASE_URL = `${API_URL}/api/teacher`;
 
 
 export async function apiFetch(path, options = {}) {
@@ -32,10 +33,16 @@ export async function apiFetch(path, options = {}) {
     ...options,
   });
 
-  const data = await res.json();
+  const contentType = res.headers.get('content-type') || '';
+  const data = contentType.includes('application/json')
+    ? await res.json().catch(() => ({}))
+    : await res.text();
 
-  if (!res.ok || data.success === false) {
-    throw new Error(data.message || `Request failed (${res.status})`);
+  if (!res.ok || data?.success === false) {
+    const message = typeof data === 'string'
+      ? data
+      : data.detail || data.message || '';
+    throw new Error(message ? `Request failed (${res.status}): ${message}` : `Request failed (${res.status})`);
   }
 
   return data;
