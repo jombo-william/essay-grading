@@ -1,7 +1,3 @@
-
-
-
-
 // src/components/student/EssayViewSheet.jsx
 import { C, Icon, Sheet } from './shared.jsx';
 
@@ -32,13 +28,7 @@ export default function EssayViewSheet({ sub, user, canUnsubmit, onClose, onUnsu
         </div>
       }
     >
-
-      {/* Submission meta */}
-      <div style={{
-        background: '#EEEDFE', border: '1px solid #CECBF6',
-        borderRadius: '10px', padding: '12px 16px', marginBottom: '14px',
-        display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px',
-      }}>
+      <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '12px', padding: '12px 16px', marginBottom: '14px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <p style={{ fontSize: '11px', fontWeight: '600', color: '#534AB7', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Submitted</p>
           <p style={{ fontSize: '13px', color: '#3C3489', fontWeight: '500', margin: 0 }}>
@@ -55,7 +45,6 @@ export default function EssayViewSheet({ sub, user, canUnsubmit, onClose, onUnsu
         </div>
       </div>
 
-      {/* Unsubmit hint */}
       {canUnsubmit && (
         <div style={{
           background: '#FAEEDA', border: '1px solid #FAC775',
@@ -69,16 +58,10 @@ export default function EssayViewSheet({ sub, user, canUnsubmit, onClose, onUnsu
         </div>
       )}
 
-      {/* Essay text */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={C.sL}>Essay content</span>
-        <span style={{ fontSize: '11px', color: '#8884A8' }}>{words} words</span>
-      </div>
-      <div style={{
-        background: '#F8F7FF', border: '1px solid #ECECF2',
-        borderRadius: '12px', padding: '18px',
-        fontSize: '14px', color: '#44425C', lineHeight: '1.85', whiteSpace: 'pre-wrap',
-      }}>
+      <p style={{ ...C.sL, marginBottom: '8px' }}>
+        Essay Content · {sub.essay_text?.trim().split(/\s+/).filter(Boolean).length} words
+      </p>
+      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', fontSize: '14px', color: '#374151', lineHeight: '1.85', whiteSpace: 'pre-wrap' }}>
         {sub.essay_text}
       </div>
 

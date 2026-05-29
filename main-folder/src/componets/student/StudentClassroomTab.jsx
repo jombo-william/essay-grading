@@ -1,5 +1,3 @@
-
-// src/components/student/StudentClassroomTab.jsx
 import { useState, useEffect } from "react";
 import { apiFetch } from "./api.js";
 
@@ -14,11 +12,11 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
   const [submitting,     setSubmitting]     = useState(null);
 
   // ── Moodle state ───────────────────────────────────────────────────────────
-  const [moodleToken,       setMoodleToken]       = useState("");
-  const [moodleSiteUrl,     setMoodleSiteUrl]     = useState("");
-  const [moodleConnected,   setMoodleConnected]   = useState(false);
-  const [moodleLoading,     setMoodleLoading]     = useState(false);
-  const [moodleSiteDisplay, setMoodleSiteDisplay] = useState("");
+  const [moodleToken,      setMoodleToken]      = useState("");
+  const [moodleSiteUrl,    setMoodleSiteUrl]    = useState("");
+  const [moodleConnected,  setMoodleConnected]  = useState(false);
+  const [moodleLoading,    setMoodleLoading]    = useState(false);
+  const [moodleSiteDisplay,setMoodleSiteDisplay]= useState("");
 
   // ── Styles ─────────────────────────────────────────────────────────────────
   const card = {
@@ -28,46 +26,78 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
     border: "1px solid #ECECF2",
     marginBottom: "16px",
   };
-
-  const platformBadge = (bg) => ({
-    width: "40px", height: "40px", borderRadius: "10px",
-    background: bg, display: "flex", alignItems: "center",
-    justifyContent: "center", flexShrink: 0, color: "#fff", fontSize: "18px",
-  });
-
-  const btn = (bg = "#3b82f6", extra = {}) => ({
-    display: "inline-flex", alignItems: "center", gap: "6px",
-    padding: "9px 16px", background: bg, color: "#fff",
-    border: "none", borderRadius: "8px", fontWeight: "600",
-    fontSize: "13px", cursor: "pointer", fontFamily: "inherit", lineHeight: 1,
-    ...extra,
-  });
-
-  const selectStyle = {
-    width: "100%", padding: "9px 36px 9px 12px",
-    borderRadius: "8px", border: "1px solid #ECECF2",
-    fontSize: "13px", fontFamily: "inherit",
-    background: "#F8F7FF", appearance: "none", cursor: "pointer",
-    color: "#1A1830",
-  };
-
-  const inputStyle = {
-    width: "100%", padding: "9px 12px",
-    borderRadius: "8px", border: "1px solid #ECECF2",
-    fontSize: "13px", fontFamily: "inherit",
-    background: "#F8F7FF", color: "#1A1830", outline: "none",
+  const input = {
+    width: "100%", padding: "10px 14px", borderRadius: "10px",
+    border: "1.5px solid #e2e8f0", fontSize: "13px",
+    fontFamily: "inherit", marginBottom: "12px",
     boxSizing: "border-box",
   };
-
   const stepLabel = {
-    fontWeight: "600", fontSize: "11px", color: "#8884A8",
-    marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em",
     display: "block",
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#8884A8",
+    textTransform: "uppercase",
+    letterSpacing: "0.07em",
+    marginBottom: "8px",
   };
+  const divider = {
+    height: "1px",
+    background: "#F1EFE8",
+    margin: "16px 0",
+  };
+  const btn = background => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    padding: "9px 16px",
+    borderRadius: "9px",
+    border: "none",
+    background,
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: "13px",
+    cursor: "pointer",
+    fontFamily: "inherit",
+  });
+  const selectStyle = {
+    width: "100%",
+    padding: "10px 36px 10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #D3D1C7",
+    fontSize: "13px",
+    fontFamily: "inherit",
+    background: "#F8F7FF",
+    color: "#1A1830",
+    appearance: "none",
+    boxSizing: "border-box",
+  };
+  const inputStyle = {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid #D3D1C7",
+    fontSize: "13px",
+    fontFamily: "inherit",
+    background: "#F8F7FF",
+    color: "#1A1830",
+    outline: "none",
+    boxSizing: "border-box",
+  };
+  const platformBadge = background => ({
+    width: "40px",
+    height: "40px",
+    borderRadius: "10px",
+    background,
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  });
 
-  const divider = { height: "1px", background: "#F1EFE8", margin: "16px 0" };
-
-  // ── Moodle status on load ──────────────────────────────────────────────────
+  // ── Check Moodle connection status on load ─────────────────────────────────
   useEffect(() => {
     apiFetch("/moodle/status")
       .then(res => {
@@ -157,7 +187,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
       });
       setMoodleConnected(true);
       setMoodleSiteDisplay(moodleSiteUrl);
-      showToast("Connected to Moodle successfully!", "success");
+      showToast("✅ Connected to Moodle successfully!", "success");
     } catch (err) {
       showToast(err.message || "Failed to connect to Moodle", "error");
     } finally {
@@ -180,22 +210,25 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
 
   return (
     <div>
-      <p style={{ fontSize: "16px", fontWeight: "600", color: "#1A1830", marginBottom: "16px" }}>
-        Connected Platforms
-      </p>
+      <h2 style={{ fontSize: "18px", fontWeight: "800", color: "#1e293b", marginBottom: "20px" }}>
+        🔗 Connected Platforms
+      </h2>
 
-      {/* ── Google Classroom ── */}
+      {/* ── Google Classroom ───────────────────────────────────────────────── */}
       <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
-          <div style={platformBadge("#185FA5")}>
-            <i className="ti ti-school" aria-hidden="true" />
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "linear-gradient(135deg,#4285f4,#34a853)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "20px",
+          }}>🎓</div>
           <div>
-            <p style={{ margin: 0, fontWeight: "600", fontSize: "14px", color: "#1A1830" }}>
+            <p style={{ margin: 0, fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>
               Google Classroom
             </p>
-            <p style={{ margin: 0, fontSize: "12px", color: "#8884A8" }}>
-              Submit assignments and sync results
+            <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
+              Submit assignments and sync results with Google Classroom
             </p>
           </div>
         </div>
@@ -253,9 +286,10 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
 
         {/* Step 4 — Assignments */}
         {gcAssignments.length > 0 && (
-          <>
-            <div style={divider} />
-            <span style={stepLabel}>Step 4 — Import and submit</span>
+          <div>
+            <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "10px" }}>
+              Step 4 — Import and submit an assignment
+            </p>
             {gcAssignments.map(a => (
               <div
                 key={a.id}
@@ -285,6 +319,17 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
                       {a.local_assignment_id ? "Linked — ready to submit" : "Not yet linked by teacher"}
                     </p>
                   </div>
+                  <button
+                    onClick={() => submitFromClassroom(a)}
+                    disabled={!a.local_assignment_id || submitting === a.id}
+                    style={{
+                      ...btn(a.local_assignment_id ? "linear-gradient(135deg,#10b981,#34d399)" : "#94a3b8"),
+                      opacity: !a.local_assignment_id ? 0.5 : 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {submitting === a.id ? "⏳ Submitting..." : "📤 Import and Submit"}
+                  </button>
                 </div>
                 <button
                   onClick={() => submitFromClassroom(a)}
@@ -304,7 +349,7 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
                 </button>
               </div>
             ))}
-          </>
+          </div>
         )}
       </div>
 
@@ -389,7 +434,100 @@ export default function StudentClassroomTab({ assignments, showToast, onSubmitte
         )}
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      {/* ── Moodle ────────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "linear-gradient(135deg,#f98012,#e85d04)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "20px",
+          }}>📚</div>
+          <div>
+            <p style={{ margin: 0, fontWeight: "800", fontSize: "15px", color: "#1e293b" }}>
+              Moodle
+            </p>
+            <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
+              {moodleConnected
+                ? `✅ Connected to ${moodleSiteDisplay}`
+                : "Connect to sync your submissions with Moodle"}
+            </p>
+          </div>
+        </div>
+
+        {!moodleConnected ? (
+          <>
+            <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
+              Step 1 — Enter your Moodle site URL
+            </p>
+            <input
+              style={input}
+              placeholder="e.g. https://yourschool.moodlecloud.com"
+              value={moodleSiteUrl}
+              onChange={e => setMoodleSiteUrl(e.target.value)}
+            />
+
+            <p style={{ fontWeight: "700", fontSize: "13px", color: "#374151", marginBottom: "8px" }}>
+              Step 2 — Enter your Moodle web service token
+            </p>
+            <input
+              style={input}
+              type="password"
+              placeholder="Paste your Moodle token here..."
+              value={moodleToken}
+              onChange={e => setMoodleToken(e.target.value)}
+            />
+
+            <button
+              onClick={connectMoodle}
+              disabled={moodleLoading}
+              style={{
+                ...btn("linear-gradient(135deg,#f98012,#e85d04)"),
+                width: "100%",
+                padding: "12px",
+              }}
+            >
+              {moodleLoading ? "⏳ Connecting..." : "🔌 Connect to Moodle"}
+            </button>
+
+            <div style={{
+              marginTop: "12px", background: "#fff7ed",
+              border: "1px solid #fed7aa", borderRadius: "10px",
+              padding: "10px 14px",
+            }}>
+              <p style={{ margin: 0, fontSize: "12px", color: "#92400e" }}>
+                💡 Ask your teacher for your Moodle token. Once connected, any assignment
+                you submit here will automatically appear in Moodle too.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div>
+            <div style={{
+              background: "#fff7ed", border: "1px solid #fed7aa",
+              borderRadius: "12px", padding: "14px 16px", marginBottom: "12px",
+            }}>
+              <p style={{ margin: "0 0 4px", fontWeight: "700", fontSize: "13px", color: "#ea580c" }}>
+                ✅ Moodle Connected
+              </p>
+              <p style={{ margin: 0, fontSize: "12px", color: "#92400e" }}>
+                Your submissions in EssayGrade AI will automatically sync to Moodle
+                when the assignment is linked to Moodle by your teacher.
+              </p>
+            </div>
+            <button
+              onClick={disconnectMoodle}
+              style={{
+                ...btn("#ef4444"),
+                fontSize: "12px",
+                padding: "8px 16px",
+              }}
+            >
+              🔌 Disconnect Moodle
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

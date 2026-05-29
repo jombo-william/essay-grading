@@ -1,16 +1,17 @@
+// src/components/teacher/api.js
 
 
-const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
+// const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
+//const BASE_URL = 'http://127.0.0.1:8000/api/teacher';
+
+
+const BASE_URL = 'https://jombo-essaygrade.fly.dev/api/teacher';
+
 
 export async function apiFetch(path, options = {}) {
-  const csrfToken    = getToken('csrf_token', 'token');
-  const sessionToken = getToken('session_token', 'session_token');
-
-   console.log('csrfToken:', csrfToken);        // ← ADD THIS
-  console.log('sessionToken:', sessionToken);  // ← ADD THIS
+  const csrfToken = getCsrfToken();
 
   const routeMap = {
-    // ── Legacy PHP → FastAPI mappings (kept for backward compat) ──────────
     '/get_assignments.php':     '/assignments',
     '/get_submissions.php':     '/submissions',
     '/get_pending_grading.php': '/submissions/pending',
@@ -19,15 +20,14 @@ export async function apiFetch(path, options = {}) {
     '/override_grade.php':      '/submissions/grade',
   };
 
-  const cleanPath  = path.startsWith('/') ? path : '/' + path;
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
   const mappedPath = routeMap[cleanPath] || cleanPath;
-  const url        = `${BASE_URL}${mappedPath}`;
+  const url = `${BASE_URL}${mappedPath}`;
 
   const res = await fetch(url, {
     headers: {
-      'Content-Type':  'application/json',
-      ...(csrfToken    ? { 'X-CSRF-Token':  csrfToken    } : {}),
-      ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+      'Content-Type': 'application/json',
+      ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       ...(options.headers || {}),
     },
     credentials: 'include',
@@ -43,16 +43,9 @@ export async function apiFetch(path, options = {}) {
   return data;
 }
 
-
-
-
-function getToken(cookieName, localKey) {
-  const cookieMatch = document.cookie.match(
-    new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]+)')
-  );
+function getCsrfToken() {
+  const cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-  return sessionStorage.getItem(cookieName) 
-      || sessionStorage.getItem(localKey)
-      || localStorage.getItem(localKey) 
-      || '';
+  return sessionStorage.getItem('csrf_token') || '';
 }
+

@@ -1,12 +1,5 @@
-
-
-
-
-
-// src/components/teacher/SubmissionDetail.jsx
-// No external CSS — all styles inline. Uses Tabler Icons via shared.jsx Icon component.
-
-import { Icon, Sheet, ScoreBar } from "./shared.jsx";
+// src/componets/teacher/SubmissionDetail.jsx
+import { Sheet, ScoreBar, Icon } from "./shared.jsx";
 import ChatPanel from "../ChatPanel.jsx";
 
 // ── Color tokens ──────────────────────────────────────────────────────────────

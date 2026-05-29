@@ -59,15 +59,15 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor = "#A32D2D", 
 
 // ── Assignment detail modal ───────────────────────────────────────────────────
 function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExport }) {
-  const subCount    = submissions.filter(s => s.assignment_id === assignment.id).length;
+  const subCount = submissions.filter(s => s.assignment_id === assignment.id).length;
   const gradedCount = submissions.filter(s => s.assignment_id === assignment.id && s.final_score !== null).length;
-  const isPast      = new Date() > new Date(assignment.due_date);
-  const isArchived  = assignment.is_active === false;
+  const isPast = new Date() > new Date(assignment.due_date);
+  const isArchived = assignment.is_active === false;
 
   const stats = [
-    { icon: "file-text",    label: "Submissions", value: subCount,               color: "#185FA5", bg: "#E6F1FB" },
-    { icon: "circle-check", label: "Graded",      value: gradedCount,             color: "#3B6D11", bg: "#EAF3DE" },
-    { icon: "clock-hour-4", label: "Pending",     value: subCount - gradedCount,  color: "#854F0B", bg: "#FAEEDA" },
+    { icon: "file-text", label: "Submissions", value: subCount, color: "#185FA5", bg: "#E6F1FB" },
+    { icon: "circle-check", label: "Graded", value: gradedCount, color: "#3B6D11", bg: "#EAF3DE" },
+    { icon: "clock-hour-4", label: "Pending", value: subCount - gradedCount, color: "#854F0B", bg: "#FAEEDA" },
   ];
 
   return (
@@ -110,8 +110,8 @@ function AssignmentDetailModal({ assignment, submissions, onClose, onEdit, onExp
                 {isArchived ? "Archived" : isPast ? "Closed" : "Active"} &nbsp;·&nbsp; {assignment.max_score} pts &nbsp;·&nbsp;
                 Due {assignment.due_date
                   ? new Date(assignment.due_date.replace(" ", "T")).toLocaleDateString("en-GB", {
-                      timeZone: "Africa/Blantyre", day: "numeric", month: "short", year: "numeric",
-                    })
+                    timeZone: "Africa/Blantyre", day: "numeric", month: "short", year: "numeric",
+                  })
                   : "No date"}
               </p>
             </div>
@@ -325,16 +325,16 @@ function ModalShell({ title, subtitle, iconName, iconBg, iconColor, onClose, onS
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AssignmentsTab({ assignments, submissions, loading, onCreated, onUpdated, showToast, selectedClassId, selectedClass, archivedOnly = false }) {
   const classId = selectedClassId ?? selectedClass?.id;
-  const [createOpen,    setCreateOpen]    = useState(false);
-  const [editTarget,    setEditTarget]    = useState(null);
-  const [form,          setForm]          = useState(EMPTY_FORM);
-  const [attachments,   setAttachments]   = useState([]);
-  const [saving,        setSaving]        = useState(false);
-  const [deleteTarget,  setDeleteTarget]  = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [attachments, setAttachments] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [archiveTarget, setArchiveTarget] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [viewTarget,    setViewTarget]    = useState(null);
-  const [showArchived,  setShowArchived]  = useState(false);
+  const [viewTarget, setViewTarget] = useState(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   const handleAttachFile = e => {
     const files = Array.from(e.target.files);
@@ -346,7 +346,7 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
   };
 
   const openCreate = () => { setForm(EMPTY_FORM); setAttachments([]); setCreateOpen(true); };
-  const openEdit   = a  => { setForm({ ...a, referenceMaterial: a.reference_material || "" }); setAttachments(a.attachments || []); setEditTarget(a); };
+  const openEdit = a => { setForm({ ...a, referenceMaterial: a.reference_material || "" }); setAttachments(a.attachments || []); setEditTarget(a); };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -444,18 +444,18 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
     </div>
   );
 
-  const activeAssignments   = assignments.filter(a => a.is_active !== false);
+  const activeAssignments = assignments.filter(a => a.is_active !== false);
   const archivedAssignments = assignments.filter(a => a.is_active === false);
 
   // ── Shared modal wrapper ──────────────────────────────────────────────────
-  
+
   const renderAssignment = (a) => {
-    const subCount    = submissions.filter(s => s.assignment_id === a.id).length;
+    const subCount = submissions.filter(s => s.assignment_id === a.id).length;
     const gradedCount = submissions.filter(s => s.assignment_id === a.id && s.final_score !== null).length;
-    const isPast      = new Date() > new Date(a.due_date);
-    const hasRef      = a.reference_material && a.reference_material.trim().length > 0;
-    const isArchived  = a.is_active === false;
-    const leftColor   = isArchived ? "#D3D1C7" : isPast ? "#D3D1C7" : "#1A3A6B";
+    const isPast = new Date() > new Date(a.due_date);
+    const hasRef = a.reference_material && a.reference_material.trim().length > 0;
+    const isArchived = a.is_active === false;
+    const leftColor = isArchived ? "#D3D1C7" : isPast ? "#D3D1C7" : "#1A3A6B";
 
     return (
       <div key={a.id} style={{
@@ -471,8 +471,10 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 5 }}>
               <span
                 onClick={() => setViewTarget(a)}
-                style={{ fontWeight: 700, fontSize: 14, color: "#1A1830", cursor: "pointer",
-                  textDecoration: "underline", textDecorationStyle: "dotted", textDecorationColor: "#B0AECB" }}
+                style={{
+                  fontWeight: 700, fontSize: 14, color: "#1A1830", cursor: "pointer",
+                  textDecoration: "underline", textDecorationStyle: "dotted", textDecorationColor: "#B0AECB"
+                }}
               >
                 {a.title}
               </span>
@@ -516,8 +518,8 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
                 <Icon name="calendar" size={11} style={{ color: "#B0AECB" }} />
                 Due {a.due_date
                   ? new Date(a.due_date.replace(" ", "T")).toLocaleDateString("en-GB", {
-                      timeZone: "Africa/Blantyre", day: "numeric", month: "short", year: "numeric",
-                    })
+                    timeZone: "Africa/Blantyre", day: "numeric", month: "short", year: "numeric",
+                  })
                   : "No date"}
               </span>
               <span style={{ fontSize: 11, color: "#B0AECB", display: "flex", alignItems: "center", gap: 4 }}>

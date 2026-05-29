@@ -1,7 +1,3 @@
-
-
-
-
 // src/components/student/AssignmentDetail.jsx
 import { C, Icon, Badge, Sheet, scoreColor } from './shared.jsx';
 

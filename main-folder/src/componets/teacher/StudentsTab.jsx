@@ -1,22 +1,20 @@
 
-
-
-
 // src/components/teacher/StudentsTab.jsx
 // No external CSS — all styles inline. Uses Tabler Icons via shared.jsx Icon component.
 
 import { useState, useMemo } from 'react';
 import { Icon, Badge } from './shared.jsx';
+import './students.css';
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-const scoreColor   = p => p >= 70 ? '#3B6D11' : p >= 50 ? '#854F0B' : '#A32D2D';
-const scoreBg      = p => p >= 70 ? '#EAF3DE' : p >= 50 ? '#FAEEDA' : '#FCEBEB';
-const scoreBorder  = p => p >= 70 ? '#C0DD97' : p >= 50 ? '#FAC775' : '#F7C1C1';
+const scoreColor = p => p >= 70 ? '#3B6D11' : p >= 50 ? '#854F0B' : '#A32D2D';
+const scoreBg = p => p >= 70 ? '#EAF3DE' : p >= 50 ? '#FAEEDA' : '#FCEBEB';
+const scoreBorder = p => p >= 70 ? '#C0DD97' : p >= 50 ? '#FAC775' : '#F7C1C1';
 
-const aiColor  = s => s >= 50 ? '#A32D2D' : s >= 30 ? '#854F0B' : '#3B6D11';
-const aiBg     = s => s >= 50 ? '#FCEBEB' : s >= 30 ? '#FAEEDA' : '#EAF3DE';
+const aiColor = s => s >= 50 ? '#A32D2D' : s >= 30 ? '#854F0B' : '#3B6D11';
+const aiBg = s => s >= 50 ? '#FCEBEB' : s >= 30 ? '#FAEEDA' : '#EAF3DE';
 const aiBorder = s => s >= 50 ? '#F7C1C1' : s >= 30 ? '#FAC775' : '#C0DD97';
-const aiIcon   = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
+const aiIcon = s => s >= 50 ? 'alert-triangle' : s >= 30 ? 'alert-circle' : 'circle-check';
 
 function detectAtRiskStudents(submissions) {
   const byStudent = {};
@@ -30,9 +28,9 @@ function detectAtRiskStudents(submissions) {
     const reasons = [];
     let riskScore = 0;
 
-    const gradedSubs     = subs.filter(s => s.final_score !== null);
+    const gradedSubs = subs.filter(s => s.final_score !== null);
     const ungradedAiSubs = subs.filter(s => s.status === 'ai_graded' && s.final_score === null);
-    const flaggedSubs    = subs.filter(s => s.ai_detection_score >= 50);
+    const flaggedSubs = subs.filter(s => s.ai_detection_score >= 50);
     const borderlineSubs = subs.filter(s => s.ai_detection_score >= 30 && s.ai_detection_score < 50);
 
     if (flaggedSubs.length > 0) {
@@ -91,9 +89,9 @@ function StatusBadge({ status, aiDetection }) {
 
 // ── AT-RISK PANEL ─────────────────────────────────────────────────────────────
 function AtRiskPanel({ submissions, onClose }) {
-  const atRiskList     = useMemo(() => detectAtRiskStudents(submissions), [submissions]);
-  const critical       = atRiskList.filter(s => s.level === 'critical');
-  const watch          = atRiskList.filter(s => s.level === 'watch');
+  const atRiskList = useMemo(() => detectAtRiskStudents(submissions), [submissions]);
+  const critical = atRiskList.filter(s => s.level === 'critical');
+  const watch = atRiskList.filter(s => s.level === 'watch');
   const uniqueStudents = [...new Set(submissions.map(s => s.student_name))].length;
 
   return (
@@ -102,8 +100,7 @@ function AtRiskPanel({ submissions, onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon name="alert-triangle" size={16} style={{ color: '#A32D2D', flexShrink: 0 }} />
           <div>
-            <p style={{ fontWeight: 700, fontSize: 13, color: '#A32D2D', margin: 0 }}>AI At-Risk Student Detection</p>
-            <p style={{ fontSize: 11, color: '#791F1F', margin: 0 }}>Based on scores, AI flags and submission patterns</p>
+            <p style={{ fontWeight: 700, fontSize: 13, color: '#A32D2D', margin: 0 }}>Need Support Students</p>
           </div>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A32D2D', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4 }}>
@@ -113,9 +110,9 @@ function AtRiskPanel({ submissions, onClose }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, padding: '12px 16px', borderBottom: '1px solid #F1EFE8' }}>
         {[
-          { num: critical.length, label: 'Critical risk',   color: '#A32D2D' },
-          { num: watch.length,    label: 'Watch closely',   color: '#854F0B' },
-          { num: uniqueStudents,  label: 'Students total',  color: '#185FA5' },
+          { num: critical.length, label: 'Critical risk', color: '#A32D2D' },
+          { num: watch.length, label: 'Watch closely', color: '#854F0B' },
+          { num: uniqueStudents, label: 'Students total', color: '#185FA5' },
         ].map(s => (
           <div key={s.label} style={{ background: '#F8F7FF', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
             <p style={{ fontSize: 22, fontWeight: 700, color: s.color, margin: 0, lineHeight: 1 }}>{s.num}</p>
@@ -209,10 +206,10 @@ function handleExportStudents(submissions) {
     const assignmentRows = student.assignments
       .sort((a, b) => a.assignment_title.localeCompare(b.assignment_title))
       .map(sub => {
-        const isFlagged  = sub.ai_detection_score >= 50;
-        const aiScore    = sub.ai_score !== null ? (isFlagged ? `0/${sub.max_score}` : `${sub.ai_score}/${sub.max_score}`) : '—';
+        const isFlagged = sub.ai_detection_score >= 50;
+        const aiScore = sub.ai_score !== null ? (isFlagged ? `0/${sub.max_score}` : `${sub.ai_score}/${sub.max_score}`) : '—';
         const finalScore = sub.final_score !== null ? `${sub.final_score}/${sub.max_score}` : '—';
-        const status     = sub.status === 'graded' ? 'Graded' : sub.status === 'ai_graded' ? 'Pending' : 'Processing';
+        const status = sub.status === 'graded' ? 'Graded' : sub.status === 'ai_graded' ? 'Pending' : 'Processing';
         return `
           <tr>
             <td style="padding:8px 12px;border-bottom:1px solid #F1EFE8;font-size:13px;color:#5F5E5A;">${sub.assignment_title}</td>
@@ -295,8 +292,8 @@ function handleExportStudents(submissions) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function StudentsTab({ students, submissions, assignments, loading, onGrade, onEditGrade }) {
-  const [searchQuery,   setSearchQuery]   = useState('');
-  const [showAtRisk,    setShowAtRisk]    = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAtRisk, setShowAtRisk] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState(null);
   const [gradeFeedback, setGradeFeedback] = useState('');
 
@@ -310,14 +307,31 @@ export default function StudentsTab({ students, submissions, assignments, loadin
     </div>
   );
 
+  // ── shared button height so all header controls line up ──
+  const HDR_H = 34;
+
   return (
     <div style={{ minHeight: '100vh', background: '#F1EFE8', fontFamily: "'DM Sans','Segoe UI',sans-serif" }}>
 
       {/* ── Header ── */}
-      <div style={{ background: '#022aa4', padding: '0 20px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 12px rgba(2,42,164,0.35)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 38, height: 38, background: 'rgba(255,255,255,0.18)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name="writing" size={19} style={{ color: '#fff' }} />
+      <div style={{
+        background: '#1a2e5a',
+        padding: '0 20px',
+        height: 62,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        boxShadow: '0 2px 12px rgba(15,29,58,0.35)',
+      }}>
+
+        {/* Left — logo + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ width: 38, height: 38, background: '#c9a227', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="writing" size={19} style={{ color: '#1a2e5a' }} />
           </div>
           <div>
             <p style={{ fontWeight: 700, fontSize: 15, color: '#fff', margin: 0 }}>EssayGrade AI</p>
@@ -325,32 +339,79 @@ export default function StudentsTab({ students, submissions, assignments, loadin
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        {/* Right — search + buttons, all same height */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+
           {/* Search */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Icon name="search" size={13} style={{ position: 'absolute', left: 9, color: '#8884A8', pointerEvents: 'none' }} />
+            <Icon name="search" size={14} style={{ position: 'absolute', left: 10, color: '#8884A8', pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Search student…"
+              placeholder="search student…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ padding: '7px 12px 7px 28px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.25)', fontSize: 13, color: '#1A1830', background: '#fff', outline: 'none', width: 180, fontFamily: 'inherit' }}
+              style={{
+                height: HDR_H,
+                padding: '0 12px 0 32px',
+                borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.25)',
+                fontSize: 12,
+                color: '#1A1830',
+                background: '#fff',
+                outline: 'none',
+                width: 180,
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
 
           {/* Export */}
           <button
             onClick={() => handleExportStudents(submissions)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 8, cursor: 'pointer', border: '1px solid #C0DD97', background: '#EAF3DE', color: '#3B6D11', fontSize: 13, fontWeight: 500, fontFamily: 'inherit' }}
+            style={{
+              height: HDR_H,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 13px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              border: '1px solid #C0DD97',
+              background: '#EAF3DE',
+              color: '#3B6D11',
+              fontSize: 12,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
+            }}
           >
-            <Icon name="file-export" size={14} style={{ color: '#3B6D11' }} />
+            <Icon name="file-export" size={12} style={{ color: '#3B6D11' }} />
             Export PDF
           </button>
 
           {/* Watchlist */}
           <button
             onClick={() => setShowAtRisk(prev => !prev)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 8, cursor: 'pointer', border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)', background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)', color: '#A32D2D', fontSize: 13, fontWeight: 500, fontFamily: 'inherit', transition: 'all 0.15s' }}
+            style={{
+              height: HDR_H,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 13px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              border: showAtRisk ? '1px solid #F7C1C1' : '1px solid rgba(247,193,193,0.6)',
+              background: showAtRisk ? '#FCEBEB' : 'rgba(252,235,235,0.85)',
+              color: '#A32D2D',
+              fontSize: 12,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
+              transition: 'all 0.15s',
+            }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#A32D2D', flexShrink: 0, animation: 'atRiskPulse 1.4s ease-in-out infinite' }} />
             <Icon name="users-group" size={14} style={{ color: '#A32D2D' }} />
@@ -362,7 +423,10 @@ export default function StudentsTab({ students, submissions, assignments, loadin
         </div>
       </div>
 
-      <style>{`@keyframes atRiskPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.45; transform:scale(1.4); } } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes atRiskPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.45; transform:scale(1.4); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
 
       {/* ── Main ── */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '28px 16px 64px' }}>
@@ -401,9 +465,9 @@ export default function StudentsTab({ students, submissions, assignments, loadin
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {sorted.map(student => {
-                const gradedCount  = student.assignments.filter(s => s.final_score !== null).length;
+                const gradedCount = student.assignments.filter(s => s.final_score !== null).length;
                 const flaggedCount = student.assignments.filter(s => s.ai_detection_score >= 50).length;
-                const avgFinal     = gradedCount > 0
+                const avgFinal = gradedCount > 0
                   ? Math.round(student.assignments.filter(s => s.final_score !== null).reduce((sum, s) => sum + (s.final_score / s.max_score) * 100, 0) / gradedCount)
                   : null;
 
@@ -463,9 +527,9 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                             .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
                             .map((sub, subIdx) => {
                               const isFlagged = sub.ai_detection_score >= 50;
-                              const finalPct  = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
-                              const isLast    = subIdx === student.assignments.length - 1;
-                              const aiPct     = sub.ai_detection_score ?? 0;
+                              const finalPct = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
+                              const isLast = subIdx === student.assignments.length - 1;
+                              const aiPct = sub.ai_detection_score ?? 0;
                               return (
                                 <tr key={sub.id} style={{ borderBottom: isLast ? 'none' : '1px solid #F1EFE8' }}>
                                   <td style={{ padding: '12px 14px' }}>
