@@ -436,7 +436,7 @@ const PRE_SUBMISSION = {
   id:100, assignment_id:1, assignment_title:'Climate Change & Society', max_score:100,
   essay_text:`Climate change is one of the most pressing global challenges, and its socio-economic impacts on developing nations are particularly severe.\n\nFirstly, food insecurity is a major consequence. In Sub-Saharan Africa, over 60% of the population relies on rain-fed agriculture. The IPCC (2022) projects crop yields could fall by up to 25% by 2050.\n\nSecondly, economic losses are severe. The World Bank (2023) estimates developing nations lose 5% of GDP annually due to climate-related disasters.\n\nThirdly, mass displacement is rising. The IOM (2021) recorded over 30 million internal climate displacements in 2020 alone.\n\nIn conclusion, climate change is a development crisis requiring urgent global cooperation and financial support for affected nations.`,
   submitted_at: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-  submit_mode:'write', file_name:null, ai_score:null, ai_detection_score:null, final_score:null, ai_feedback:null, teacher_feedback:null, status:'pending', rubric_breakdown:[],
+  submit_mode:'write', file_name:null, ai_score:null, ai_detection_score:null, final_score:null, ai_feedback:null, teacher_feedback:null, status:'submitted', rubric_breakdown:[],
 }
 
 const INITIAL_SUBMISSIONS = [
@@ -515,6 +515,7 @@ function ResultCard({ s, onClick, scoreColor, scoreLabel }) {
             {s.final_score !== null && <span style={badge('green')}>✅ Graded</span>}
             {!isPending && s.final_score === null && s.ai_score !== null && !isAI && <span style={badge('amber')}>⏳ Pending</span>}
             {!isPending && s.final_score === null && s.ai_score !== null && isAI  && <span style={badge('red')}>🚨 AI Flagged</span>}
+            {!isPending && s.final_score === null && s.ai_score === null && s.status === 'submitted' && <span style={badge('green')}>✅ Submitted</span>}
             {isPending && <span style={badge('gray')}>🤖 Grading...</span>}
           </div>
           <p style={{ fontSize:12, color:'#94a3b8', margin:0 }}>Submitted {new Date(s.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>
@@ -791,7 +792,7 @@ export default function Results() {
             <p style={{ fontSize:13, color:'#94a3b8', margin:'2px 0 0' }}>Click any card to view full feedback</p>
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
-            {[{i:'✅',l:'Graded',c:'#16a34a'},{i:'⏳',l:'Pending',c:'#d97706'},{i:'🚨',l:'AI flagged',c:'#dc2626'},{i:'🤖',l:'Grading',c:NAVY}].map(x => (
+            {[{i:'✅',l:'Graded',c:'#16a34a'},{i:'⏳',l:'Pending',c:'#d97706'},{i:'🚨',l:'AI flagged',c:'#dc2626'},{i:'📩',l:'Submitted',c:'#3B6D11'}].map(x => (
               <div key={x.l} style={{ display:'flex', alignItems:'center', gap:4 }}>
                 <span style={{ fontSize:12 }}>{x.i}</span>
                 <span style={{ fontSize:11, color:x.c, fontWeight:600 }}>{x.l}</span>

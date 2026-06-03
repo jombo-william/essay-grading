@@ -125,10 +125,12 @@ export default function AssignmentsTab({
                       </span>
                     ) : isAI ? (
                       <Badge color="red" icon="alert-triangle">AI flagged</Badge>
-                    ) : sub.status === 'pending' ? (
-                      <Badge color="gray" icon="loader-2">Grading…</Badge>
-                    ) : (
+                    ) : sub.status === 'submitted' ? (
+                      <Badge color="green" icon="circle-check">Submitted</Badge>
+                    ) : sub.status === 'ai_graded' ? (
                       <Badge color="amber" icon="clock">Awaiting teacher</Badge>
+                    ) : (
+                      <Badge color="gray" icon="loader-2">Grading…</Badge>
                     )}
                   </div>
                 );

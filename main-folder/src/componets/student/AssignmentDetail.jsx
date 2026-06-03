@@ -28,10 +28,10 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
             <p style={{ fontSize: '12px', color: '#3B6D11', margin: 0 }}>
               {pct !== null
                 ? `Score: ${sub.final_score}/${sub.max_score} (${pct}%)`
-                : isAI ? `AI content detected (${sub.ai_detection_score}%) — score: 0`
-                : sub?.status === 'pending' ? 'Grading in progress…'
-                : sub?.ai_score != null ? 'Awaiting teacher approval'
-                : 'Grading in progress'}
+                : isAI ? `AI content detected (${sub.ai_detection_score}%) — pending review`
+                : sub?.status === 'submitted' ? 'Submitted'
+                : sub?.status === 'ai_graded' ? 'Graded — awaiting teacher approval'
+                : 'Submitted'}
             </p>
           </div>
         </div>
