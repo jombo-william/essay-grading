@@ -160,14 +160,14 @@ export default function LandingPage() {
           <p className="section-desc">From essay submission to detailed feedback in under 2 minutes — here's the simple 4-step process.</p>
           <div className="steps-grid">
             {[
-              { num: '01', icon: '📤', title: 'Student Submits Essay', text: 'Students log in and upload their essay in the portal. Supports English and Chichewa.' },
-              { num: '02', icon: '🤖', title: 'AI Analyses the Text', text: 'Google Gemini AI & Hugging Face evaluates grammar, content, structure and vocabulary against the grading rubric.' },
-              { num: '03', icon: '📊', title: 'Grade & Feedback Generated', text: "A detailed score breakdown and personalised feedback is generated instantly and shown to the student after the teacher's approval." },
-              { num: '04', icon: '✅', title: 'Teacher Reviews & Approves', text: 'Teachers can review AI grades, make adjustments, and monitor class performance from their dashboard.' },
+              { num: '01', icon: 'ti-cloud-upload', title: 'Student Submits Essay', text: 'Students log in and upload their essay in the portal. Supports English and Chichewa.' },
+              { num: '02', icon: 'ti-robot', title: 'AI Analyses the Text', text: 'Google Gemini AI & Hugging Face evaluates grammar, content, structure and vocabulary against the grading rubric.' },
+              { num: '03', icon: 'ti-chart-bar', title: 'Grade & Feedback Generated', text: "A detailed score breakdown and personalised feedback is generated instantly and shown to the student after the teacher's approval." },
+              { num: '04', icon: 'ti-circle-check', title: 'Teacher Reviews & Approves', text: 'Teachers can review AI grades, make adjustments, and monitor class performance from their dashboard.' },
             ].map(s => (
               <div key={s.num} className="step-card">
                 <div className="step-num">{s.num}</div>
-                <div className="step-icon">{s.icon}</div>
+                <div className="step-icon"><i className={`ti ${s.icon}`} aria-hidden="true" style={{ fontSize: 22, color: '#e8c547' }} /></div>
                 <div className="step-title">{s.title}</div>
                 <p className="step-text">{s.text}</p>
               </div>
@@ -184,15 +184,15 @@ export default function LandingPage() {
           <p className="section-desc">Tools designed around the MSCE curriculum and local needs.</p>
           <div className="features-grid">
             {[
-              { icon: '⚡', title: 'Instant Grading', text: 'Results in under 2 minutes, no more waiting weeks.' },
-              { icon: '🎯', title: '85%+ Accuracy', text: 'Matches human teacher assessments, validated on MSCE rubrics.' },
-              { icon: '📋', title: 'Custom Rubrics', text: 'Teachers set grading criteria per assignment.' },
-              { icon: '🔍', title: 'Plagiarism Detection', text: 'Flags copied or suspicious content automatically.' },
-              { icon: '📈', title: 'Progress Tracking', text: 'Visual dashboards show student improvement over time.' },
-              { icon: '📱', title: 'Mobile Friendly', text: 'Works on smartphones, even on low-bandwidth connections.' },
+              { icon: 'ti-bolt', title: 'Instant Grading', text: 'Results in under 2 minutes, no more waiting weeks.' },
+              { icon: 'ti-target', title: '85%+ Accuracy', text: 'Matches human teacher assessments, validated on MSCE rubrics.' },
+              { icon: 'ti-clipboard-list', title: 'Custom Rubrics', text: 'Teachers set grading criteria per assignment.' },
+              { icon: 'ti-search', title: 'Plagiarism Detection', text: 'Flags copied or suspicious content automatically.' },
+              { icon: 'ti-trending-up', title: 'Progress Tracking', text: 'Visual dashboards show student improvement over time.' },
+              { icon: 'ti-device-mobile', title: 'Mobile Friendly', text: 'Works on smartphones, even on low-bandwidth connections.' },
             ].map(f => (
               <div key={f.title} className="feature-card">
-                <div className="feature-icon">{f.icon}</div>
+                <div className="feature-icon"><i className={`ti ${f.icon}`} aria-hidden="true" style={{ fontSize: 22, color: 'var(--navy)' }} /></div>
                 <div>
                   <div className="feature-title">{f.title}</div>
                   <p className="feature-text">{f.text}</p>

@@ -17,7 +17,7 @@ export { colors };
 
 const EMPTY_FORM = {
   title: "", description: "", instructions: "",
-  referenceMaterial: "", max_score: 100, due_date: "",
+  referenceMaterial: "", rubricContent: "", max_score: 100, due_date: "",
   rubric: { content: 35, structure: 25, grammar: 20, evidence: 20 },
 };
 
@@ -346,7 +346,7 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
   };
 
   const openCreate = () => { setForm(EMPTY_FORM); setAttachments([]); setCreateOpen(true); };
-  const openEdit = a => { setForm({ ...a, referenceMaterial: a.reference_material || "" }); setAttachments(a.attachments || []); setEditTarget(a); };
+  const openEdit = a => { setForm({ ...a, referenceMaterial: a.reference_material || "", rubricContent: a.rubric_content || "" }); setAttachments(a.attachments || []); setEditTarget(a); };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -399,7 +399,6 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
 
   const handleCreate = async () => {
     if (!form.title || !form.instructions || !form.due_date) { showToast("Please fill in Title, Instructions, and Due Date.", "error"); return; }
-    if (Object.values(form.rubric).reduce((a, b) => a + b, 0) !== 100) { showToast("Rubric weights must total 100%.", "error"); return; }
     if (!classId) { showToast("No class selected.", "error"); return; }
     setSaving(true);
     try {
@@ -408,7 +407,7 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
         body: JSON.stringify({
           class_id: classId, title: form.title, description: form.description || "",
           instructions: form.instructions, reference_material: form.referenceMaterial || "",
-          max_score: form.max_score || 100, due_date: form.due_date, rubric: form.rubric,
+          rubric_content: form.rubricContent || "", max_score: form.max_score || 100, due_date: form.due_date, rubric: form.rubric,
         }),
       });
       setCreateOpen(false);
@@ -420,7 +419,6 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
 
   const handleEditSave = async () => {
     if (!form.title || !form.instructions || !form.due_date) { showToast("Please fill in Title, Instructions, and Due Date.", "error"); return; }
-    if (Object.values(form.rubric || {}).reduce((a, b) => a + b, 0) !== 100) { showToast("Rubric weights must total 100%.", "error"); return; }
     setSaving(true);
     try {
       await apiFetch("/assignments/update", {
@@ -428,7 +426,7 @@ export default function AssignmentsTab({ assignments, submissions, loading, onCr
         body: JSON.stringify({
           id: editTarget.id, title: form.title, description: form.description || "",
           instructions: form.instructions, reference_material: form.referenceMaterial || "",
-          max_score: form.max_score || 100, due_date: form.due_date, rubric: form.rubric,
+          rubric_content: form.rubricContent || "", max_score: form.max_score || 100, due_date: form.due_date, rubric: form.rubric,
         }),
       });
       setEditTarget(null);

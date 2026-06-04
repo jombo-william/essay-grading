@@ -1,12 +1,12 @@
 // src/componets/teacher/AssignmentForm.jsx
 import { useRef, useState } from "react";
-import { inp, label } from "./shared.jsx";
+import { inp, label, Icon } from "./shared.jsx";
 
 const FILE_TYPES = [
-  { label: "📄 PDF / Word", accept: ".pdf,.doc,.docx", bg: "#eff6ff", color: "#2563eb", border: "#bfdbfe" },
-  { label: "🖼️ Image",      accept: "image/*",          bg: "#fdf4ff", color: "#9333ea", border: "#e9d5ff" },
-  { label: "🎬 Video",      accept: "video/*",          bg: "#fff7ed", color: "#ea580c", border: "#fed7aa" },
-  { label: "📎 Any File",   accept: "*",                bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
+  { label: "PDF / Word", accept: ".pdf,.doc,.docx", bg: "#eff6ff", color: "#2563eb", border: "#bfdbfe", icon: "file-text" },
+  { label: "Image",      accept: "image/*",          bg: "#fdf4ff", color: "#9333ea", border: "#e9d5ff", icon: "image" },
+  { label: "Video",      accept: "video/*",          bg: "#fff7ed", color: "#ea580c", border: "#fed7aa", icon: "video" },
+  { label: "Any File",   accept: "*",                bg: "#f8fafc", color: "#475569", border: "#e2e8f0", icon: "paperclip" },
 ];
 
 //const API_BASE = "https://jombo-essaygrade.fly.dev/api";
@@ -28,15 +28,87 @@ const loadPdfJs = () =>
 export default function AssignmentForm({ form, setForm, attachments, setAttachments, onAttachFile, assignmentId }) {
   const fileRef      = useRef();
   const refFileRef   = useRef();
-  const rubricTotal  = Object.values(form.rubric || {}).reduce((a, b) => a + b, 0);
+  const rubricFileRef = useRef();
 
   const [refUploading, setRefUploading] = useState(false);
   const [refUploadMsg, setRefUploadMsg] = useState("");
   const [refFileNames, setRefFileNames] = useState([]);
 
+  const [rubricUploading, setRubricUploading] = useState(false);
+  const [rubricUploadMsg, setRubricUploadMsg] = useState("");
+  const [rubricFileName, setRubricFileName] = useState("");
+
   const triggerUpload = (accept) => {
     fileRef.current.accept = accept;
     fileRef.current.click();
+  };
+
+  // ── Handle rubric/marking key file upload ──────────────────────────────────
+  const handleRubricFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setRubricUploading(true);
+    setRubricFileName(files[0].name);
+    setRubricUploadMsg("Reading rubric file...");
+
+    try {
+      let extractedText = "";
+      const file = files[0];
+
+      if (file.type === "text/plain") {
+        extractedText = await file.text();
+      } else if (file.type === "application/pdf") {
+        try {
+          const pdfjsLib    = await loadPdfJs();
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page    = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(item => item.str).join(" ") + "\n";
+          }
+          extractedText = fullText.trim();
+        } catch (pdfErr) {
+          setRubricUploadMsg("Error reading PDF file.");
+          setTimeout(() => setRubricUploadMsg(""), 4000);
+          setRubricUploading(false);
+          return;
+        }
+      } else {
+        try {
+          extractedText = await file.text();
+        } catch {
+          setRubricUploadMsg("Error reading file.");
+          setTimeout(() => setRubricUploadMsg(""), 4000);
+          setRubricUploading(false);
+          return;
+        }
+      }
+
+      if (!extractedText || extractedText.trim().length < 10) {
+        setRubricUploadMsg("No readable text found in the file.");
+        setTimeout(() => setRubricUploadMsg(""), 4000);
+        setRubricUploading(false);
+        return;
+      }
+
+      setForm(prev => ({
+        ...prev,
+        rubricContent: extractedText.trim().slice(0, 10000),
+      }));
+
+      setRubricUploadMsg(`Rubric uploaded successfully (${extractedText.trim().length} characters).`);
+      setTimeout(() => setRubricUploadMsg(""), 5000);
+
+    } catch (err) {
+      setRubricUploadMsg(`Error: ${err.message}`);
+      setTimeout(() => setRubricUploadMsg(""), 4000);
+    } finally {
+      setRubricUploading(false);
+      e.target.value = "";
+    }
   };
 
   // ── Handle reference material file upload ─────────────────────────────────
@@ -46,7 +118,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
 
     setRefUploading(true);
     setRefFileNames(files.map(file => file.name));
-    setRefUploadMsg(`📤 Reading ${files.length} file${files.length === 1 ? "" : "s"}...`);
+    setRefUploadMsg(`Reading ${files.length} file${files.length === 1 ? "" : "s"}...`);
 
     try {
       let appendedText = "";
@@ -61,7 +133,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
           extractedText = await file.text();
 
         } else if (file.type === "application/pdf") {
-          setRefUploadMsg(`📄 Extracting text from ${file.name}...`);
+          setRefUploadMsg(`Extracting text from ${file.name}...`);
           try {
             const pdfjsLib    = await loadPdfJs();
             const arrayBuffer = await file.arrayBuffer();
@@ -100,7 +172,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
       }
 
       if (succeeded === 0) {
-        setRefUploadMsg(`❌ No readable text found in the selected file${files.length === 1 ? "" : "s"}.`);
+        setRefUploadMsg(`No readable text found in the selected file${files.length === 1 ? "" : "s"}.`);
         setTimeout(() => setRefUploadMsg(""), 4000);
         return;
       }
@@ -112,11 +184,11 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
       }));
 
       const failedMsg = failed.length > 0 ? ` (${failed.length} failed)` : "";
-      setRefUploadMsg(`✅ ${succeeded} of ${files.length} file${files.length === 1 ? "" : "s"} uploaded successfully${failedMsg}, ${totalChars} characters added.`);
+      setRefUploadMsg(`${succeeded} of ${files.length} file${files.length === 1 ? "" : "s"} uploaded successfully${failedMsg}, ${totalChars} characters added.`);
       setTimeout(() => setRefUploadMsg(""), 5000);
 
     } catch (err) {
-      setRefUploadMsg(`❌ Error: ${err.message}`);
+      setRefUploadMsg(`Error: ${err.message}`);
       setTimeout(() => setRefUploadMsg(""), 4000);
     } finally {
       setRefUploading(false);
@@ -128,6 +200,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       <input ref={fileRef}    type="file" multiple style={{ display: "none" }} onChange={onAttachFile} />
       <input ref={refFileRef} type="file" multiple accept=".pdf,.txt,.doc,.docx" style={{ display: "none" }} onChange={handleRefFileChange} />
+      <input ref={rubricFileRef} type="file" accept=".pdf,.txt,.doc,.docx" style={{ display: "none" }} onChange={handleRubricFileChange} />
 
       {/* Title */}
       <div>
@@ -170,7 +243,8 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
               fontFamily: "inherit",
             }}
           >
-            {refUploading ? "⏳ Reading..." : "📎 Upload files"}
+            <Icon name={refUploading ? "loader-2" : "upload"} size={14} style={{ color: "#7c3aed" }} />
+            {refUploading ? "Reading..." : "Upload files"}
           </button>
         </div>
 
@@ -201,7 +275,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
           onChange={e => setForm({ ...form, referenceMaterial: e.target.value })}
         />
         <p style={{ fontSize: "12px", color: "#8b5cf6", marginTop: "6px", fontWeight: "500" }}>
-          🤖 Upload a book, notes, or multiple documents — the AI will use them to strictly assess student essays.
+          Upload a book, notes, or multiple documents — the AI will use them to strictly assess student essays.
         </p>
       </div>
 
@@ -219,26 +293,59 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
         </div>
       </div>
 
-      {/* Rubric */}
+      {/* Rubric / Marking Key */}
       <div>
-        <label style={label}>Grading Rubric</label>
-        <div style={{ background: "#f8fafc", borderRadius: "14px", padding: "18px", border: "1px solid #e2e8f0" }}>
-          {Object.entries(form.rubric || {}).map(([k, v]) => (
-            <div key={k} style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
-              <span style={{ fontSize: "13px", color: "#475569", fontWeight: "600", textTransform: "capitalize", width: "100px", flexShrink: 0 }}>{k}</span>
-              <input type="number" min="0" max="100" value={v}
-                onChange={e => setForm({ ...form, rubric: { ...form.rubric, [k]: parseInt(e.target.value) || 0 } })}
-                style={{ width: "64px", padding: "7px 10px", border: "1.5px solid #e2e8f0", borderRadius: "9px", fontSize: "13px", fontWeight: "700", outline: "none", textAlign: "center", fontFamily: "inherit" }} />
-              <span style={{ fontSize: "12px", color: "#94a3b8" }}>%</span>
-              <div style={{ flex: 1, height: "7px", background: "#e2e8f0", borderRadius: "4px", overflow: "hidden" }}>
-                <div style={{ height: "7px", background: "linear-gradient(90deg,#3b82f6,#38bdf8)", borderRadius: "4px", width: `${v}%`, transition: "width 0.2s" }} />
-              </div>
-            </div>
-          ))}
-          <p style={{ fontSize: "12px", fontWeight: "700", margin: "4px 0 0", color: rubricTotal !== 100 ? "#dc2626" : "#16a34a" }}>
-            Total: {rubricTotal}% {rubricTotal !== 100 && "⚠️ Must equal 100"}
-          </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+          <label style={{ ...label, margin: 0 }}>Rubric / Marking Key</label>
+          <button
+            type="button"
+            onClick={() => rubricFileRef.current.click()}
+            disabled={rubricUploading}
+            style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              padding: "6px 14px", borderRadius: "8px",
+              border: "1.5px dashed #059669",
+              background: rubricUploading ? "#f0fdf4" : "#ecfdf5",
+              color: "#059669", fontSize: "12px", fontWeight: "700",
+              cursor: rubricUploading ? "not-allowed" : "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            <Icon name={rubricUploading ? "loader-2" : "file-up"} size={14} style={{ color: "#059669" }} />
+            {rubricUploading ? "Reading..." : "Upload rubric"}
+          </button>
         </div>
+
+        {/* Rubric upload status message */}
+        {rubricUploadMsg && (
+          <div style={{
+            padding: "8px 12px", borderRadius: "8px", marginBottom: "8px",
+            background: rubricUploadMsg.includes("Error") ? "#fef2f2" : "#f0fdf4",
+            border: `1px solid ${rubricUploadMsg.includes("Error") ? "#fecaca" : "#bbf7d0"}`,
+            fontSize: "12px", fontWeight: "600",
+            color: rubricUploadMsg.includes("Error") ? "#dc2626" : "#15803d",
+          }}>
+            {rubricUploadMsg}
+          </div>
+        )}
+
+        {rubricFileName && (
+          <div style={{ marginBottom: "10px", fontSize: "12px", color: "#475569" }}>
+            <Icon name="check-circle" size={14} style={{ color: "#059669", marginRight: "4px", display: "inline" }} />
+            Rubric: {rubricFileName}
+          </div>
+        )}
+
+        <textarea
+          style={{ ...inp, resize: "vertical", lineHeight: "1.65", minHeight: "90px" }}
+          rows={3}
+          placeholder="Paste or upload a rubric/marking key with assessment criteria and marks distribution..."
+          value={form.rubricContent || ""}
+          onChange={e => setForm({ ...form, rubricContent: e.target.value })}
+        />
+        <p style={{ fontSize: "12px", color: "#059669", marginTop: "6px", fontWeight: "500" }}>
+          Upload a PDF or text file containing your rubric, marking guide, or assessment criteria. The AI will use this to grade essays consistently.
+        </p>
       </div>
 
       {/* File attachments for students */}
@@ -250,7 +357,8 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
           {FILE_TYPES.map(ft => (
             <button key={ft.label} type="button" onClick={() => triggerUpload(ft.accept)}
-              style={{ padding: "8px 16px", borderRadius: "10px", border: `1px solid ${ft.border}`, background: ft.bg, color: ft.color, fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}>
+              style={{ padding: "8px 16px", borderRadius: "10px", border: `1px solid ${ft.border}`, background: ft.bg, color: ft.color, fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: "6px" }}>
+              <Icon name={ft.icon} size={14} style={{ color: ft.color }} />
               {ft.label}
             </button>
           ))}

@@ -56,59 +56,39 @@ export default function AssignmentDetail({ assignment, inline, onClose, onWrite,
         {a.description}
       </p>
 
-      {/* Instructions */}
-      <div style={{
-        background: '#FAEEDA', border: '1px solid #FAC775',
-        borderRadius: '10px', padding: '14px 16px', marginBottom: '16px',
-      }}>
-        <span style={{ ...C.sL, color: '#854F0B' }}>Instructions</span>
-        <p style={{ fontSize: '13px', color: '#633806', margin: 0, lineHeight: 1.75 }}>
-          {a.instructions}
-        </p>
-      </div>
+{/* Instructions */}
+       <div style={{
+         background: '#FAEEDA', border: '1px solid #FAC775',
+         borderRadius: '10px', padding: '14px 16px', marginBottom: '16px',
+       }}>
+         <span style={{ ...C.sL, color: '#854F0B' }}>Instructions</span>
+         <p style={{ fontSize: '13px', color: '#633806', margin: 0, lineHeight: 1.75 }}>
+           {a.instructions}
+         </p>
+       </div>
 
-      {/* Rubric */}
-      {a.rubric && (
-        <div style={{ marginBottom: '16px' }}>
-          <span style={C.sL}>Grading rubric</span>
-          {Object.entries(a.rubric).map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', color: '#6B6890', textTransform: 'capitalize', fontWeight: '500', width: '100px', flexShrink: 0 }}>
-                {k.replace(/_/g, ' ')}
-              </span>
-              <div style={{ flex: 1, height: '6px', background: '#EEEDFE', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${v}%`, background: '#3C3489', borderRadius: '3px' }} />
-              </div>
-              <span style={{ fontSize: '12px', color: '#3C3489', fontWeight: '600', width: '32px', textAlign: 'right' }}>
-                {v}%
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Info grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-        {[
-          { label: 'Max score',  value: `${a.max_score} pts`, icon: 'trophy'    },
-          { label: 'Deadline',   value: new Date(a.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), icon: 'calendar' },
-          { label: 'Status',     value: isSubmitted ? 'Submitted' : isPast ? 'Not submitted' : 'Not yet submitted', icon: 'file-text' },
-          { label: 'Grading',    value: 'Automatic on submit', icon: 'check'    },
-        ].map(d => (
-          <div key={d.label} style={{
-            background: '#F8F7FF', border: '1px solid #ECECF2',
-            borderRadius: '10px', padding: '10px 12px',
-          }}>
-            <p style={{ fontSize: '11px', color: '#8884A8', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px' }}>
-              {d.label}
-            </p>
-            <p style={{ fontSize: '13px', color: '#1A1830', fontWeight: '500', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Icon name={d.icon} size={14} style={{ color: '#3C3489' }} />
-              {d.value}
-            </p>
-          </div>
-        ))}
-      </div>
+       {/* Info grid */}
+       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+         {[
+           { label: 'Max score',  value: `${a.max_score} pts`, icon: 'trophy'    },
+           { label: 'Deadline',   value: new Date(a.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), icon: 'calendar' },
+           { label: 'Status',     value: isSubmitted ? 'Submitted' : isPast ? 'Not submitted' : 'Not yet submitted', icon: 'file-text' },
+           { label: 'Grading',    value: 'Automatic on submit', icon: 'check'    },
+         ].map(d => (
+           <div key={d.label} style={{
+             background: '#F8F7FF', border: '1px solid #ECECF2',
+             borderRadius: '10px', padding: '10px 12px',
+           }}>
+             <p style={{ fontSize: '11px', color: '#8884A8', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px' }}>
+               {d.label}
+             </p>
+             <p style={{ fontSize: '13px', color: '#1A1830', fontWeight: '500', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+               <Icon name={d.icon} size={14} style={{ color: '#3C3489' }} />
+               {d.value}
+             </p>
+           </div>
+         ))}
+       </div>
     </>
   );
 

@@ -126,25 +126,7 @@ export default function WriteEssaySheet({ assignment, onClose, onSubmit, submitt
       }
     >
 
-      {/* Rubric chips */}
-      {assignment.rubric && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
-          {Object.entries(assignment.rubric).map(([k, v]) => (
-            <div key={k} style={{
-              background: '#F8F7FF', border: '1px solid #ECECF2',
-              borderRadius: '8px', padding: '4px 10px',
-              display: 'flex', gap: '5px', alignItems: 'center',
-            }}>
-              <span style={{ fontSize: '12px', color: '#6B6890', textTransform: 'capitalize', fontWeight: '500' }}>
-                {k.replace(/_/g, ' ')}
-              </span>
-              <span style={{ fontSize: '12px', color: '#3C3489', fontWeight: '600' }}>{v}%</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Write / Upload toggle */}
+{/* Write / Upload toggle */}
       <div style={{
         display: 'flex', background: '#F1EFE8',
         borderRadius: '10px', padding: '3px', marginBottom: '16px', gap: '2px',

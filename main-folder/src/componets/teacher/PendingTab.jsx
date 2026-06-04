@@ -546,20 +546,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
                     Not graded
                   </p>
                 )}
-                {sub.ai_detection_score !== null && sub.ai_detection_score !== undefined && (
-                  <div style={{ marginTop: 5 }}>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '2px 8px', borderRadius: 20,
-                      fontSize: 11, fontWeight: 600,
-                      background: aiBg(aiPct), color: aiColor(aiPct),
-                      border: `1px solid ${aiBorder(aiPct)}`,
-                    }}>
-                      <Icon name={aiIcon(aiPct)} size={11} style={{ color: aiColor(aiPct) }} />
-                      {aiPct}% AI
-                    </span>
-                  </div>
-                )}
+
               </div>
             </div>
 

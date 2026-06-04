@@ -477,11 +477,7 @@ function ResultCard({ s, onClick }) {
         <div style={{ flex:1 }}>
           <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:6, marginBottom:4 }}>
             <span style={{ fontWeight:800, fontSize:15, color:'#1e293b' }}>{s.assignment_title}</span>
-            {s.submit_mode==='upload' && s.file_name && <span style={badge('purple')}>📎 File</span>}
-            {s.final_score !== null                               && <span style={badge('green')}>✅ Graded</span>}
-            {!isPending && s.final_score===null && s.ai_score!==null && !isAI && <span style={badge('amber')}>⏳ Pending</span>}
-            {!isPending && s.final_score===null && s.ai_score!==null &&  isAI && <span style={badge('red')}>🚨 AI Flagged</span>}
-            {isPending && <span style={badge('gray')}>🤖 Grading...</span>}
+            {s.submit_mode==='upload' && s.file_name && <span style={badge('purple')}>File</span>}
           </div>
           <p style={{ fontSize:12, color:'#94a3b8', margin:0 }}>
             Submitted {new Date(s.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
@@ -541,19 +537,18 @@ export default function ResultsTab({ results, loading, onOpenResult, studentName
           <p style={{ fontSize:20, fontWeight:800, color:'#1e293b', margin:0 }}>My Results</p>
           <p style={{ fontSize:13, color:'#94a3b8', margin:'2px 0 0' }}>Click any card to view full feedback</p>
         </div>
-        <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
-          {[{i:'✅',l:'Graded',c:'#16a34a'},{i:'⏳',l:'Pending',c:'#d97706'},{i:'🚨',l:'AI flagged',c:'#dc2626'},{i:'🤖',l:'Grading',c:NAVY}].map(x => (
-            <div key={x.l} style={{ display:'flex', alignItems:'center', gap:4 }}>
-              <span style={{ fontSize:12 }}>{x.i}</span>
-              <span style={{ fontSize:11, color:x.c, fontWeight:600 }}>{x.l}</span>
-            </div>
-          ))}
-        </div>
+        <div />
       </div>
 
       {results.length === 0 && (
         <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e2e8f0', padding:'48px 24px', textAlign:'center' }}>
-          <p style={{ fontSize:36, margin:'0 0 10px' }}>📭</p>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 0 10px' }}>
+            <rect x="2" y="3" width="20" height="18" rx="2" />
+            <line x1="2" y1="8" x2="22" y2="8" />
+            <line x1="8" y1="3" x2="8" y2="8" />
+            <circle cx="12" cy="14" r="2" />
+            <line x1="12" y1="10" x2="12" y2="12" />
+          </svg>
           <p style={{ fontWeight:700, color:'#64748b', fontSize:14, margin:0 }}>No submissions yet. Submit an assignment to see your results here.</p>
         </div>
       )}

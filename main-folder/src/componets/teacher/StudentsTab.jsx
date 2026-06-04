@@ -65,11 +65,7 @@ function detectAtRiskStudents(submissions) {
 
 // ── STATUS BADGE ─────────────────────────────────────────────────────────────
 function StatusBadge({ status, aiDetection }) {
-  if (aiDetection >= 50) return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: '#FCEBEB', color: '#A32D2D', border: '1px solid #F7C1C1' }}>
-      <Icon name="alert-triangle" size={11} style={{ color: '#A32D2D' }} /> AI Flagged
-    </span>
-  );
+
   if (status === 'graded') return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: '#EAF3DE', color: '#3B6D11', border: '1px solid #C0DD97' }}>
       <Icon name="circle-check" size={11} style={{ color: '#3B6D11' }} /> Graded
@@ -277,7 +273,7 @@ function handleExportStudents(submissions) {
           <div class="stats">
             <div class="stat"><div class="stat-num">${sorted.length}</div><div class="stat-label">Students</div></div>
             <div class="stat"><div class="stat-num">${submissions.filter(s => s.final_score !== null).length}</div><div class="stat-label">Graded</div></div>
-            <div class="stat"><div class="stat-num">${submissions.filter(s => s.ai_detection_score >= 50).length}</div><div class="stat-label">AI Flagged</div></div>
+
           </div>
           <table style="width:100%;border-collapse:collapse;"><tbody>${rows}</tbody></table>
         </div>
@@ -503,12 +499,7 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                             Avg {avgFinal}%
                           </span>
                         )}
-                        {flaggedCount > 0 && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#A32D2D', border: '1px solid #F7C1C1' }}>
-                            <Icon name="alert-triangle" size={11} style={{ color: '#A32D2D' }} />
-                            {flaggedCount} flagged
-                          </span>
-                        )}
+
                       </div>
                     </div>
 
@@ -517,7 +508,7 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead>
                           <tr style={{ background: '#F1EFE8' }}>
-                            {['Assignment', 'Submitted', 'Status', 'AI Score', 'Final Score', 'AI Flag', 'Actions'].map(h => (
+                            {['Assignment', 'Submitted', 'Status', 'AI Score', 'Final Score', 'Actions'].map(h => (
                               <th key={h} style={{ padding: '8px 14px', fontSize: 11, fontWeight: 700, color: '#5F5E5A', textAlign: h === 'Assignment' ? 'left' : 'center', textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>{h}</th>
                             ))}
                           </tr>
@@ -526,10 +517,8 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                           {student.assignments
                             .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
                             .map((sub, subIdx) => {
-                              const isFlagged = sub.ai_detection_score >= 50;
                               const finalPct = sub.final_score !== null ? Math.round((sub.final_score / sub.max_score) * 100) : null;
                               const isLast = subIdx === student.assignments.length - 1;
-                              const aiPct = sub.ai_detection_score ?? 0;
                               return (
                                 <tr key={sub.id} style={{ borderBottom: isLast ? 'none' : '1px solid #F1EFE8' }}>
                                   <td style={{ padding: '12px 14px' }}>
@@ -552,21 +541,13 @@ export default function StudentsTab({ students, submissions, assignments, loadin
                                   </td>
                                   <td style={{ padding: '12px', textAlign: 'center' }}>
                                     {sub.ai_score !== null
-                                      ? <span style={{ fontWeight: 700, fontSize: 13, color: isFlagged ? '#A32D2D' : '#185FA5' }}>{isFlagged ? 0 : sub.ai_score}/{sub.max_score}</span>
+                                      ? <span style={{ fontWeight: 700, fontSize: 13, color: '#185FA5' }}>{sub.ai_score}/{sub.max_score}</span>
                                       : <span style={{ color: '#B0AECB', fontSize: 12 }}>—</span>}
                                   </td>
                                   <td style={{ padding: '12px', textAlign: 'center' }}>
                                     {sub.final_score !== null
                                       ? <span style={{ fontWeight: 700, fontSize: 13, color: scoreColor(finalPct) }}>{sub.final_score}/{sub.max_score}</span>
                                       : <span style={{ color: '#B0AECB', fontSize: 12 }}>—</span>}
-                                  </td>
-                                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                                    {sub.ai_detection_score !== null ? (
-                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: aiBg(aiPct), color: aiColor(aiPct), border: `1px solid ${aiBorder(aiPct)}` }}>
-                                        <Icon name={aiIcon(aiPct)} size={11} style={{ color: aiColor(aiPct) }} />
-                                        {aiPct}%
-                                      </span>
-                                    ) : <span style={{ color: '#B0AECB', fontSize: 12 }}>—</span>}
                                   </td>
                                   <td style={{ padding: '12px', textAlign: 'center' }}>
                                     <div style={{ display: 'flex', gap: 5, justifyContent: 'center' }}>

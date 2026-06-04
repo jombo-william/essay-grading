@@ -17,9 +17,6 @@ const labelStyle = {
 };
 
 export default function SubmissionDetail({ sub, user, onClose, onGrade, onEditGrade }) {
-  const aiPct   = sub.ai_detection_score ?? 0;
-  const flagged = aiPct >= 50;
-
   return (
     <Sheet
       onClose={onClose}
@@ -73,12 +70,6 @@ export default function SubmissionDetail({ sub, user, onClose, onGrade, onEditGr
             label: "AI score",
             value: sub.ai_score !== null ? `${sub.ai_score}/${sub.max_score}` : "—",
           },
-          {
-            icon: flagged ? "alert-triangle" : "shield-check",
-            label: "AI detection",
-            value: sub.ai_detection_score !== null ? `${sub.ai_detection_score}%` : "—",
-            color: flagged ? C.red.text : aiPct >= 30 ? "#854F0B" : C.green.text,
-          },
         ].map(d => (
           <div key={d.label} style={{ background: "#F8F7FF", border: "1px solid #ECECF2", borderRadius: 11, padding: "12px 14px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 5 }}>
@@ -101,15 +92,7 @@ export default function SubmissionDetail({ sub, user, onClose, onGrade, onEditGr
         </div>
       )}
 
-      {/* AI flag warning */}
-      {flagged && (
-        <div style={{ background: C.red.bg, border: `1px solid ${C.red.border}`, borderRadius: 11, padding: "13px 16px", marginBottom: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
-          <Icon name="alert-triangle" size={15} style={{ color: C.red.text, flexShrink: 0, marginTop: 1 }} />
-          <p style={{ fontSize: 13, fontWeight: 600, color: C.red.text, margin: 0, lineHeight: 1.5 }}>
-            {aiPct}% AI content detected. Score auto-set to 0. Your review determines the final outcome.
-          </p>
-        </div>
-      )}
+
 
       {/* AI feedback */}
       {sub.ai_feedback && (
