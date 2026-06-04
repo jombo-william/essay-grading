@@ -32,7 +32,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
 
   const [refUploading, setRefUploading] = useState(false);
   const [refUploadMsg, setRefUploadMsg] = useState("");
-  const [refFileName,  setRefFileName]  = useState("");
+  const [refFileNames, setRefFileNames] = useState([]);
 
   const triggerUpload = (accept) => {
     fileRef.current.accept = accept;
@@ -41,72 +41,78 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
 
   // ── Handle reference material file upload ─────────────────────────────────
   const handleRefFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
     setRefUploading(true);
-    setRefFileName(file.name);
-    setRefUploadMsg("📤 Reading file...");
+    setRefFileNames(files.map(file => file.name));
+    setRefUploadMsg(`📤 Reading ${files.length} file${files.length === 1 ? "" : "s"}...`);
 
     try {
-      let extractedText = "";
+      let appendedText = "";
+      let totalChars = 0;
+      let succeeded = 0;
+      const failed = [];
 
-      if (file.type === "text/plain") {
-        // TXT — read directly
-        extractedText = await file.text();
+      for (const file of files) {
+        let extractedText = "";
 
-      } else if (file.type === "application/pdf") {
-        // PDF — extract with pdf.js
-        setRefUploadMsg("📄 Extracting text from PDF...");
-        try {
-          const pdfjsLib    = await loadPdfJs();
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = "";
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page    = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            fullText += content.items.map(item => item.str).join(" ") + "\n";
-          }
-          extractedText = fullText.trim();
-        } catch (pdfErr) {
-          setRefUploadMsg(`❌ Could not extract PDF text: ${pdfErr.message}`);
-          setTimeout(() => setRefUploadMsg(""), 4000);
-          setRefUploading(false);
-          e.target.value = "";
-          return;
-        }
-
-      } else {
-        // Other files — try reading as text
-        try {
+        if (file.type === "text/plain") {
           extractedText = await file.text();
-        } catch {
-          setRefUploadMsg("❌ Could not read this file type. Please use PDF or TXT.");
-          setTimeout(() => setRefUploadMsg(""), 4000);
-          setRefUploading(false);
-          e.target.value = "";
-          return;
+
+        } else if (file.type === "application/pdf") {
+          setRefUploadMsg(`📄 Extracting text from ${file.name}...`);
+          try {
+            const pdfjsLib    = await loadPdfJs();
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page    = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              fullText += content.items.map(item => item.str).join(" ") + "\n";
+            }
+            extractedText = fullText.trim();
+          } catch (pdfErr) {
+            failed.push(file.name);
+            continue;
+          }
+
+        } else {
+          try {
+            extractedText = await file.text();
+          } catch {
+            failed.push(file.name);
+            continue;
+          }
         }
+
+        if (!extractedText || extractedText.trim().length < 10) {
+          failed.push(file.name);
+          continue;
+        }
+
+        const trimmed = extractedText.trim().slice(0, 5000);
+        if (appendedText) appendedText += "\n\n";
+        appendedText += `--- ${file.name} ---\n${trimmed}`;
+        totalChars += trimmed.length;
+        succeeded += 1;
       }
 
-      if (!extractedText || extractedText.trim().length < 10) {
-        setRefUploadMsg("❌ No readable text found in the file.");
+      if (succeeded === 0) {
+        setRefUploadMsg(`❌ No readable text found in the selected file${files.length === 1 ? "" : "s"}.`);
         setTimeout(() => setRefUploadMsg(""), 4000);
-        setRefUploading(false);
-        e.target.value = "";
         return;
       }
 
-      // Limit to 5000 chars and append to existing reference material
-      const trimmed  = extractedText.trim().slice(0, 5000);
       const existing = form.referenceMaterial ? form.referenceMaterial.trim() + "\n\n" : "";
       setForm(prev => ({
         ...prev,
-        referenceMaterial: existing + `--- ${file.name} ---\n${trimmed}`,
+        referenceMaterial: existing + appendedText,
       }));
 
-      setRefUploadMsg(`✅ "${file.name}" — ${trimmed.length} characters extracted successfully`);
+      const failedMsg = failed.length > 0 ? ` (${failed.length} failed)` : "";
+      setRefUploadMsg(`✅ ${succeeded} of ${files.length} file${files.length === 1 ? "" : "s"} uploaded successfully${failedMsg}, ${totalChars} characters added.`);
       setTimeout(() => setRefUploadMsg(""), 5000);
 
     } catch (err) {
@@ -121,7 +127,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       <input ref={fileRef}    type="file" multiple style={{ display: "none" }} onChange={onAttachFile} />
-      <input ref={refFileRef} type="file" accept=".pdf,.txt,.doc,.docx" style={{ display: "none" }} onChange={handleRefFileChange} />
+      <input ref={refFileRef} type="file" multiple accept=".pdf,.txt,.doc,.docx" style={{ display: "none" }} onChange={handleRefFileChange} />
 
       {/* Title */}
       <div>
@@ -164,7 +170,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
               fontFamily: "inherit",
             }}
           >
-            {refUploading ? "⏳ Reading..." : "📎 Upload File"}
+            {refUploading ? "⏳ Reading..." : "📎 Upload files"}
           </button>
         </div>
 
@@ -181,6 +187,12 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
           </div>
         )}
 
+        {refFileNames.length > 0 && (
+          <div style={{ marginBottom: "10px", fontSize: "12px", color: "#475569" }}>
+            Uploaded files: {refFileNames.join(", ")}
+          </div>
+        )}
+
         <textarea
           style={{ ...inp, resize: "vertical", lineHeight: "1.65", minHeight: "90px" }}
           rows={3}
@@ -189,7 +201,7 @@ export default function AssignmentForm({ form, setForm, attachments, setAttachme
           onChange={e => setForm({ ...form, referenceMaterial: e.target.value })}
         />
         <p style={{ fontSize: "12px", color: "#8b5cf6", marginTop: "6px", fontWeight: "500" }}>
-          🤖 Upload a book, notes, or any document — the AI will use it to strictly assess student essays.
+          🤖 Upload a book, notes, or multiple documents — the AI will use them to strictly assess student essays.
         </p>
       </div>
 
