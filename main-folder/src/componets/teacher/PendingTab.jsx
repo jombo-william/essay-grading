@@ -639,21 +639,7 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                {gradeModal.ai_detection_score !== null && gradeModal.ai_detection_score !== undefined && (
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '3px 10px', borderRadius: 20,
-                    fontSize: 11, fontWeight: 600,
-                    background: aiBg(gradeModal.ai_detection_score ?? 0),
-                    color: aiColor(gradeModal.ai_detection_score ?? 0),
-                    border: `1px solid ${aiBorder(gradeModal.ai_detection_score ?? 0)}`,
-                  }}>
-                    <Icon name={aiIcon(gradeModal.ai_detection_score ?? 0)} size={11} style={{ color: aiColor(gradeModal.ai_detection_score ?? 0) }} />
-                    {gradeModal.ai_detection_score}% AI · {aiLabel(gradeModal.ai_detection_score ?? 0)}
-                  </span>
-                )}
-                <button onClick={() => setGradeModal(null)} style={{
+              <button onClick={() => setGradeModal(null)} style={{
                   width: 32, height: 32, borderRadius: 8,
                   border: '1px solid #ECECF2', background: '#fff',
                   cursor: 'pointer', color: '#5F5E5A',
@@ -661,7 +647,6 @@ export default function PendingTab({ pending = [], loading, onViewEssay, onGrade
                 }}>
                   <Icon name="x" size={15} />
                 </button>
-              </div>
             </div>
 
             {/* Modal body */}
